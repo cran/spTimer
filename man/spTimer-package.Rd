@@ -1,0 +1,64 @@
+\name{spTimer-package}
+\alias{spTimer-package}
+\alias{spTimer}
+\docType{package}
+\title{
+Spatio-Temporal Bayesian Modelling using R
+}
+\description{
+This package uses different hierarchical Bayesian spatio-temporal modelling strategies, namely the gaussian processes (GP) models, the autoregressive (AR) models, and models using Gaussian predictive processes (GPP) approximation 
+%and the dynamic linear models (DLM),  the fusion models (FM) 
+to analyse space-time observations.
+}
+\details{
+\tabular{ll}{
+Package: \tab spTimer\cr
+Type: \tab Package\cr
+Version: \tab 0.01\cr
+Date: \tab 2010-10-10\cr
+License: \tab GPL\cr
+LazyLoad: \tab yes
+}
+The back-end code of this package is built under c language.\cr
+Main functions used: \cr
+\code{> \link{spT.Gibbs}} \cr
+\code{> \link{spT.prediction}} \cr
+\code{> \link{spT.forecast}} \cr
+\code{> \link{spT.priors}} \cr
+\code{> \link{spT.initials}} \cr
+\code{> \link{spT.decay}} \cr
+\code{> \link{spT.time}} \cr
+Some other functions: \cr
+\code{> \link{spT.geodist}} \cr
+\code{> \link{spT.grid.coords}} \cr
+\code{> \link{spT.data.selection}} \cr
+\code{> \link{spT.MCMC.stat}} \cr
+\code{> \link{spT.MCMC.plot}} \cr
+\code{> \link{spT.validation}} \cr
+\code{> \link{spT.pCOVER}} \cr
+\code{> \link{spT.segment.plot}} \cr
+Data descriptions: \cr
+\code{> \link{NYdata}} \cr
+\code{> \link{NYsite}} \cr
+}
+\author{
+K.S. Bakar & S.K. Sahu \cr
+Maintainer: K.S. Bakar <shuvo.bakar@csiro.au>
+}
+\references{
+1. Sahu, S.K. & Bakar, K.S. (2012). Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, Accepted.\cr
+2. Sahu, S.K., Gelfand, A.E., & Holland, D.M. (2007). High-Resolution Space-Time Ozone Modelling for Assessing Trends. Journal of the American Statistical Association, 102, 1221-1234.\cr
+3. Bakar, K.S. & Sahu, S.K. (2012). spTimer: Spatio-Temporal Bayesian Modelling Using R.\cr
+4. Bakar, K.S. (2012). Bayesian Analysis of Daily Maximum Ozone Levels. PhD Thesis, University of Southampton, Southampton, United Kingdom.
+%2. West, M. & Harrison, J. (1997). Bayesian Forecasting and Dynamic Models, 2nd Edition. New York: Springer.\cr
+%3. Stroud, J.R., Muller, P. & Sanso, B. (2001). Dynamic Models for Spatio-Temporal Data. Journal of the Royal Statistical Society: Series B, 63, 673-689.
+}
+\keyword{ package }
+\seealso{
+Packages 'spBayes'; 'maps'; 'MBA'; 'coda'; website: \code{http://www.r-project.org/}.
+%Package  \code{http://www.r-project.org/}.
+%Package  \code{http://www.r-project.org/}.
+}
+%\examples{
+%~~ simple examples of the most important functions ~~
+%}
