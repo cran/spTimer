@@ -1,4 +1,4 @@
-c12c5f06dc122ea06d83cc1d25478005 *DESCRIPTION
+5cc63490d2172d93c63bed96d1d8b7db *DESCRIPTION
 d705db283b0e6d3a506eb5463eb8f69f *NAMESPACE
 405a003b27eacf6f3053b2461aec522d *R/spAR.r
 cc0302f15e97384e9cedf6ec4d753cd9 *R/spGP.r
@@ -28,7 +28,7 @@ c03d5d40f5c9048c841ac5adafe5ff4a *man/spT.prediction.Rd
 97add1510cd696a4cfb1e33554027c49 *man/spT.time.Rd
 2d59470684208c6ad8d80428e976f476 *man/spT.validation.Rd
 b3d03afb10f21c6caafa9fe9760ad3b4 *man/spTimer-internal.Rd
-2692fef565090a4e0d173fc4aa94dcd1 *man/spTimer-package.Rd
+dc26aa4181c5cab436e85f7583d73f9b *man/spTimer-package.Rd
 b9a551bd4382feea448394c887504c0a *src/Print.h
 88f1d9cfbda1e3f20c5c89cf4c49b961 *src/common.c
 b1d34d96e4f7e79ff182773a8decbdbd *src/common.h

@@ -14,10 +14,6 @@ to analyse space-time observations.
 \tabular{ll}{
 Package: \tab spTimer\cr
 Type: \tab Package\cr
-Version: \tab 0.01\cr
-Date: \tab 2010-10-10\cr
-License: \tab GPL\cr
-LazyLoad: \tab yes
 }
 The back-end code of this package is built under c language.\cr
 Main functions used: \cr
@@ -39,16 +35,16 @@ Some other functions: \cr
 \code{> \link{spT.segment.plot}} \cr
 Data descriptions: \cr
 \code{> \link{NYdata}} \cr
-\code{> \link{NYsite}} \cr
+\code{> \link{NYsite}} 
 }
 \author{
 K.S. Bakar & S.K. Sahu \cr
 Maintainer: K.S. Bakar <shuvo.bakar@csiro.au>
 }
 \references{
-1. Sahu, S.K. & Bakar, K.S. (2012). Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, Accepted.\cr
+1. Sahu, S.K. & Bakar, K.S. (2012). Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, In Press.\cr
 2. Sahu, S.K., Gelfand, A.E., & Holland, D.M. (2007). High-Resolution Space-Time Ozone Modelling for Assessing Trends. Journal of the American Statistical Association, 102, 1221-1234.\cr
-3. Bakar, K.S. & Sahu, S.K. (2012). spTimer: Spatio-Temporal Bayesian Modelling Using R.\cr
+3. Bakar, K.S. & Sahu, S.K. (2012). spTimer: Spatio-Temporal Bayesian Modelling Using R. URL: http://www.southampton.ac.uk/~sks/research/papers/spTimeRpaper.pdf \cr
 4. Bakar, K.S. (2012). Bayesian Analysis of Daily Maximum Ozone Levels. PhD Thesis, University of Southampton, Southampton, United Kingdom.
 %2. West, M. & Harrison, J. (1997). Bayesian Forecasting and Dynamic Models, 2nd Edition. New York: Springer.\cr
 %3. Stroud, J.R., Muller, P. & Sanso, B. (2001). Dynamic Models for Spatio-Temporal Data. Journal of the Royal Statistical Society: Series B, 63, 673-689.
