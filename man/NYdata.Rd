@@ -13,8 +13,8 @@
 \format{Columns: each contains 1798 observations. 
 	\itemize{
 	\item   1st col = Site index (s.index), 
-	\item   2nd col = Latitude, 
-	\item   3rd col = Longitude, 
+	\item   2nd col = Longitude,
+	\item   3rd col = Latitude,  
 	\item	4th col = Year (year),
 	\item	5th col = Month (month),
 	\item	6th col = Day (day), 
@@ -24,14 +24,29 @@
 	\item	10th col = Relative humidity (RH).
         }
 }
+\seealso{
+\code{\link{DataFit}, \link{DataFitFore}, \link{DataValFore}, \link{DataValPred}}.
+}
 \examples{
+\dontrun{
 ##
 
 data(NYdata)
 head(NYdata)
 
+# plots in NY map
+
+NYsite<-unique(cbind(NYdata[,1:3]))
+head(NYsite)
+
+# map
+library(maps)
+map(database="state",regions="new york")
+points(NYsite[,2:3],pch=19)
+
+
 ##
-}
+}}
 \source{US EPA}
 %\references{
 %http://www.epa.gov/

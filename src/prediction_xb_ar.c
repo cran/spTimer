@@ -11,7 +11,7 @@
 // Iteration and Prediction of O_lt for all sites and all time points "XB"
 void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT, 
      int *T, int *p, int *N, int *valN, double *d, double *d12, 
-     double *phip, double *sig_ep, double *sig_etap, double *sig_l0p, 
+     double *phip, double *nup, double *sig_ep, double *sig_etap, double *sig_l0p, 
      double *rhop, double *betap, double *mu_lp,  
      double *X, double *valX, double *op, int *constant, double *zpred)
 {
@@ -27,12 +27,13 @@ void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      ns = *nsite;
      p1 = *p;
      
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
      
-     double *phi, *sig_e, *sig_eta, *sig_l0, *rho, *beta, *mu_l, *o, *zpr;
+     double *phi, *nu, *sig_e, *sig_eta, *sig_l0, *rho, *beta, *mu_l, *o, *zpr;
 
      phi = (double *) malloc((size_t)((col)*sizeof(double)));       
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));            
      sig_e = (double *) malloc((size_t)((col)*sizeof(double)));            
      sig_eta = (double *) malloc((size_t)((col)*sizeof(double)));       
      sig_l0 = (double *) malloc((size_t)((r1*col)*sizeof(double)));       
@@ -41,9 +42,16 @@ void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      mu_l = (double *) malloc((size_t)((r1*col)*sizeof(double)));       
      o = (double *) malloc((size_t)((N1*col)*sizeof(double)));       
      zpr = (double *) malloc((size_t)((rT1*col*ns)*sizeof(double)));       
-                                   
+
+     GetRNGstate();                                   
      for(i=0; i < its1; i++) {
-         phi[0] = phip[0];
+         phi[0] = phip[i];
+         if(cov[0]==4){
+           nu[0] = nup[i];
+         }
+         else{
+           nu[0] = 0.0;
+         }
          sig_e[0] = sig_ep[i];     
          sig_eta[0] = sig_etap[i];
          rho[0] = rhop[i];
@@ -61,7 +69,7 @@ void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
          }
 
          z_pr_ar(cov, nsite, n, r, rT, T, p, N, valN, d, d12, 
-         phi, sig_e, sig_eta, sig_l0, rho, beta, mu_l, X, valX,
+         phi, nu, sig_e, sig_eta, sig_l0, rho, beta, mu_l, X, valX,
          o, constant, zpr);
                                               
          for(k=0; k < ns; k++){       
@@ -73,8 +81,9 @@ void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
        printR (i, its1); 
 
        } // end of iteration loop
-       
-       free(phi); free(sig_e); free(sig_eta); free(sig_l0); free(rho); 
+       PutRNGstate();
+            
+       free(phi); free(nu); free(sig_e); free(sig_eta); free(sig_l0); free(rho); 
        free(beta); free(mu_l); free(o); free(zpr);
        return;
 }       
@@ -82,7 +91,7 @@ void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
 
 // Prediction for all sites for all time point "XB"
 void z_pr_ar(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p, 
-     int *N, int *valN, double *d, double *d12, double *phip, 
+     int *N, int *valN, double *d, double *d12, double *phip, double *nup,
      double *sig_ep, double *sig_etap, double *sig_l0p, double *rhop, 
      double *betap, double *mu_lp,  double *X, double *valX,
      double *op, int *constant, double *zpred)
@@ -108,7 +117,12 @@ void z_pr_ar(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
     S_eta12c = (double *) malloc((size_t)((n1*col)*sizeof(double)));
     det = (double *) malloc((size_t)((col)*sizeof(double))); 
 
-        
+
+    covF(cov, n, n, phip, nup, d, S_eta);
+    MInv(S_eta, Si_eta, n, det);    
+    covF(cov, n, nsite, phip, nup, d12, S_eta12);
+
+/*        
       // exponential covariance
       if(cov[0] == 1){
         for(i = 0; i < (n1*n1); i++){
@@ -165,7 +179,7 @@ void z_pr_ar(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
           S_eta12[i] = (1.0+phip[0]*d12[i])*exp(-1.0*phip[0]*d12[i]);        
         }
       }
-
+*/
 
     double *S, *m1, *O11, *O_l0, *XB;
     S = (double *) malloc((size_t)((n1*n1)*sizeof(double)));     

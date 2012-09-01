@@ -10,9 +10,9 @@
        x$alpha_l=NULL; x$delta2_l=NULL;
        x$prior_a<-2; x$prior_b<-1;
        x$mu_beta<-rep(0,p); x$delta2_beta<-matrix(0,p,p);
-       diag(x$delta2_beta)<-10^4;
-       x$mu_rho<-0; x$delta2_rho<-10^4;
-       x$alpha_l<-rep(0,r); x$delta2_l<-rep(10^4,r)
+       diag(x$delta2_beta)<-10^10;
+       x$mu_rho<-0; x$delta2_rho<-10^10;
+       x$alpha_l<-rep(0,r); x$delta2_l<-rep(10^10,r)
        x
      }
      else{
@@ -30,7 +30,7 @@
      }
      if(is.null(x$delta2_beta)){
        x$delta2_beta<-matrix(0,p,p);
-       diag(x$delta2_beta)<-10^4;
+       diag(x$delta2_beta)<-10^10;
      }
      if(length(c(x$delta2_beta)) != (p*p)){
        delta2_beta<-matrix(0,p,p);
@@ -41,7 +41,7 @@
        x$mu_rho<-0; 
      }
      if(is.null(x$delta2_rho)){
-       x$delta2_rho<-10^4;
+       x$delta2_rho<-10^10;
      }
      if(is.null(x$alpha_l)){
        x$alpha_l<-rep(0,r); 
@@ -50,7 +50,7 @@
        x$alpha_l<-rep(c(x$alpha_l),r)
      }
      if(is.null(x$delta2_l)){
-       x$delta2_l<-rep(10^4,r);
+       x$delta2_l<-rep(10^10,r);
      }
      if(length(c(x$delta2_l)) != r){
        x$delta2_l<-rep(c(x$delta2_l),r)
@@ -78,6 +78,7 @@
         x$mu_l[i] <- 0
       }
       lm.coef<-lm(c(z) ~ X-1)$coef
+      lm.coef[is.na(lm.coef)]<-0
       x$beta<-lm.coef[1:(dim(X)[[2]])]
       x
      }
@@ -106,6 +107,7 @@
       }
       if(is.null(x$beta)){
        lm.coef<-lm(c(z) ~ X-1)$coef
+       lm.coef[is.na(lm.coef)]<-0
        x$beta<-lm.coef[1:(dim(X)[[2]])]
       }
       x
@@ -158,6 +160,15 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     if ( !is.matrix(knots.coords) ) {
          stop("Error: knots.coords must be a (n x 2) matrix of xy-coordinate locations")
     }
+   #
+   # check time.data
+   if(is.null(time.data)){
+     time.data<-c(1,0,length(Y)/length(coords[,1]))
+   }
+   else{
+     time.data<-time.data
+   }
+   #
    #
          n <- length(coords[,1])            # number of sites
          r <- time.data[1]                  # number of years
@@ -345,7 +356,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
             as.double(initials$rho), as.double(initials$mu_l),
             as.double(X), as.double(zm), as.double(w0), as.double(w),
             as.integer(trans),
-            phip = double(nItr), accept = double(1), 
+            phip = double(nItr), accept = double(1), nup = double(nItr),
             sig2eps = double(nItr), sig2etap = double(nItr), 
             betap = matrix(double(p*nItr), p, nItr), rhop = double(nItr),
             mu_lp = matrix(double(r*nItr), r, nItr), 
@@ -353,7 +364,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
             w0p = matrix(double(knots * r * nItr),knots * r, nItr), 
             wp = matrix(double(knots*r*T*nItr), knots * r * T, nItr), 
             gof = as.double(1), penalty = as.double(1),
-            fitted = matrix(double(2*n*r*T),n*r*T,2))[43:55]
+            fitted = matrix(double(2*n*r*T),n*r*T,2))[43:56]
      #     
      if(X.out==TRUE){
       out$X <- X
@@ -371,6 +382,9 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
       cat("##","\n")
      #
            out$phip <- as.matrix(out$phip[(nBurn+1):nItr])
+           if(cov==4){
+           out$nup <- as.matrix(out$nup[(nBurn+1):nItr])
+           }
            out$sig2eps <- as.matrix(out$sig2eps[(nBurn+1):nItr])
            out$sig2etap <- as.matrix(out$sig2etap[(nBurn+1):nItr])
            out$sig2lp <- matrix(out$sig2lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
@@ -601,6 +615,12 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
     #
       #
            phip<-posteriors$phip[(nBurn+1):nItr,]
+           if(cov==4){
+           nup<-posteriors$nup[(nBurn+1):nItr,]
+           }
+           else{
+           nup<-0
+           } 
            sig2ep<-posteriors$sig2ep[(nBurn+1):nItr,]
            sig2etap<-posteriors$sig2etap[(nBurn+1):nItr,]
            sig2lp<-matrix(posteriors$sig2lp,r,nItr)
@@ -655,14 +675,14 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            as.integer(scale.transform), as.integer(itt),
            as.integer(nsite),as.integer(n),as.integer(m),
            as.integer(r),as.integer(T),as.integer(r*T),as.integer(p), 
-           as.integer(nsite*r*T),as.double(phip),as.double(dm),
+           as.integer(nsite*r*T),as.double(phip),as.double(nup),as.double(dm),
            as.double(dnsm),as.double(wp),as.double(sig2ep),
            as.double(betap),as.double(pred.x),as.integer(1),
            zpred=double(itt*nsite*r*T))$zpred,nsite*r*T,itt)
       #
       #
       output<-NULL
-      output$prediction.samples<-out
+      output$pred.samples<-out
       out<-NULL
       output$knots.coords <- posteriors$knots.coords
       output$pred.coords <- pred.coords
@@ -693,7 +713,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
           cat("# Predicted samples and summary statistics are given.\n# nBurn = ",nBurn+posteriors$nBurn,". Iterations = ",posteriors$iterations,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$prediction.samples[,])
+          szp<-spT.Summary.Stat(output$pred.samples[,])
           # 
           output$Mean <- matrix(szp$Mean,r*T, nsite)
           output$Median <- matrix(szp$Median,r*T, nsite)
@@ -800,38 +820,38 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       if(is.null(fore.data)){
         fore.data<-data.frame(tmp=rep(1,nsite*r*K))
       }
-      forecast.x<-Formula.matrix(call.f,data=fore.data)[[2]]
+      fore.x<-Formula.matrix(call.f,data=fore.data)[[2]]
     #
     #
 #      #
-#        if (is.null(forecast.X)){
+#        if (is.null(fore.X)){
 #           if(dimnames(posteriors$X)[[2]][1]=="(Intercept)"){
-#           forecast.x <- matrix(rep(1,nsite*r*K))
+#           fore.x <- matrix(rep(1,nsite*r*K))
 #           }
 #           else{ 
 #           stop("\n Error: need to specify the forecast covariates \n ...")
 #           }
 #        }
 #      #
-#        if (!is.null(forecast.X)){
-#        if (!is.matrix(forecast.X)) {
-#           stop("Error: forecast.X must be a MATRIX.")
+#        if (!is.null(fore.X)){
+#        if (!is.matrix(fore.X)) {
+#           stop("Error: fore.X must be a MATRIX.")
 #        }
 #      #
 #        if(dimnames(posteriors$X)[[2]][1]=="(Intercept)"){
-#           Intercept <- rep(1,dim(forecast.X)[1])
-#           forecast.x <- cbind(Intercept,forecast.X)
+#           Intercept <- rep(1,dim(fore.X)[1])
+#           fore.x <- cbind(Intercept,fore.X)
 #        } 
 #      #
 #        if(dimnames(posteriors$X)[[2]][1] != "(Intercept)"){
-#           forecast.x <- forecast.X
+#           fore.x <- fore.X
 #        } 
 #      #
 #        }
-#        forecast.X <- NULL
+#        fore.X <- NULL
 #      #
-#      if(length(c(forecast.x)) != (nsite*r*K*p)){
-#           stop("Error: number of observations in forecast.X mismatches with the fore.coords.")
+#      if(length(c(fore.x)) != (nsite*r*K*p)){
+#           stop("Error: number of observations in fore.X mismatches with the fore.coords.")
 #      }  	
 #      #
       ###
@@ -864,6 +884,12 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       #
       #
            phip<-posteriors$phip[(nBurn+1):nItr]
+           if(cov==4){
+           nup<-posteriors$nup[(nBurn+1):nItr,]
+           }
+           else{
+           nup<-0
+           } 
            sig_ep<-posteriors$sig2ep[(nBurn+1):nItr]
            sig_etap<-posteriors$sig2etap[(nBurn+1):nItr]
            rhop<-posteriors$rhop[(nBurn+1):nItr]
@@ -876,21 +902,21 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
        as.integer(itt),as.integer(K),as.integer(nsite),
        as.integer(m),as.integer(r),as.integer(p),as.integer(r*T),
        as.integer(T),as.integer(r*K),as.integer(nsite*r*K),
-       as.double(dnsitem),as.double(dm),as.double(phip),
+       as.double(dnsitem),as.double(dm),as.double(phip),as.double(nup),
        as.double(sig_ep),as.double(sig_etap),as.double(betap),
-       as.double(rhop),as.double(wp),as.double(forecast.x),
+       as.double(rhop),as.double(wp),as.double(fore.x),
        as.integer(1),fz=double(nsite*r*K*itt))$fz,nsite*r*K,itt)
       #
       output <- NULL
           #
           if(posteriors$scale.transform=="NONE"){ 
-      output$forecast.samples <- out
+      output$fore.samples <- out
           }
           if(posteriors$scale.transform=="SQRT"){ 
-      output$forecast.samples <- out^2
+      output$fore.samples <- out^2
           }
           if(posteriors$scale.transform=="LOG"){ 
-      output$forecast.samples <- exp(out)
+      output$fore.samples <- exp(out)
           }
           # 
       #output$n.fore.sites <- nsite
@@ -921,7 +947,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
           cat("# Forecast samples and summary statistics are given.\n# nBurn = ",nBurn,". Iterations = ",nItr,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$forecast.samples[,])
+          szp<-spT.Summary.Stat(output$fore.samples[,])
           # 
           out <- NULL
           output$Mean <- matrix(szp$Mean,r*K, nsite)
@@ -1023,6 +1049,14 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          stop("Error: pred.data must be a data frame")
     }
    #
+   # check time.data
+   if(is.null(time.data)){
+     time.data<-c(1,0,length(Y)/length(coords[,1]))
+   }
+   else{
+     time.data<-time.data
+   }
+   #
          n <- length(coords[,1])            # number of sites
          r <- time.data[1]                  # number of years
          T <- time.data[3]                  # number of days
@@ -1119,7 +1153,10 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          stop("\n Error: scale.transform is not correctly specified \n")
     }
     #
-  #
+    #
+      initials<-initials.checking.gpp(initials,zm,X,n,r,T,coords.D.knots)
+    #
+    #
     if(spatial.decay$type=="FIXED"){
          spdecay <- 1
          init.phi <- spatial.decay$value 
@@ -1142,8 +1179,6 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          stop("\n Error: spatial.decay is not correctly specified \n")
     }
     #
-      initials<-initials.checking.gpp(initials,zm,X,n,r,T,coords.D.knots)
-    #
     if (length(initials$mu_l) != r){
          stop("Error: need to specify correct number of years (r) for mu_l initials.")
     }
@@ -1154,7 +1189,6 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          stop("Error: need to specify correct number (p) of initial parameters for beta.")
     }
     #
-
     #
     if (length(priors$mu_beta) != p){
          stop("Error: need to specify correct number (p) of mu_beta priors.")
@@ -1235,10 +1269,10 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
       call.f<-formula  
       call.f<-as.formula(paste("tmp~",paste(call.f,sep="")[[3]]))
       if(is.data.frame(pred.data)){
-      if((nsite*r*T)!=dim(pred.data)[[1]]){
-        print("#\n # Check the pred.data \n#\n")
-      }
-      pred.data$tmp<-rep(1,nsite*r*T)
+        if((nsite*r*T)!=dim(pred.data)[[1]]){
+          print("#\n # Check the pred.data \n#\n")
+        }
+        pred.data$tmp<-rep(1,nsite*r*T)
       }
       if(is.null(pred.data)){
         pred.data<-data.frame(tmp=rep(1,nsite*r*T))
@@ -1295,18 +1329,23 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
            tmp<-read.table('OutGPP_Values_Parameter.txt', sep='',header=FALSE)
            tmp<-tmp[(nBurn+1):nItr,]
            tmp<-spT.Summary.Stat(t(tmp))
+           if(cov==4){
+           row.names(tmp)<- c(x.names,"rho","sig2eps","sig2eta","phi","nu")
+           }
+           else{
            row.names(tmp)<- c(x.names,"rho","sig2eps","sig2eta","phi")
+           }
            out$parameters<-round(tmp, 4)
            tmp<-NULL
 
            tmp<-read.table('OutGPP_Stats_FittedValue.txt', sep=',',header=FALSE)
            names(tmp)<- c("Mean","SD")
-           out$fit<-round(tmp, 4)
+           out$fitted<-round(tmp, 4)
            tmp<-NULL
 
            tmp<-read.table('OutGPP_Stats_PredValue.txt', sep=',',header=FALSE)
            names(tmp)<- c("Mean","SD")
-           out$prediction<-round(tmp, 4)
+           out$pred<-round(tmp, 4)
            tmp<-NULL
 #
        if(annual.aggregation=="ave"){
@@ -1349,6 +1388,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
            out$pred.n<-nsite
            out$r <- r
            out$T <- T
+           out$T <- Y
            out$initials <- initials	
            out$priors <- priors 
            out$iterations <- nItr 

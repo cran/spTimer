@@ -36,10 +36,13 @@ double sqr(double x);
 //void matprint2(double *x, int m, int n);
 void IdentityM(int *n, double *I);
 void MAdd(double *x, int *xrow, int *xcol, double *y, double *out);
+//void MAdd2(double *x, int *xrow, int *xcol, double *y, double *out);
 void MSub(double *x, int *xrow, int *xcol, double *y, double *out);
 void MProd(double *y, int *nycol, int *nyrow, double *x, 
      int *nxrow, double *out);
-     
+//void MProd3(double *y, int *nycol, int *nyrow, double *x, 
+//     int *nxrow, double *out);
+          
 void MTranspose(double *x, int *ncol, int *nrow, double *tx);
 
 void QuadMat(double *a, int *n, double *x, int *p, double *out);

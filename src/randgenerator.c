@@ -1,18 +1,19 @@
 //** File Name 'randgenerator.c' **//
 
-#include"randgenerator.h"
+#include "randgenerator.h"
 #include "mathematics.h"
 
 /* This generates the random number*/
 double drand48 (void)
 {
 //   srand(22);    
-   return ((double)rand() + 0.5)/((double)RAND_MAX + 1.0);
+//   return ((double)rand() + 0.5)/((double)RAND_MAX + 1.0); // return some uniform dist number
+     return((double)unif_rand());     // calling from Rmath.h
 }
 
 
 // random number for uniform distribution
-double runif(int constant)
+double myrunif(int constant)
 {
        double U;
        U = (drand48 ());
@@ -23,7 +24,7 @@ void runif_val(int *n, int *constant, double *out)
 {
        int i;
        for(i=0; i< *n; i++){
-       out[i] = runif(*constant);
+       out[i] = myrunif(*constant);
        }
        return;
 }       
@@ -226,7 +227,7 @@ void mvrnormal(int *n, double *mu, double *s2, int *p, double *y)
   #endif
 
   for(i=0;i<nn;i++)
-  { for(j=0;j<pp;j++) z0[j]=rnorm_for_multivariate();
+  { for(j=0;j<pp;j++) z0[j]=norm_rand(); //z0[j]=rnorm_for_multivariate();
     for(j=0;j<pp;j++)
     { for(zz=0.,k=0;k<=j;k++) zz+=lowert[j*pp+k]*z0[k];
       y[i+j*nn]=zz+mu[j];

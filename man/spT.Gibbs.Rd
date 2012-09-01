@@ -6,7 +6,7 @@ This function is used to draw MCMC samples using the Gibbs sampler.
 }
 \usage{
 spT.Gibbs(formula, data=parent.frame(), model, time.data, 
-coords, knots.coords, pred.coords, pred.data, priors, initials, 
+coords, knots.coords, newcoords, newdata, priors, initials, 
 nItr, nBurn, report, tol.dist, distance.method, cov.fnc, 
 scale.transform, spatial.decay, annual.aggrn)
 %X.out=TRUE, Y.out=TRUE)
@@ -18,16 +18,16 @@ scale.transform, spatial.decay, annual.aggrn)
 \item{time.data}{Defining the segments of the time-series set up using the function \code{\link{spT.time}}.}
 \item{coords}{The n by 2 matrix defining the locations (e.g., longitude/easting, latitude/northing) of the fitting sites, where n is the number of fitting sites.}
 \item{knots.coords}{The locations of the knots in similar format to coords above, only required if \code{model="GPP"}.}
-\item{pred.coords}{The locations of the prediction sites in similar format to coords above, only required if fit and predictions are done simultaneously.}
-\item{pred.data}{The covariate values at the prediction sites specified by \code{pred.coords}. This should have same space-time structure as the original data frame.}
-\item{priors}{The prior distributions for the parameters.  Default distributions are specified if these are not specified. See details in \code{\link{spT.priors}}.}
+\item{newcoords}{The locations of the prediction sites in similar format to coords above, only required if fit and predictions are done simultaneously.}
+\item{newdata}{The covariate values at the prediction sites specified by \code{pred.coords}. This should have same space-time structure as the original data frame.}
+\item{priors}{The prior distributions for the parameters. Default distributions are specified if these are not specified. If priors=NULL a flat prior distribution will be used with large variance. See details in \code{\link{spT.priors}}.}
 \item{initials}{The preferred initial values for the parameters. If omitted, default values are provided automatically. Further  details are provided in  \code{\link{spT.initials}}.}
-\item{nItr}{Number of MCMC iterations.}
-\item{nBurn}{Number of burn-in samples. This number of samples will be discarded before making any inference.}
+\item{nItr}{Number of MCMC iterations. Default value is 13000.}
+\item{nBurn}{Number of burn-in samples. This number of samples will be discarded before making any inference. Default value is 3000.}
 \item{report}{Number of reports to display while running the Gibbs sampler. Defaults to number of iterations. }
 \item{distance.method}{The preferred method to calculate the distance between any two locations. The available options are "geodetic:km", "geodetic:mile", "euclidean", "maximum", "manhattan", and "canberra". See details in \code{\link{dist}}.}
 \item{tol.dist}{Minimum separation distance between any two locations out of those  specified by coords, knots.coords and pred.coords. The default is 0.005. The programme will exit if the minimum distance is less than the non-zero specified value. This will ensure non-singularity of the covariance matrices.}
-\item{cov.fnc}{Covariance function for the spatial effects. The available options  are "exponential", "gaussian", "spherical" and "matern".}
+\item{cov.fnc}{Covariance function for the spatial effects. The available options  are "exponential", "gaussian", "spherical" and "matern". If "matern" is used then by default the smooth parameter (\eqn{\nu}) is estimated from (0,1) uniform distribution using discrete samples.}
 \item{scale.transform}{The transformation method for the response variable. Currently implemented options are: "NONE", "SQRT", and "LOG" with  "NONE" as the deault.}
 \item{spatial.decay}{Provides the options for sampling the spatial decay parameter \eqn{\phi}. Currently implemented options  are "DISCRETE", "MH" or "FIXED" and further options for each of these are specified by \code{\link{spT.decay}}. The default is "MH".}
 \item{annual.aggrn}{This provides the options for calculating annual summary statistics by aggregating different time segments (e.g., annual mean). Currently implemented options are: "NONE", "ave" and "an4th", where "ave" = annual average, "an4th"= annual 4th highest. Only applicable if \code{\link{spT.time}} inputs more than one segment and when fit and predict are done simultaneously.}
@@ -39,6 +39,7 @@ scale.transform, spatial.decay, annual.aggrn)
 %\item{Y}{The observed values, if Y.out=TRUE.}
 \item{accept}{The acceptance rate for the \eqn{\phi} parameter if the "MH" method of sampling is chosen.}
 \item{phip}{MCMC samples for the parameter \eqn{\phi}.}
+\item{nup}{MCMC samples for the parameter \eqn{\nu}. Only available if "matern" covariance function is used.}
 \item{sig2ep}{MCMC samples for the parameter \eqn{\sigma^2_\epsilon}.}
 \item{sig2etap}{MCMC samples for the parameter \eqn{\sigma^2_\eta}.}
 \item{betap}{MCMC samples for the parameter \eqn{\beta}.}
@@ -105,97 +106,61 @@ OutGPP_Annual_4th_Highest_Prediction.txt: (nItr x (predsites*r)) matrix. \cr
 %\note{
 %}
 \seealso{
-\code{\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{spT.MCMC.stat}, \link{spT.MCMC.plot}, \link{spT.prediction}, \link{spT.forecast}}.
+\code{\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{spT.MCMC.stat}, \link{spT.MCMC.plot}, \link{predict.spT}, \link{spT.prediction}, \link{spT.forecast}}.
 }
 \examples{
 \dontrun{
 ##
 
 ###########################
-## Read data:
+## Attach library spTimer
 ###########################
 
 library(spTimer)
-
-data(NYdata)
-data(NYsite)
-
-head(NYdata)
-head(NYsite)
-
-# map
-library(maps)
-map(database="state",regions="new york")
-points(NYsite[,2:3],pch=19)
-
-# descriptive stat
-
-summary(NYdata[,7:10])
-
-# 
-n.sites <- length(unique(NYsite[,1])) # Total number of sites
-n.valsites <- 4                       # Let 4 sites are set aside  
-nall.sites <- 1:n.sites               # Numbered sites 
-nrand.sites <- sort(sample(nall.sites, n.valsites)) # Select 4 sites randomly
-nval.sites <- nrand.sites              # Numbered validation sites 
-nfit.sites <- nall.sites[-nrand.sites] # Numbered fitted sites
-
-# split the NYdata into fitted and validation part
-
-val.dat <- spT.data.selection(data=NYdata,random=F,s=nval.sites)
-fit.dat <- spT.data.selection(data=NYdata,random=F,s=nfit.sites)
-
-val.site <- spT.data.selection(data=NYsite,random=F,s=nval.sites)
-fit.site <- spT.data.selection(data=NYsite,random=F,s=nfit.sites)
-
-# set aside last day of August for forecast validation
-
-fit.fore<-fit.dat[fit.dat$Month==8 & fit.dat$Day==31,]
-val.fore<-val.dat[val.dat$Month==8 & val.dat$Day==31,]
-
-# new fitted and validation data with 61 days
-
-fit.dat<-fit.dat[fit.dat$Month !=8 | fit.dat$Day !=31,]
-val.dat<-val.dat[val.dat$Month !=8 | val.dat$Day !=31,]
-
-
-#
-library(maps)
-map(database="state",regions="new york")
-points(fit.site[,2:3],pch=2,col=4)
-points(val.site[,2:3],pch=19,col=2)
-#
 
 ###########################
 ## The GP models:
 ###########################
 
-# define the coordinates
-coords<-as.matrix(fit.site[,2:3])
+##
+## Model fitting
+##
 
+# Read data 
+data(DataFit); 
+
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+
+# MCMC via Gibbs using default choices
+set.seed(11)
+post.gp <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="GP", coords=coords, 
+         scale.transform="SQRT")
+print(post.gp)
+
+# MCMC via Gibbs not using default choices
 # define the time-series 
-time.data<-spT.time(t.series=61,segment=1)
+time.data<-spT.time(t.series=60,segment=1)
 
 # hyper-parameters for the prior distributions
 priors<-spT.priors(model="GP",var.prior=Gam(2,1),
         beta.prior=Nor(0,10^4))
-#priors<-NULL
 
 # initial values for the model parameters
 initials<-spT.initials(model="GP", sig2eps=0.01, 
             sig2eta=0.5, beta=NULL, phi=0.001)
-#initials<-NULL
 
-# input for spatial decay
+# input for spatial decay, any one approach from below
 #spatial.decay<-spT.decay(type="FIXED", value=0.01)
 spatial.decay<-spT.decay(type="MH", tuning=0.08)
 #spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
 
-
-# input for the MCMC algorithms
+# Iterations for the MCMC algorithms
 nItr<-5000
 
 # MCMC via Gibbs
+set.seed(11)
 post.gp <- spT.Gibbs(formula=o8hrmax ~ cMAXTMP+WDSP+RH, 
          data=fit.dat, model="GP", time.data=time.data, 
          coords=coords, priors=priors, initials=initials, 
@@ -203,72 +168,75 @@ post.gp <- spT.Gibbs(formula=o8hrmax ~ cMAXTMP+WDSP+RH,
          tol.dist=2, distance.method="geodetic:km", 
          cov.fnc="exponential", scale.transform="SQRT", 
          spatial.decay=spatial.decay)
+print(post.gp)
 
-#object.size(post.gp)/(1024*1024) #MB
-names(post.gp)
+# Summary and plots
+summary(post.gp)
+summary(post.gp,pack="coda")
+plot(post.gp)
+plot(post.gp,residuals=TRUE)
 
-# model selection criteria
-post.gp$PMCC # 
+coef(post.gp)
+terms(post.gp)
+formula(post.gp)
+model.frame(post.gp)
+model.matrix(post.gp)
 
-# MCMC summary and plots
-spT.MCMC.stat(post.gp,nBurn=1000)
-spT.MCMC.plot(post.gp,nBurn=1000)
-
-# Use of coda pakcage
-
-library(coda)
-tmp<-as.mcmc(post.gp)
-plot(tmp)
-summary(tmp)
-
+# Model selection criteria
+post.gp$PMCC 
 
 ##
-## Fit and Prediction simultaneously
+## Fit and spatially prediction simultaneously
 ##
 
+# Read data 
+data(DataFit); 
+data(DataValPred)
 
-pred.coords<-as.matrix(val.site[,2:3])
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 
-coords<-as.matrix(fit.site[,2:3])
-time.data<-spT.time(t.series=61,segment=1)
+# MCMC via Gibbs will provide output in *.txt format  
+# from C routine to avoide large data problem in R
+set.seed(11)
+post.gp.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="GP", coords=coords, 
+         newcoords=pred.coords, newdata=DataValPred,
+         scale.transform="SQRT")
+print(post.gp.fitpred)
+summary(post.gp.fitpred)
+coef(post.gp.fitpred)
+plot(post.gp.fitpred)
+names(post.gp.fitpred)
 
-priors<-spT.priors(model="GP",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
-initials<-spT.initials(model="GP", sig2eps=0.01, 
-            sig2eta=0.5, beta=NULL, phi=0.001)
-
-# input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.08)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
-
-nItr<-5000 
-
-# MCMC via Gibbs
-post.gp.fit.pred <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=fit.dat, model="GP", time.data=time.data, 
-         coords=coords, pred.coords=pred.coords, pred.data=val.dat,
-         priors=priors, initials=initials, 
-         nItr=nItr, nBurn=1000, report=nItr, 
-         tol.dist=2, distance.method="geodetic:km", 
-         cov.fnc="exponential", scale.transform="SQRT", 
-         spatial.decay=spatial.decay,
-         annual.aggregation="NONE")
-
-names(post.gp.fit.pred)
-
-post.gp.fit.pred$parameter
-
+# validation criteria
+spT.validation(DataValPred$o8hrmax,c(post.gp.fitpred$prediction[,1]))  
 
 ###########################
 ## The AR models:
 ###########################
 
-# define the coordinates
-coords<-as.matrix(fit.site[,2:3])
+##
+## Model fitting
+##
 
+# Read data 
+data(DataFit); 
+
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+
+# MCMC via Gibbs using default choices
+set.seed(11)
+post.ar <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="AR", coords=coords, 
+         scale.transform="SQRT")
+print(post.ar)
+
+# MCMC via Gibbs not using default choices
 # define the time-series 
-time.data<-spT.time(t.series=61,segment=1)
+time.data<-spT.time(t.series=60,segment=1)
 
 # hyper-parameters for the prior distributions
 priors<-spT.priors(model="AR",var.prior=Gam(2,1),
@@ -278,16 +246,16 @@ priors<-spT.priors(model="AR",var.prior=Gam(2,1),
 initials<-spT.initials(model="AR", sig2eps=0.01, 
             sig2eta=0.5, beta=NULL, phi=0.001)
 
-# input for spatial decay
+# Input for spatial decay
 #spatial.decay<-spT.decay(type="FIXED", value=0.01)
 spatial.decay<-spT.decay(type="MH", tuning=0.08)
 #spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
 
-# input for the MCMC algorithms
-nItr<-500
-
+# Iterations for the MCMC algorithms
+nItr<-5000
 
 # MCMC via Gibbs
+set.seed(11)
 post.ar <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
          data=fit.dat, model="AR", time.data=time.data, 
          coords=coords, priors=priors, initials=initials, 
@@ -295,175 +263,135 @@ post.ar <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH,
          tol.dist=2, distance.method="geodetic:km", 
          cov.fnc="exponential", scale.transform="SQRT", 
          spatial.decay=spatial.decay)
+print(post.ar)
 
-object.size(post.ar)/(1024*1024) #MB
-names(post.ar)
+# Summary and plots
+summary(post.ar)
+plot(post.ar)
 
-# model selection criteria
-post.ar$PMCC # 
-
-# MCMC summary and plots
-spT.MCMC.stat(post.ar,nBurn=100)
-spT.MCMC.plot(post.ar,nBurn=100)
-
-# Use of coda pakcage
-library(coda)
-tmp<-as.mcmc(post.ar)
-plot(tmp)
-summary(tmp)
-
+# Model selection criteria
+post.ar$PMCC 
 
 ##
-## fit and predict combinedly for AR models with text output
+## Fit and spatially prediction simultaneously
 ##
 
-pred.coords<-as.matrix(val.site[,2:3])
+# Read data 
+data(DataFit); 
+data(DataValPred)
 
-coords<-as.matrix(fit.site[,2:3])
-time.data<-spT.time(t.series=61,segment=1)
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 
-priors<-spT.priors(model="AR",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
+# MCMC via Gibbs will provide output in *.txt format  
+# from C routine to avoide large data problem in R
+set.seed(11)
+post.ar.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="AR", coords=coords, 
+         newcoords=pred.coords, newdata=DataValPred,
+         scale.transform="SQRT")
+print(post.ar.fitpred)
+summary(post.ar.fitpred)
+names(post.ar.fitpred)
 
-initials<-spT.initials(model="AR", sig2eps=0.01, 
-            sig2eta=0.5, beta=NULL, phi=0.001)
+# validation criteria
+spT.validation(DataValPred$o8hrmax,c(post.ar.fitpred$prediction[,1]))  
 
-# input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.08)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
+#################################
+## The GPP approximation models:
+#################################
 
-nItr<-500
-nBurn<-100
+##
+## Model fitting
+##
 
-# MCMC via Gibbs
-post.ar.fit.pred <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=fit.dat, model="AR", time.data=time.data, 
-         coords=coords, pred.coords=pred.coords, pred.data=val.dat,
-         priors=priors, initials=initials, 
-         nItr=nItr, nBurn=nBurn, report=nItr, 
-         tol.dist=2, distance.method="geodetic:km", 
-         cov.fnc="exponential", scale.transform="SQRT", 
-         spatial.decay=spatial.decay,
-         annual.aggregation="an4th")
+# Read data 
+data(DataFit); 
 
-names(post.ar.fit.pred)
-
-post.ar.fit.pred$para
-
-
-
-
-###########################
-## Models with GPP approximations:
-###########################
-
-
-# define the coordinates and knots
-coords<-as.matrix(fit.site[,2:3])
-knots.coords<-spT.grid.coords(Longitude=c(max(coords[,1]),
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+# Define knots
+knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
               min(coords[,1])),Latitude=c(max(coords[,2]),
               min(coords[,2])), by=c(4,4))
 
-library(maps)
-map(database="state",regions="new york")
-points(coords,pch=2,col=2)
-points(knots.coords,pch=19,col=4)
+# MCMC via Gibbs using default choices
+set.seed(11)
+post.gpp <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="GPP", coords=coords, 
+         knots.coords=knots, scale.transform="SQRT")
+print(post.gpp)
 
+# MCMC via Gibbs not using default choices
 # define the time-series 
-time.data<-spT.time(t.series=61,segment=1)
+time.data<-spT.time(t.series=60,segment=1)
 
 # hyper-parameters for the prior distributions
 priors<-spT.priors(model="GPP",var.prior=Gam(2,1),
         beta.prior=Nor(0,10^4))
-#priors<-NULL
 
 # initial values for the model parameters
 initials<-spT.initials(model="GPP", sig2eps=0.01, 
             sig2eta=0.5, beta=NULL, phi=0.001)
-#initials<-NULL
-
 
 # input for spatial decay
 #spatial.decay<-spT.decay(type="FIXED", value=0.001)
 spatial.decay<-spT.decay(type="MH", tuning=0.05) # 
 #spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.001,0.009),segments=10)
 
-
-# input for the MCMC algorithms
+# Iterations for the MCMC algorithms
 nItr<-5000 
 
 # MCMC via Gibbs
+set.seed(11)
 post.gpp <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
          data=fit.dat, model="GPP", time.data=time.data, 
          coords=coords, knots.coords=knots.coords,
          priors=priors, initials=initials, 
-         nItr=nItr, nBurn=0, report=nItr/10, 
+         nItr=nItr, nBurn=0, report=nItr, 
          tol.dist=2, distance.method="geodetic:km", 
          cov.fnc="exponential", scale.transform="SQRT", 
          spatial.decay=spatial.decay)
+print(post.gpp)
 
+# Summary and plots
+summary(post.gpp)
+plot(post.gpp)
 
-object.size(post.gpp)/(1024*1024) #MB
-names(post.gpp)
-
-
-# model selection criteria
-post.gpp$PMCC # 
-
-# MCMC summary and plots
-spT.MCMC.stat(post.gpp,nBurn=1000)
-spT.MCMC.plot(post.gpp,nBurn=1000,ACF=T)
-
-# Use of coda pakcage
-library(coda)
-tmp<-as.mcmc(post.gpp)
-plot(tmp)
-summary(tmp)
-
+# Model selection criteria
+post.gpp$PMCC 
 
 ##
-## fit and predict together for the GPP with text output
+## Fit and spatially prediction simultaneously
 ##
 
-pred.coords<-as.matrix(val.site[,2:3])
+# Read data 
+data(DataFit); 
+data(DataValPred)
 
-coords<-as.matrix(fit.site[,2:3])
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 knots.coords<-spT.grid.coords(Longitude=c(max(coords[,1]),
               min(coords[,1])),Latitude=c(max(coords[,2]),
               min(coords[,2])), by=c(4,4))
-time.data<-spT.time(t.series=61,segment=1)
 
-priors<-spT.priors(model="GPP",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
-#priors<-NULL
-initials<-spT.initials(model="GPP", sig2eps=0.01, 
-            sig2eta=0.5, beta=NULL, phi=0.001)
-#initials<-NULL
+# MCMC via Gibbs will provide output in *.txt format  
+# from C routine to avoide large data problem in R
+set.seed(11)
+post.gpp.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="GP", coords=coords, knots.coords=knots.coords,
+         newcoords=pred.coords, newdata=DataValPred,
+         scale.transform="SQRT")
+print(post.gpp.fitpred)
+summary(post.gpp.fitpred)
+plot(post.gpp.fitpred)
 
-# input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.0008)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.001,0.002),segments=5)
+names(post.gpp.fitpred)
 
-
-nItr<-500 
-
-# MCMC via Gibbs
-post.gpp.fit.pred <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=fit.dat, model="GPP", time.data=time.data, 
-         coords=coords, knots.coords=knots.coords,
-         pred.coords=pred.coords, pred.data=val.dat,
-         priors=priors, initials=initials, 
-         nItr=nItr, nBurn=100, report=nItr, 
-         tol.dist=2, distance.method="geodetic:km", 
-         cov.fnc="exponential", scale.transform="SQRT", 
-         spatial.decay=spatial.decay,
-         annual.aggregation="NONE")
-
-names(post.gpp.fit.pred)
-
-post.gpp.fit.pred$para
+# validation criteria
+spT.validation(DataValPred$o8hrmax,c(post.gpp.fitpred$prediction[,1]))  
 
 ##
 }

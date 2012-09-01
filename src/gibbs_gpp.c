@@ -24,8 +24,8 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      int *nsite, int *nsiterT, double *dnsm, double *Xpred, int *transform, 
      double *accept_f, double *gof, double *penalty)    
 {
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
      
      int its1, col, i, j, n1, m1, r1, T1, p1, N1, rep1, nsite1, brin, trans1;
      its1 = *its;
@@ -59,7 +59,7 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      }      
 
      double *phip, *sig2ep, *sig2etap, *rhop, *betap;
-     double *mu_lp, *sig2lp, *wp, *w0p, *zfit, *acc;
+     double *mu_lp, *sig2lp, *wp, *w0p, *zfit, *ofit, *acc;
      phip = (double *) malloc((size_t)((col)*sizeof(double)));          
      sig2ep = (double *) malloc((size_t)((col)*sizeof(double)));
      sig2etap = (double *) malloc((size_t)((col)*sizeof(double)));
@@ -70,6 +70,7 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      wp = (double *) malloc((size_t)((m1*r1*T1)*sizeof(double))); 
      w0p = (double *) malloc((size_t)((m1*r1)*sizeof(double))); 
      zfit = (double *) malloc((size_t)((N1*col)*sizeof(double)));
+     ofit = (double *) malloc((size_t)((N1*col)*sizeof(double)));     
      acc = (double *) malloc((size_t)((col)*sizeof(double)));
 
      double *phi1, *sig2e1, *sig2eta1, *rho1, *beta1;
@@ -82,6 +83,11 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      double *zp, *anf; //, tmp[T1];
      zp = (double *) malloc((size_t)((nsite1*r1*T1)*sizeof(double)));      
      anf = (double *) malloc((size_t)((nsite1*r1)*sizeof(double)));      
+
+     double *nu, *nup;
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));
+     nup = (double *) malloc((size_t)((col)*sizeof(double)));     
+     nu[0] = 0.5;
           
        ext_sige(phi, phi1);
        ext_sige(sig2e, sig2e1);
@@ -120,16 +126,16 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
        textan = fopen("OutGPP_Annual_w126_Prediction.txt", "w");
      }
 
-            
+     GetRNGstate();            
      for(i=0; i < its1; i++) {
 
      JOINT_onephi_gpp(cov, spdecay, flag, n, m, T, r, rT, p, N, 
      shape_e, shape_eta, shape_l, prior_a, prior_b, mu_beta, delta2_beta, 
-     mu_rho, delta2_rho, alpha_l, delta2_l, phi1, tau, phis, phik, dm, dnm, 
+     mu_rho, delta2_rho, alpha_l, delta2_l, phi1, tau, phis, phik, nu, dm, dnm, 
      constant, sig2e1, sig2eta1, sig2l, beta1, rho1, mu_l, X, z, w0, w, 
-     phip, acc, sig2ep, sig2etap, betap, rhop, mu_lp, sig2lp, w0p, wp, zfit);
+     phip, acc, nup, sig2ep, sig2etap, betap, rhop, mu_lp, sig2lp, w0p, wp, zfit);
 
-     z_pr_gpp1(cov, nsite, n, m, r, T, rT, p, nsiterT, phip, dm, dnsm, 
+     z_pr_gpp1(cov, nsite, n, m, r, T, rT, p, nsiterT, phip, nup, dm, dnsm, 
      wp, sig2ep, betap, Xpred, constant, zp);
 
      accept1 += acc[0];
@@ -141,6 +147,9 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      fprintf(parafile, "%f ", sig2ep[0]);
      fprintf(parafile, "%f ", sig2etap[0]);
      fprintf(parafile, "%f ", phip[0]);
+     if(cov[0]==4){
+      fprintf(parafile, "%f ", nup[0]);
+     }     
      fprintf(parafile, "\n");
 
 
@@ -186,8 +195,12 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
        ext_rho(rhop, rho1); 
        ext_beta(p, betap, beta1);              
 
-       
+     if(cov[0]==4){
+     para_printRnu (i, its1, rep1, p1, accept1, phip, nup, rhop, sig2ep, sig2etap, betap); 
+     }                   
+     else {              
      para_printR (i, its1, rep1, p1, accept1, phip, rhop, sig2ep, sig2etap, betap); 
+     }
 
       if(i >= brin){
          annual_aggregate(aggtype, nsite, r, T, zp, anf);
@@ -223,13 +236,15 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
 */
       } // end of loop i >= brin
      } // end of iteration loop
+     PutRNGstate();
 
      fclose(parafile);
      fclose(predfile);
      fclose(textan);
 
     free(phip); free(sig2ep); free(sig2etap); free(rhop); free(betap);
-    free(mu_lp); free(sig2lp); free(wp); free(w0p); free(zfit); free(acc); 
+    free(mu_lp); free(sig2lp); free(wp); free(w0p); free(zfit); free(ofit); 
+    free(acc); 
     free(phi1); free(sig2e1); free(sig2eta1); free(rho1); free(beta1);
     free(zp); free(anf); 
 
@@ -308,13 +323,13 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      double *dm, double *dnm, int *constant, 
      double *sig2e, double *sig2eta, double *sig2l, double *beta, 
      double *rho, double *mu_l, double *X, double *z, double *w0, double *w,
-     int *transform, double *phi_etaf, double *accept_etaf,
+     int *transform, double *phi_etaf, double *accept_etaf, double *nupf,
      double *sig2ef, double *sig2etaf, double *betaf, double *rhof, 
      double *mu_lf, double *sig2lf, double *w0f, double *wf, 
      double *gof, double *penalty, double *z_mean_sd)
 {
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
      
      int its1, col, i, j, n1, m1, r1, T1, p1, N1, rep1, brin, trans1;
      its1 = *its;
@@ -366,7 +381,12 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      acc_eta = (double *) malloc((size_t)((col)*sizeof(double)));
      out = (double *) malloc((size_t)((col)*sizeof(double)));     
 //     z1 = (double *) malloc((size_t)((N1)*sizeof(double)));
-     
+
+     double *nu, *nup;
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));
+     nup = (double *) malloc((size_t)((col)*sizeof(double)));     
+     nu[0] = 2.0/3.0;
+          
        ext_sige(phi_eta, phi_eta1);
        ext_sige(sig2e, sig2e1);
        ext_sigeta(sig2eta, sig2eta1);
@@ -390,19 +410,21 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      }
 */
 
+     GetRNGstate();
      for(i=0; i < its1; i++) {
 
      JOINT_onephi_gpp(cov, spdecay, flag, n, m, T, r, rT, p, N, 
      shape_e, shape_eta, shape_l, prior_a, prior_b, mu_beta, delta2_beta, 
-     mu_rho, delta2_rho, alpha_l, delta2_l, phi_eta1, tau_eta, phis, phik, 
+     mu_rho, delta2_rho, alpha_l, delta2_l, phi_eta1, tau_eta, phis, phik, nu, 
      dm, dnm, constant, sig2e1, sig2eta1, sig2l1, beta1, rho1, mu_l1, X, z, 
-     w0, w, phi_etap, acc_eta, sig2ep, sig2etap, betap, rhop, mu_lp, sig2lp, 
+     w0, w, phi_etap, acc_eta, nup, sig2ep, sig2etap, betap, rhop, mu_lp, sig2lp, 
      w0p, wp, zfit);
 
      accept1 += acc_eta[0];
         
      phi_etaf[i] = phi_etap[0];
-
+     nupf[i] = nup[0];
+     
      sig2ef[i] = sig2ep[0];
      sig2etaf[i] = sig2etap[0];
      rhof[i] = rhop[0];
@@ -432,21 +454,28 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      }
 
        ext_sige(phi_etap, phi_eta1);
+       ext_sige(nup, nu);       
        ext_sige(sig2ep, sig2e1);
        ext_sigeta(sig2etap, sig2eta1); 
        ext_rho(rhop, rho1); 
        ext_beta(p, betap, beta1);              
 
+     if(cov[0]==4){
+     para_printRnu (i, its1, rep1, p1, accept1, phi_etap, nup, rhop, sig2ep, sig2etap, betap); 
+     }                   
+     else {              
      para_printR (i, its1, rep1, p1, accept1, phi_etap, rhop, sig2ep, sig2etap, betap); 
+     }
 //     printR(i, its1); 
      
      } // end of iteration loop
-     
+     PutRNGstate();
 
-     free(phi_etap); free(sig2ep); free(sig2etap); free(rhop); free(betap);
-     free(mu_lp); free(sig2lp); free(wp); free(w0p); free(zfit);
-     free(phi_eta1); free(sig2e1); free(sig2eta1); free(rho1); free(beta1);
-     free(mu_l1); free(sig2l1); free(acc_eta); free(out); //free(z1); // free(w01); free(w1); 
+     free(phi_etap); free(nu); free(nup); free(sig2ep); free(sig2etap); 
+     free(rhop); free(betap); free(mu_lp); free(sig2lp); free(wp); free(w0p); 
+     free(zfit); free(phi_eta1); free(sig2e1); free(sig2eta1); free(rho1); 
+     free(beta1); free(mu_l1); free(sig2l1); free(acc_eta); free(out); 
+     //free(z1); // free(w01); free(w1); 
 
      accept_etaf[0] = accept1;
 

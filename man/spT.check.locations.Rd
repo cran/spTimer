@@ -24,14 +24,15 @@ spT.check.sites.inside(coords, method)
 These functions are used to avoid of occuring non-positive definite correlation matrix.
 }
 \seealso{
-\code{\link{spT.geodist}, \link{dist}, \link{spT.data.selection}, \link{NYsite}}.
+\code{\link{spT.geodist}, \link{dist}, \link{spT.data.selection}}.
 }
 \examples{
 \dontrun{
 ##
 
-data(NYsite)
-head(NYsite)
+data(NYdata)	
+head(NYdata)
+NYsite<-unique(NYdata[,1:3])	
 
 # Sample 4 sites randomly from the data NYdata.
 

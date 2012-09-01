@@ -17,8 +17,8 @@ void z_pr_its_gpp_wtilde(int *cov, int *scale, int *its, int *nsite,
      double *sig2ep, double *sig2etap, double *sig2lp, double *rhop, 
      double *betap, double *Xpred, int *constant, double *zpred)
 {
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
 
      int i, j, its1, nsite1, m1, r1, T1, p1, col;
      its1 = *its;
@@ -41,7 +41,7 @@ void z_pr_its_gpp_wtilde(int *cov, int *scale, int *its, int *nsite,
      beta = (double *) malloc((size_t)((p1*col)*sizeof(double)));
      zp = (double *) malloc((size_t)((nsite1*r1*T1)*sizeof(double)));
           
-
+     GetRNGstate();
      for(i=0; i<its1; i++){
 
        phi_eta[0] = phi_etap[i];
@@ -83,7 +83,8 @@ void z_pr_its_gpp_wtilde(int *cov, int *scale, int *its, int *nsite,
        }
      printR(i, its1); 
      } // end of iteration loop
-
+     PutRNGstate();
+     
      free(phi_eta); free(w0); free(w); free(sig2e);
      free(sig2eta); free(sig2l); free(rho); free(beta);
      free(zp);
@@ -736,7 +737,7 @@ void w0_pr_gpp(int *nsite, int *m, int *r, double *w0p, double *mu_lp,
 
 // the prediction
 void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, int *r, 
-     int *T, int *rT, int *p, int *nsiterT, double *phi_etap, double *dm, 
+     int *T, int *rT, int *p, int *nsiterT, double *phi_etap, double *nup, double *dm, 
      double *dnsm, double *wp, double *sig2ep, double *betap, double *Xpred, 
      int *constant, double *zpred)
 {
@@ -752,8 +753,9 @@ void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, i
      p1 =*p;
      col =*constant;
      
-     double *phi_eta, *w, *sig2e, *beta, *zp;
+     double *phi_eta, *nu, *w, *sig2e, *beta, *zp;
      phi_eta = (double *) malloc((size_t)((col)*sizeof(double)));
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));     
      w = (double *) malloc((size_t)((r1*T1*m1)*sizeof(double)));
      sig2e = (double *) malloc((size_t)((col)*sizeof(double)));
      beta = (double *) malloc((size_t)((p1*col)*sizeof(double)));
@@ -763,6 +765,12 @@ void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, i
      for(i=0; i<its1; i++){
 
        phi_eta[0] = phi_etap[i];
+         if(cov[0]==4){
+           nu[0] = nup[i];
+         }
+         else{
+           nu[0] = 0.0;
+         }
        for(j=0; j< r1*T1*m1; j++){
           w[j] = wp[j+i*r1*T1*m1];
        }    
@@ -771,7 +779,7 @@ void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, i
           beta[j] = betap[j+i*p1];
        }    
               
-       z_pr_gpp1(cov, nsite, n, m, r, T, rT, p, nsiterT, phi_eta, dm, dnsm, 
+       z_pr_gpp1(cov, nsite, n, m, r, T, rT, p, nsiterT, phi_eta, nu, dm, dnsm, 
        w, sig2e, beta, Xpred, constant, zp);
 
        for(j=0; j< nsite1*r1*T1; j++){
@@ -793,7 +801,7 @@ void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, i
      printR(i, its1); 
      } // end of iteration loop
 
-     free(phi_eta); free(w); free(sig2e); free(beta); free(zp);
+     free(phi_eta); free(nu); free(w); free(sig2e); free(beta); free(zp);
      return;
 }
 
@@ -801,7 +809,7 @@ void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, i
 
 // approach dnsm x dm     
 void z_pr_gpp1(int *cov, int *nsite, int *n, int *m, int *r, int *T, 
-     int *rT, int *p, int *nsiterT, double *phi_etap, double *dm, 
+     int *rT, int *p, int *nsiterT, double *phi_etap, double *nup, double *dm, 
      double *dnsm, double *wp, double *sig2ep, double *betap, 
      double *Xpred, int *constant, double *zpred)
 {
@@ -826,7 +834,7 @@ void z_pr_gpp1(int *cov, int *nsite, int *n, int *m, int *r, int *T,
      mu = (double *) malloc((size_t)((col)*sizeof(double)));
      out = (double *) malloc((size_t)((col)*sizeof(double)));
 
-
+/*
       // exponential covariance
       if(cov[0] == 1){
         for(i = 0; i < (m1*m1); i++){
@@ -880,9 +888,12 @@ void z_pr_gpp1(int *cov, int *nsite, int *n, int *m, int *r, int *T,
 
         }
       }
+*/      
 
-     MInv(S_eta, S_eta, m, det);
-     MProd(S_eta, m, m, Snsm, nsite, A); // nsite x m
+    covF(cov, m, m, phi_etap, nup, dm, S_eta);
+    covF(cov, m, nsite, phi_etap, nup, dnsm, Snsm);
+    MInv(S_eta, S_eta, m, det);
+    MProd(S_eta, m, m, Snsm, nsite, A); // nsite x m
 
 // wp is a m x rT matrix
      MProd(wp, rT, m, A, nsite, Aw);  // nsite x rT,  
@@ -897,8 +908,6 @@ void z_pr_gpp1(int *cov, int *nsite, int *n, int *m, int *r, int *T,
                             
      free(S_eta); free(det); free(Snsm); free(A); 
      free(Aw); free(tAw); free(XB); free(mu); free(out);
-
-
 
      return;
 }

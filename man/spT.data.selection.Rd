@@ -16,7 +16,7 @@ spT.data.selection(data, random = TRUE, num.rs = NULL,
 \item{reverse}{Logical value: if TRUE then \code{num.rs} will be discarded from the data.}
 }
 \seealso{
-\code{\link{NYdata}}, \code{\link{NYsite}}.
+\code{\link{NYdata}}.
 }
 \examples{
 \dontrun{

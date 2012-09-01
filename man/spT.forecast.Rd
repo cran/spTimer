@@ -18,8 +18,8 @@ spT.forecast(nBurn, K=1, fore.data, fore.coords,
 \item{Summary}{Logical, if TRUE then provide MCMC summary statistics for forecast.}
 }
 \value{
-\item{forecast.samples}{Forecast MCMC samples.}
-\item{n.fore.sites}{Total number of sites for forecasts.}
+\item{fore.samples}{Forecast MCMC samples.}
+\item{fore.coords}{Forecast coordinates.}
 \item{Mean}{Average of the MCMC predictions, if Summary=TRUE.}
 \item{Median}{Median of the MCMC predictions, if Summary=TRUE.}
 \item{SD}{Standard deviation of the MCMC predictions, if Summary=TRUE.}
@@ -29,7 +29,7 @@ spT.forecast(nBurn, K=1, fore.data, fore.coords,
 \item{model}{The model method used for prediction.}
 }
 \seealso{
-\code{\link{spT.Gibbs}}, \code{\link{spT.prediction}}.
+\code{\link{predict.spT}}, \code{\link{spT.Gibbs}}, \code{\link{spT.prediction}}.
 }
 \examples{
 \dontrun{
@@ -40,34 +40,47 @@ spT.forecast(nBurn, K=1, fore.data, fore.coords,
 ###########################
 
 ##
-##  Foreecasts: GP models
+## Temporal  prediction/forecast 
+## 1. In the unobserved locations
 ##
 
-# define forecast coordinates and variables
-# forecast in the validation sites (hold-out sites)
+# Read data
+data(DataValFore);
 
-fore.coords<-as.matrix(val.site[,2:3])
+# define forecast coordinates
+fore.coords<-as.matrix(unique(cbind(DataValFore[,2:3])))
 
-# one-step ahead forecast, i.e., in day 62
-fore.gp <- spT.forecast(nBurn=100, K=1, fore.data=val.fore, 
+# Two-step ahead forecast, i.e., in day 61 and 62 
+# in the unobserved locations using output from spT.Gibbs
+set.seed(11)
+fore.gp <- spT.forecast(nBurn=100, K=2, fore.data=DataValFore, 
            fore.coords=fore.coords, posteriors=post.gp, Summary=TRUE)
-
-names(fore.gp)
+print(fore.gp)
 
 # forecast validations for the validation sites
-spT.validation(val.fore$o8hrmax,c(fore.gp$Mean)) # 
-spT.pCOVER(val.fore$o8hrmax,c(fore.gp$Up),c(fore.gp$Low)) # 
-spT.segment.plot(val.fore$o8hrmax,c(fore.gp$Mean),
+spT.validation(DataValFore$o8hrmax,c(fore.gp$Mean)) # 
+spT.pCOVER(DataValFore$o8hrmax,c(fore.gp$Up),c(fore.gp$Low)) # 
+spT.segment.plot(DataValFore$o8hrmax,c(fore.gp$Mean),
       c(fore.gp$Up),c(fore.gp$Low))
 abline(a=0,b=1)
 
+##
+## Temporal  prediction/forecast 
+## 2. In the observed/fitted locations
+##
 
-# forecast in the fitted sites 
-fore.coords<-as.matrix(fit.site[,2:3])
+# Read data
+data(DataFitFore)
 
-fore.gp <- spT.forecast(nBurn=100, K=1, fore.data=fit.fore, 
+# Define forecast coordinates
+fore.coords<-as.matrix(unique(cbind(DataFitFore[,2:3])))
+
+# Two-step ahead forecast, i.e., in day 61 and 62, 
+# in the fitted locations using output from spT.Gibbs
+set.seed(11)
+fore.gp <- spT.forecast(nBurn=100, K=2, fore.data=fit.fore, 
            fore.coords=fore.coords, posteriors=post.gp, Summary=TRUE)
-names(fore.gp)
+print(fore.gp)
 
 # forecast validations for the fitted sites
 spT.validation(fit.fore$o8hrmax,c(fore.gp$Mean)) # 
@@ -76,44 +89,54 @@ spT.segment.plot(fit.fore$o8hrmax,c(fore.gp$Mean),
       c(fore.gp$Up),c(fore.gp$Low))
 abline(a=0,b=1)
 
-
 ###########################
 ## The AR models:
 ###########################
 
-
 ##
-## Forecasts: AR models
+## Temporal  prediction/forecast 
+## 1. In the unobserved locations
 ##
 
-# define forecast coordinates and variables
-# forecast in the validation sites (hold-out sites)
+# Read data
+data(DataValFore);
 
-fore.coords<-as.matrix(val.site[,2:3])
+# define forecast coordinates
+fore.coords<-as.matrix(unique(cbind(DataValFore[,2:3])))
 
-# one-step ahead forecast, i.e., in day 62
-fore.ar <- spT.forecast(nBurn=100, K=1, fore.data=val.fore, 
+# Two-step ahead forecast, i.e., in day 61 and 62 
+# in the unobserved locations using output from spT.Gibbs
+set.seed(11)
+fore.ar <- spT.forecast(nBurn=100, K=2, fore.data=DataValFore, 
            fore.coords, pred.samples.ar=pred.ar,
            posteriors=post.ar, Summary=TRUE)
-
-names(fore.ar)
+print(fore.ar)
 
 # forecast validations for the validation sites
-spT.validation(val.fore$o8hrmax,c(fore.ar$Mean)) # 
-spT.pCOVER(val.fore$o8hrmax,c(fore.ar$Up),c(fore.ar$Low)) # 
-spT.segment.plot(val.fore$o8hrmax,c(fore.ar$Mean),
+spT.validation(DataValFore$o8hrmax,c(fore.ar$Mean)) # 
+spT.pCOVER(DataValFore$o8hrmax,c(fore.ar$Up),c(fore.ar$Low)) # 
+spT.segment.plot(DataValFore$o8hrmax,c(fore.ar$Mean),
       c(fore.ar$Up),c(fore.ar$Low))
 abline(a=0,b=1)
 
+##
+## Temporal  prediction/forecast 
+## 2. In the observed/fitted locations
+##
 
-# forecast in the fitted sites 
-fore.coords<-as.matrix(fit.site[,2:3])
+# Read data
+data(DataFitFore)
 
-fore.ar <- spT.forecast(nBurn=100, K=1, fore.data=fit.fore, 
+# Define forecast coordinates
+fore.coords<-as.matrix(unique(cbind(DataFitFore[,2:3])))
+
+# Two-step ahead forecast, i.e., in day 61 and 62, 
+# in the fitted locations using output from spT.Gibbs
+set.seed(11)
+fore.ar <- spT.forecast(nBurn=100, K=2, fore.data=fit.fore, 
            fore.coords, pred.samples.ar=NULL,
            posteriors=post.ar, Summary=TRUE)
-names(fore.ar)
-
+print(fore.ar)
 
 # forecast validations for the fitted sites
 spT.validation(fit.fore$o8hrmax,c(fore.ar$Mean)) # 
@@ -122,39 +145,52 @@ spT.segment.plot(fit.fore$o8hrmax,c(fore.ar$Mean),
       c(fore.ar$Up),c(fore.ar$Low))
 abline(a=0,b=1)
 
-
 ###########################
 ## Models with GPP approximations:
 ###########################
 
-
 ##
-## Forecasts: GPP based models
+## Temporal  prediction/forecast 
+## 1. In the unobserved locations
 ##
 
-# define forecast coordinates and variables
-# forecast in the validation sites (hold-out sites)
-fore.coords<-as.matrix(val.site[,2:3])
+# Read data
+data(DataValFore);
 
-# one-step ahead forecast, i.e., in day 62
-fore.gpp <- spT.forecast(nBurn=100, K=1, fore.data=val.fore, 
+# define forecast coordinates
+fore.coords<-as.matrix(unique(cbind(DataValFore[,2:3])))
+
+# Two-step ahead forecast, i.e., in day 61 and 62 
+# in the unobserved locations using output from spT.Gibbs
+set.seed(11)
+fore.gpp <- spT.forecast(nBurn=100, K=2, fore.data=DataValFore, 
            fore.coords=fore.coords, posteriors=post.gpp, 
            Summary=TRUE)
 
 names(fore.gpp)
 
 # forecast validations for the validation sites
-spT.validation(val.fore$o8hrmax,c(fore.gpp$Mean)) #
-spT.pCOVER(val.fore$o8hrmax,c(fore.gpp$Up),c(fore.gpp$Low)) # 
-spT.segment.plot(val.fore$o8hrmax,c(fore.gpp$Mean),
+spT.validation(DataValFore$o8hrmax,c(fore.gpp$Mean)) #
+spT.pCOVER(DataValFore$o8hrmax,c(fore.gpp$Up),c(fore.gpp$Low)) # 
+spT.segment.plot(DataValFore$o8hrmax,c(fore.gpp$Mean),
       c(fore.gpp$Up),c(fore.gpp$Low))
 abline(a=0,b=1)
 
+##
+## Temporal  prediction/forecast 
+## 2. In the observed/fitted locations
+##
 
-# forecast in the fitted sites 
-forecast.coords<-as.matrix(fit.site[,2:3])
+# Read data
+data(DataFitFore)
 
-fore.gpp <- spT.forecast(nBurn=100, K=1, fore.data=fit.fore, 
+# Define forecast coordinates
+fore.coords<-as.matrix(unique(cbind(DataFitFore[,2:3])))
+
+# Two-step ahead forecast, i.e., in day 61 and 62, 
+# in the fitted locations using output from spT.Gibbs
+set.seed(11)
+fore.gpp <- spT.forecast(nBurn=100, K=2, fore.data=fit.fore, 
            fore.coords=forecast.coords, posteriors=post.gpp, 
            Summary=TRUE)
 names(fore.gpp)
@@ -165,7 +201,6 @@ spT.pCOVER(fit.fore$o8hrmax,c(fore.gpp$Up),c(fore.gpp$Low)) #
 spT.segment.plot(fit.fore$o8hrmax,c(fore.gpp$Mean),
       c(fore.gpp$Up),c(fore.gpp$Low))
 abline(a=0,b=1)
-
 
 ##
 }

@@ -15,8 +15,8 @@
 
 void zlt_fore_gp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r, 
      int *p, int *rT, int *T, int *rK, int *nrK, double *d, double *d12,
-     double *phip, double *sig_ep, double *sig_etap, double *foreX, 
-     double *betap, int *constant, double *foreZ)
+     double *phip, double *nup, double *sig_ep, double *sig_etap, double *foreX, 
+     double *betap, double *wp, int *constant, double *foreZ)
 {
      int i, j, its1, n1, ns, r1, T1, K1, p1, col;
      its1 = *its;
@@ -28,36 +28,48 @@ void zlt_fore_gp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r,
      p1 =*p;
      col =*constant;     
 
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
 
-     double *phi, *sig_e, *sig_eta, *beta, *fZ;
+     double *phi, *nu, *sig_e, *sig_eta, *beta, *w, *fZ;
      phi = (double *) malloc((size_t)((col)*sizeof(double)));       
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));            
      sig_e = (double *) malloc((size_t)((col)*sizeof(double)));       
      sig_eta = (double *) malloc((size_t)((col)*sizeof(double)));       
      beta = (double *) malloc((size_t)((p1*col)*sizeof(double)));       
+     w = (double *) malloc((size_t)((n1)*sizeof(double)));            
      fZ = (double *) malloc((size_t)((ns*r1*K1*col)*sizeof(double)));       
      
-     
+     GetRNGstate();     
      for(i=0; i<its1; i++){
-     phi[0] = phip[i];         
+     phi[0] = phip[i];
+         if(cov[0]==4){
+           nu[0] = nup[i];
+         }
+         else{
+           nu[0] = 0.0;
+         }
      sig_e[0] = sig_ep[i];
      sig_eta[0] = sig_etap[i];
      for(j=0; j<p1; j++){
         beta[j] = betap[j+i*p1];
      }
-              
+     //for(j=0; j<n1; j++){
+     //   w[j] = wp[j+i*n1];
+     //}
+                   
      zlt_fore_gp(cov, K, nsite, n, r, p, rT, T, rK, nrK, d, d12, 
-     phi, sig_e, sig_eta, foreX, beta, constant, fZ);
+     phi, nu, sig_e, sig_eta, foreX, beta, wp, constant, fZ);
      
      for(j=0; j < ns*r1*K1; j++){       
          foreZ[j+i*ns*r1*K1] = fZ[j];                                                
      }
      printR(i, its1); 
      } // end of iteration loop
-
-     free(phi); free(sig_e); free(sig_eta);
-     free(beta); free(fZ);
+     PutRNGstate();
+     
+     free(phi); free(nu); free(sig_e); free(sig_eta);
+     free(beta); free(w); free(fZ);
      
      return;
 }
@@ -67,8 +79,8 @@ void zlt_fore_gp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r,
 // K-step Forecasts without its
 void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p, 
      int *rT, int *T, int *rK, int *nrK, double *d, double *d12, 
-     double *phi, double *sig_e, double *sig_eta, double *foreX, 
-     double *beta, int *constant, double *foreZ)
+     double *phi, double *nu, double *sig_e, double *sig_eta, double *foreX, 
+     double *beta, double *w, int *constant, double *foreZ)
 { 
      int l, k, t, i, T1, K1, r1, n1, ns, nns, col;
      T1 =*T;
@@ -86,7 +98,7 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
     S_eta12c = (double *) malloc((size_t)((n1*col)*sizeof(double)));
     det = (double *) malloc((size_t)((col)*sizeof(double))); 
 
-        
+/*        
       // exponential covariance
       if(cov[0] == 1){
         for(i = 0; i < (n1*n1); i++){
@@ -143,7 +155,11 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
           S_eta12[i] = (1.0+phi[0]*d12[i])*exp(-1.0*phi[0]*d12[i]);        
         }
       }
+*/
 
+    covF(cov, n, n, phi, nu, d, S_eta);
+    MInv(S_eta, Si_eta, n, det);    
+    covF(cov, n, nsite, phi, nu, d12, S_eta12);
 
      double *mu, *sig, *s21, *XB, *XB1, *eta, *eps, *zfore;
      mu = (double *) malloc((size_t)((col)*sizeof(double))); 
@@ -155,7 +171,7 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
      eps = (double *) malloc((size_t)((col)*sizeof(double)));       
      zfore = (double *) malloc((size_t)((ns*col)*sizeof(double)));       
 
-     mu[0] = 0.0;
+//     mu[0] = 0.0;
      
      MProd(beta, constant, p, foreX, nrK, XB);  // nsiterK x 1     
      for(l=0; l<r1; l++){
@@ -164,13 +180,10 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
          extract_alt2(l, k, nsite, rK, K, XB, XB1); // nsite x 1
          mvrnormal(constant, mu, sig_e, constant, eps); 
          for(i=0; i<ns; i++){
+/*
             if(ns == n1){
-            mvrnormal(constant, mu, sig_eta, constant, eta);
-            mvrnormal(constant, mu, sig_e, constant, eps); 
-            zfore[i] = XB1[i]+eta[0]+eps[0];                                             
-            }
-            else{
-            extn_12(i, n, S_eta12,S_eta12c); // n x 1
+            extn_12(i, n, S_eta,S_eta12c); // n x 1
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean
             xTay(S_eta12c, Si_eta, S_eta12c, n, s21); // 1 x 1
             if(s21[0] > 1.0){
                 s21[0] = 1.0-pow(1,-320);
@@ -182,20 +195,49 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
             mvrnormal(constant, mu, sig, constant, eta); 
             mvrnormal(constant, mu, sig_e, constant, eps); 
             zfore[i] = XB1[i]+eta[0]+eps[0];                                             
-            }                 
+            }
+            else{
+*/
+            extn_12(i, n, S_eta12,S_eta12c); // n x 1
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean
+            xTay(S_eta12c, Si_eta, S_eta12c, n, s21); // 1 x 1
+            if(s21[0] > 1.0){
+                s21[0] = 1.0-pow(1,-320);
+            }
+            if(s21[0] == 1.0){ 
+                s21[0] = 1.0-pow(1,-320);
+            }
+            sig[0] = sig_eta[0] * (1.0 - s21[0]);
+            mvrnormal(constant, mu, sig, constant, eta); 
+            mvrnormal(constant, mu, sig_e, constant, eps); 
+            zfore[i] = XB1[i]+eta[0]+eps[0];                                             
+//            }                 
          }
          put_together1(l, k, nsite, r, K, foreZ, zfore);
        }
        for(k=1; k<K1; k++){     
          extract_alt2(l, k, nsite, rK, K, XB, XB1); // nsite x 1
          for(i=0; i<ns; i++){
+/*
             if(ns == n1){
-            mvrnormal(constant, mu, sig_eta, constant, eta); 
+            extn_12(i, n, S_eta,S_eta12c); // n x 1
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean
+            xTay(S_eta12c, Si_eta, S_eta12c, n, s21); // 1 x 1
+            if(s21[0] > 1.0){
+                s21[0] = 1.0-pow(1,-320);
+            }
+            if(s21[0] == 1.0){ 
+                s21[0] = 1.0-pow(1,-320);
+            }
+            sig[0] = sig_eta[0] * (1.0 - s21[0]);
+            mvrnormal(constant, mu, sig, constant, eta); 
             mvrnormal(constant, mu, sig_e, constant, eps); 
             zfore[i] = XB1[i]+eta[0]+eps[0];                                             
             }
             else{
+*/
             extn_12(i, n, S_eta12,S_eta12c);
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean
             xTay(S_eta12c, Si_eta, S_eta12c, n, s21);
             if(s21[0] > 1.0){
                 s21[0] = 1.0-pow(1,-320);
@@ -204,10 +246,10 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
                 s21[0] = 1.0-pow(1,-320);
             }
             sig[0] = sig_eta[0] * (1.0 - s21[0]);
-            mvrnormal(constant, mu, sig_eta, constant, eta); 
+            mvrnormal(constant, mu, sig, constant, eta); 
             mvrnormal(constant, mu, sig_e, constant, eps);             
             zfore[i] = XB1[i]+eta[0]+eps[0];                                             
-            }
+//            }
          }
          put_together1(l, k, nsite, r, K, foreZ, zfore);
        }
@@ -221,140 +263,7 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
      return;
 }
 
-/*
 
-// K-step Forecast into the existing sites with its
-//     'd' is the distance matrix of the existing sites
-// K-step Forecasts into the prediction sites with its
-//     'd' is the distance matrix of the prediction sites
-
-void zlt_fore_gp_its(int *cov, int *its, int *K, int *n, int *r, 
-     int *p, int *rT, int *T, int *rK, int *nrK, double *d, 
-     double *phip, double *sig_ep, double *sig_etap, double *foreX, 
-     double *betap, int *constant, double *foreZ)
-{
-     int i, j, its1, n1, r1, T1, K1, p1, col;
-     its1 = *its;
-     n1 =*n;
-     r1 =*r;
-     T1 =*T;
-     K1 =*K;
-     p1 =*p;
-     col =*constant;     
-
-     unsigned iseed = 44;
-     srand(iseed); 
-
-     double *phi, *sig_e, *sig_eta, *beta, *fZ;
-     phi = (double *) malloc((size_t)((col)*sizeof(double)));       
-     sig_e = (double *) malloc((size_t)((col)*sizeof(double)));       
-     sig_eta = (double *) malloc((size_t)((col)*sizeof(double)));       
-     beta = (double *) malloc((size_t)((p1*col)*sizeof(double)));       
-     fZ = (double *) malloc((size_t)((n1*r1*K1*col)*sizeof(double)));       
-     
-     
-     for(i=0; i<its1; i++){
-     phi[0] = phip[i];         
-     sig_e[0] = sig_ep[i];
-     sig_eta[0] = sig_etap[i];
-     for(j=0; j<p1; j++){
-        beta[j] = betap[j+i*p1];
-     }
-              
-     zlt_fore_gp(cov, K, n, r, p, rT, T, rK, nrK, d, phi, sig_e, sig_eta, 
-     foreX, beta, constant, fZ);
-     
-     for(j=0; j < n1*r1*K1; j++){       
-         foreZ[j+i*n1*r1*K1] = fZ[j];                                                
-     }
-     printR(i, its1); 
-     } // end of iteration loop
-
-     free(phi); free(sig_e); free(sig_eta);
-     free(beta); free(fZ);
-     
-     return;
-}
-
-
-
-// K-step Forecasts without its
-void zlt_fore_gp(int *cov, int *K, int *n, int *r, int *p, int *rT, int *T, 
-     int *rK, int *nrK, double *d, double *phi, double *sig_e, 
-     double *sig_eta, double *foreX, double *beta, int *constant,  
-     double *foreZ)
-{ 
-     int l, k, t, i, T1, K1, r1, n1, col;
-     T1 =*T;
-     K1 =*K;
-     r1 =*r;
-     n1 =*n;
-     col =*constant;
-     
-     double *S, *I, *mu, *XB, *XB1, *eta, *eps, *zfore;
-     S = (double *) malloc((size_t)((n1*n1)*sizeof(double)));       
-     I = (double *) malloc((size_t)((n1*col)*sizeof(double)));       
-     mu = (double *) malloc((size_t)((col)*sizeof(double)));       
-     XB = (double *) malloc((size_t)((n1*r1*K1*col)*sizeof(double)));       
-     XB1 = (double *) malloc((size_t)((n1*col)*sizeof(double)));       
-     eta = (double *) malloc((size_t)((n1*col)*sizeof(double)));       
-     eps = (double *) malloc((size_t)((col)*sizeof(double)));       
-     zfore = (double *) malloc((size_t)((n1*col)*sizeof(double)));       
-
-     covFormat1(cov, n, phi, d, S);
-     for(i=0; i<n1; i++){
-         I[i] = 0.0;
-     }     
-    
-     mu[0] = 0.0;
-     MProd(beta, constant, p, foreX, nrK, XB);  // nrK x 1     
-     for(l=0; l<r1; l++){
-       for(k=0; k<1; k++){     
-//         if(node[0] == 1){
-//             eta[0] = 0.0;
-//         }
-//         if(node[0] == 2){ 
-//           mvrnormal(constant, I, S, n, eta); 
-//            mvrnormal(constant, mu, sig_eta, constant, eta); 
-//         }
-         t = (T1-1);
-         extract_alt2(l, k, n, rK, K, XB, XB1); // n x 1
-            mvrnormal(constant, mu, sig_e, constant, eps); 
-         for(i=0; i<n1; i++){
-            mvrnormal(constant, mu, sig_eta, constant, eta); 
-//            zfore[i] = XB1[i]+eta[i]+eps[0];                                 
-            zfore[i] = XB1[i]+eta[0]+eps[0];                                             
-         }
-         put_together1(l, k, n, r, K, foreZ, zfore);
-       }
-       for(k=1; k<K1; k++){     
-//         if(node[0] == 1){
-//             eta[0] = 0.0;
-//         }
-//         if(node[0] == 2){ 
-//           mvrnormal(constant, I, S, n, eta); 
-//            mvrnormal(constant, mu, sig_eta, constant, eta); 
-//         }
-         extract_alt2(l, k, n, rK, K, XB, XB1); // n x 1
-            mvrnormal(constant, mu, sig_e, constant, eps); 
-         for(i=0; i<n1; i++){
-            mvrnormal(constant, mu, sig_eta, constant, eta); 
-//            zfore[i] = XB1[i]+eta[i]+eps[0];                                 
-            zfore[i] = XB1[i]+eta[0]+eps[0];                                             
-         }
-         put_together1(l, k, n, r, K, foreZ, zfore);
-       }
-     }
-       
-     free(S); 
-     free(I); free(mu); free(XB); free(XB1); 
-     free(eta); free(eps); free(zfore);
-
-     return;
-}
-
-
-*/
 /////////////////////// END ///////////////////////////////////////////////////
 
 

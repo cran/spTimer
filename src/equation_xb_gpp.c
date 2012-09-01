@@ -13,12 +13,13 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
      double *shape_l, double *prior_a, double *prior_b, double *mu_beta, 
      double *delta2_beta, double *mu_rho,  double *delta2_rho, double *alpha_l, 
      double *delta2_l, double *phi, double *tau, double *phis, int *phik,
-     double *dm, double *dnm, int *constant, 
+     double *nu, double *dm, double *dnm, int *constant, 
      double *sig2e, double *sig2eta, double *sig2l, double *beta, 
      double *rho, double *mu_l, double *X, double *z, double *w0, double *w,
-     double *phip, double *accept,
+     double *phip, double *accept, double *nup,
      double *sig2ep, double *sig2etap, double *betap, double *rhop, 
-     double *mu_lp, double *sig2lp, double *w0p, double *wp, double *zfit)
+     double *mu_lp, double *sig2lp, double *w0p, double *wp, 
+     double *zfit)
 {     
      int n1, m1, T1, r1, p1, N1, col; 
      n1 = *n;
@@ -29,8 +30,6 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
      N1 = *N;
      col = *constant;
      
-     int i;
-
    double *Qeta, *XB, *Sinv, *S, *det, *A, *C, *Aw;
 
    Qeta = (double *) malloc((size_t)((m1*m1)*sizeof(double)));
@@ -42,58 +41,38 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
    C = (double *) malloc((size_t)((n1*m1)*sizeof(double)));   
    Aw = (double *) malloc((size_t)((n1*r1*T1)*sizeof(double)));   
 
-   covFormat(cov, m, phi, dm, sig2eta, S, det, Sinv, Qeta);
-
-      if(cov[0] == 1){
-      // exponential covariance
-       for(i=0; i<n1*m1; i++){
-        C[i] = exp(-1.0*phi[0]*dnm[i]);
-       }
-      }
-      if(cov[0] == 2){
-      // gaussian covariance
-       for(i=0; i<n1*m1; i++){
-        C[i] = exp(-1.0*phi[0]*phi[0]*dnm[i]*dnm[i]);
-       }
-      }
-      if(cov[0] == 3){
-      // spherical covariance
-       for(i=0; i<n1*m1; i++){
-        C[i] = 1.0-1.5*phi[0]*dnm[i]+0.5*(phi[0]*dnm[i])*(phi[0]*dnm[i])*(phi[0]*dnm[i]);
-       }
-      }
-      if(cov[0] == 4){
-      // matern covariance nu =3/2
-       for(i=0; i<n1*m1; i++){
-        C[i] = (1.0+phi[0]*dnm[i])*exp(-1.0*phi[0]*dnm[i]);  // n x m
-       }
-      }
+   covFormat(cov, m, phi, nu, dm, sig2eta, S, det, Sinv, Qeta);
+   covF(cov, n, m, phi, nu, dnm, C);
 
    MProd(Sinv, m, m, C, n, A);  // n x m
    MProd(beta, constant, p, X, N, XB);
 
-//   rho_gpp(m, r, T, rT, p, mu_rho, delta2_rho, Qeta, w0, w, constant, rhop);     
-   
    wlt_gpp(n, m, r, T, rT, p, sig2e, rho, Qeta, A, w0, w, XB, z, 
    constant, wp);     
    w0_gpp(m, r, T, Qeta, sig2l, Sinv, rho, mu_l, wp, constant, w0p);     
 
-   rho_gpp(m, r, T, rT, p, mu_rho, delta2_rho, Qeta, w0p, wp, constant, rhop);        
+// check nu
+   if(cov[0]==4){
+      nu_gpp_DIS(cov, Qeta, det, phi, nu, m, r, T, rT, dm, rho, sig2eta, 
+      mu_l, w0, w, constant, nup); 
+   }
+   else {
+      nup[0] = nu[0];
+   }  
 
 // fixed values for phi 
    if(spdecay[0] == 1){
       accept[0] =0.0;
       phip[0] = phi[0];
+      covFormat(cov, m, phip, nup, dm, sig2eta, S, det, Sinv, Qeta);
    }
 // discrete sampling for phi 
    else if(spdecay[0] == 2){
-      phi_gpp_DIS2(cov, Qeta, det, phi, phis, phik, m, r, T, rT, 
+      phi_gpp_DIS2(cov, Qeta, det, phi, phis, phik, nup, m, r, T, rT, 
       prior_a, prior_b, dm, rho, sig2eta, mu_l, w0p, wp, constant, 
       accept, phip);
-      if(accept[0] == 1.0){    
-        covFormat(cov, m, phip, dm, sig2eta, S, det, Sinv, Qeta);
-        MProd(Sinv, m, m, C, n, A);  // n x m
-      }
+      covFormat(cov, m, phip, nup, dm, sig2eta, S, det, Sinv, Qeta);
+      MProd(Sinv, m, m, C, n, A);  // n x m
    }
 // Random-Walk MH-within-Gibbs sampling for phi
    else if(spdecay[0] == 3){
@@ -109,17 +88,15 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
      tmp[0] = -log(phi[0]); 
      mvrnormal(constant, tmp, tau, constant, phi2);
      phi2[0]= exp(-phi2[0]);
-     
-     covFormat3(cov, m, phi2, dm, sig2eta, det2, Qeta2);
+     covFormat2(cov, m, phi2, nup, dm, sig2eta, det2, Qeta2);
      phi_gpp_MH2(Qeta, Qeta2, det, det2, phi, phi2, m, r, T, rT, 
      prior_a, prior_b, rho, mu_l, w0p, wp, constant, accept, phip);
 //    phi_gpp_MH(cov, phi2, dm, dnm, Qeta, det, phi, A, n, m, r, T, rT, 
 //    prior_a, prior_b, rho, mu_l, w0p, wp, z, XB, constant, accept, phip); 
-    free(Qeta2); free(det2);
-    free(tmp); free(phi2);
-
+     free(Qeta2); free(det2);
+     free(tmp); free(phi2);
      if(accept[0]==1.0){
-       covFormat(cov, m, phip, dm, sig2eta, S, det, Sinv, Qeta);
+       covFormat(cov, m, phip, nup, dm, sig2eta, S, det, Sinv, Qeta);
        MProd(Sinv, m, m, C, n, A);  // n x m
      }
    }
@@ -129,21 +106,15 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
    }   
 
    MProd(wp, rT, m, A, n, Aw);  // n x rT
-
+   rho_gpp(m, r, T, rT, p, mu_rho, delta2_rho, Qeta, w0p, wp, constant, rhop);        
    beta_gpp(n, p, rT, N, mu_beta, delta2_beta, sig2e, X, Aw, z, 
    constant, betap); 
-
    MProd(betap, constant, p, X, N, XB);
-
    mu_l_gpp(m, r, sig2l, alpha_l, delta2_l, Sinv, w0p, constant, mu_lp);         
-
    sig_l_gpp(m, r, shape_l, prior_b, mu_lp, Sinv, w0p, constant, sig2lp);          
-
    sig_eta_gpp(m, r, T, rT, shape_eta, prior_b, Sinv, rhop, wp, w0p, 
    constant, sig2etap);
-
    sig_e_gpp(n, rT, N, shape_e, prior_b, XB, Aw, z, constant, sig2ep);
-   
    Z_fit_gpp(flag, n, m, T, r, rT, sig2ep, Aw, XB, z, constant, zfit);
    
    free(Qeta); free(XB); free(Sinv); free(S); free(det); free(A);
@@ -496,6 +467,45 @@ void Z_fit_gpp(double *flag, int *n, int *m, int *T, int *r, int *rT,
      return;
 }
 
+// Posterior samples for o_lt=XB+Aw obtained using MCMC samples
+void o_fit_gpp(double *flag, int *n, int *m, int *T, int *r, int *rT, 
+     double *Aw, double *XB, double *z, int *constant, 
+     double *zfit)
+{
+     int i, l, t, n1, m1, r1, T1, col;
+     n1 = *n;
+     m1 = *m;
+     r1 = *r;
+     T1 = *T;
+     col = *constant;
+   
+     double *XB1, *z1, *fl, *zz;
+     XB1 = (double *) malloc((size_t)((n1*col)*sizeof(double)));
+     z1 = (double *) malloc((size_t)((n1*col)*sizeof(double)));
+     fl = (double *) malloc((size_t)((n1*col)*sizeof(double)));
+     zz = (double *) malloc((size_t)((n1*col)*sizeof(double)));
+  
+     for(l=0; l < r1; l++) {
+       for(t=0; t < T1; t++) {
+         extract_alt2(l, t, n, rT, T, XB, XB1);
+         extract_alt2(l, t, n, rT, T, z, z1);
+         extract_alt2(l, t, n, rT, T, flag, fl);
+
+         for(i=0; i<n1; i++){
+             if(fl[i] == 1.0){
+             zz[i]=XB1[i]+ Aw[i+t*n1+l*n1*T1];
+             } 
+             else {
+             zz[i] = XB1[i] + Aw[i+t*n1+l*n1*T1]; 
+             }
+         }         
+         put_together1(l, t, n, r, T, zfit, zz);
+       }
+     }
+
+     free(XB1); free(z1); free(fl); free(zz);
+     return;
+}
 
 
 
@@ -807,9 +817,8 @@ void phi_gpp_MH2(double *Qeta1, double *Qeta2, double *det1, double *det2,
 // with Gamma prior    
      tr1 = (a-1.0)*log(phi1[0])-b*phi1[0]-0.5*r1*T1*log(det1[0])- u; 
      tr2 = (a-1.0)*log(phi2[0])-b*phi2[0]-0.5*r1*T1*log(det2[0])- v; 
-
 //     Rprintf("for phi1: %f for phi2: %f\n", tr1, tr2);
-     ratio[0] = exp(tr2 - tr1);
+     ratio[0] = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
      ratio_fnc(ratio, constant, U);
      if(U[0] < ratio[0]){
           phip[0] = phi2[0];
@@ -828,7 +837,7 @@ void phi_gpp_MH2(double *Qeta1, double *Qeta2, double *det1, double *det2,
 
 // phi sample random walk 
 void phi_gpp_DIS2(int *cov, double *Qeta1, double *det1, double *phi1,    
-     double *phis, int *phik, int *m, int *r, int *T, int *rT, 
+     double *phis, int *phik, double *nu, int *m, int *r, int *T, int *rT, 
      double *prior_a, double *prior_b, double *dm, double *rho, 
      double *sig2eta, double *mu_l, double *w0, double *w, int *constant, 
      double *accept, double *phip) 
@@ -854,7 +863,7 @@ void phi_gpp_DIS2(int *cov, double *Qeta1, double *det1, double *phi1,
           
      for(i=0; i< *phik; i++){
         phitmp[0] = phis[i];
-        covFormat3(cov, m, phitmp, dm, sig2eta, det, Qeta);
+        covFormat2(cov, m, phitmp, nu, dm, sig2eta, det, Qeta);
      	phiden_gpp(phitmp, Qeta, det, m, r, T, rT, prior_a, prior_b,
         rho, w0, w, constant, out);
         pden[i] = out[0];
@@ -890,8 +899,7 @@ void phi_gpp_DIS2(int *cov, double *Qeta1, double *det1, double *phi1,
 
      phiden_gpp(phi1, Qeta1, det1, m, r, T, rT, prior_a, prior_b,
      rho, w0, w, constant, tr1);
-
-     ratio[0] = exp(tr2[0] - tr1[0]);
+     ratio[0] = exp(tr2[0] + exp(tr2[0]) - tr1[0] - exp(tr1[0]));
      ratio_fnc(ratio, constant, U);
      if(U[0] < ratio[0]){
           phip[0] = phis[i];
@@ -962,12 +970,140 @@ void phiden_gpp(double *phi, double *Qeta, double *det, int *m, int *r,
 }
 
 
+// nu sample random walk 
+void nu_gpp_DIS(int *cov, double *Qeta1, double *det1, double *phi, double *nu1, 
+     int *m, int *r, int *T, int *rT, double *dm, double *rho, double *sig2eta, 
+     double *mu_l, double *w0, double *w, int *constant, double *nup) 
+{
+     int row, col, i, r1, T1, N1, rT1;
+     row = *m;
+     col = *constant;
+     r1 = *r;
+     T1 = *T;
+     N1 = row*r1*T1;
+     rT1 = *rT;
+
+     int nuk;
+
+     nuk=20;
+     double *nus;
+     nus = (double *) malloc((size_t)((nuk)*sizeof(double)));             
+     nus[0]=0.05; nus[1]=0.10; nus[2]=0.15; nus[3]=0.20; nus[4]=0.25;  
+     nus[5]=0.30; nus[6]=0.35; nus[7]=0.40; nus[8]=0.45; nus[9]=0.50;  
+     nus[10]=0.55; nus[11]=0.60; nus[12]=0.65; nus[13]=0.70; nus[14]=0.75; 
+     nus[15]=0.80; nus[16]=0.85; nus[17]=0.90; nus[18]=0.95; nus[19]=1.0; 
+
+
+     double *nutmp, *pden, *Qeta, *det, *out;
+     nutmp = (double *) malloc((size_t)((col)*sizeof(double)));             
+     pden = (double *) malloc((size_t)((nuk)*sizeof(double)));             
+     Qeta = (double *) malloc((size_t)((row*row)*sizeof(double)));             
+     det = (double *) malloc((size_t)((col)*sizeof(double)));             
+     out = (double *) malloc((size_t)((col)*sizeof(double))); 
+     double u;
+     u =0.0;     
+          
+     for(i=0; i< nuk; i++){
+        nutmp[0] = nus[i];
+        covFormat2(cov, m, phi, nutmp, dm, sig2eta, det, Qeta);
+        nuden_gpp(Qeta, det, m, r, T, rT, rho, w0, w, constant, out);
+        pden[i] = out[0];
+        u += out[0];
+     }     
+     free(nutmp); free(Qeta); free(det); free(out);
+
+     double *pprob, *U, *tr2;
+     pprob = (double *) malloc((size_t)((nuk)*sizeof(double)));             
+     U = (double *) malloc((size_t)((col)*sizeof(double)));
+     tr2 = (double *) malloc((size_t)((col)*sizeof(double)));             
+
+     pprob[0] = pden[0]/u;         
+
+     for(i=0; i< (nuk-1); i++){
+        pprob[i+1] = pprob[i] + pden[i+1]/u;
+     }
+     runif_val(constant, constant, U);
+     if ( U[0] >  pprob[0]){
+     i = 0 ;
+     do{
+       i = i + 1;
+       } while ( ( U[0] > pprob[i] ) & ( i< nuk - 1 ) ) ;   
+     }
+     else i=0;
+     tr2[0] = pden[i];  
+     
+     free(pprob);
+
+     double *ratio, *tr1;
+     ratio = (double *) malloc((size_t)((col)*sizeof(double)));             
+     tr1 = (double *) malloc((size_t)((col)*sizeof(double)));         
+
+     nuden_gpp(Qeta1, det1, m, r, T, rT, rho, w0, w, constant, tr1);
+     ratio[0] = exp(tr2[0] + exp(tr2[0]) - tr1[0] - exp(tr1[0]));
+     ratio_fnc(ratio, constant, U);
+     if(U[0] < ratio[0]){
+          nup[0] = nus[i];
+     }             
+     else {
+        nup[0] = nu1[0];
+     }     
+ 
+     free(ratio); free(tr2); free(tr1); free(pden); free(U);
+     return;
+}
+
+// nu density for the gpp
+void nuden_gpp(double *Qeta, double *det, int *m, int *r, int *T, int *rT, 
+     double *rho, double *w0, double *w, int *constant, double *out)
+{
+     int m1, col, t, l, i, r1, T1;
+     m1 = *m;
+     col = *constant;
+     r1 = *r;
+     T1 = *T;
+
+     double *w2, *er;
+     w2 = (double *) malloc((size_t)((m1*col)*sizeof(double)));
+     er = (double *) malloc((size_t)((m1*col)*sizeof(double)));
+     
+     double u;
+     u = 0.0;         
+      for(l=0; l < r1; l++) {
+      for(t=0; t < T1; t++) {
+             if(t == 0){
+                   for(i=0; i<m1; i++){
+                     w2[i] = w0[i+l*m1];
+		     er[i] = w[i+t*m1+l*m1*T1]-rho[0]*w2[i];	
+                   }      
+             }
+             else {       
+                   for(i=0; i<m1; i++){
+                     w2[i] = w[i+(t-1)*m1+l*m1*T1];
+		     er[i] = w[i+t*m1+l*m1*T1]-rho[0]*w2[i];	
+                   }      
+             }
+             u += xTay2(er, Qeta, er, m1);
+     }
+     }
+     free(w2); free(er);
+
+     u =  0.5 * u;
+     if(det[0] <= 0){
+        det[0] = pow(1,-320);
+     }
+     double tr;
+     tr = 0.0;        
+     tr = -0.5*r1*T1*log(det[0])-u; // uniform prior log(1) = 0
+     out[0] = tr;
+
+     return;
+}
 
 
 
 
 // phi sampling random walk another approach
-void phi_gpp_MH(int *cov, double *phi2, double *dm, double *dnm,
+void phi_gpp_MH(int *cov, double *phi2, double *nu, double *dm, double *dnm,
      double *Sinv1, double *det1, double *phi1, double *A1,   
      int *n, int *m, int *r, int *T, int *rT, double *prior_a, double *prior_b, 
      double *rho, double *mu_l, double *w0, double *w, double *z, double *XB, 
@@ -986,7 +1122,7 @@ void phi_gpp_MH(int *cov, double *phi2, double *dm, double *dnm,
    C2 = (double *) malloc((size_t)((m1*n1)*sizeof(double)));
    A2 = (double *) malloc((size_t)((m1*n1)*sizeof(double)));
 
-
+/*
     if(cov[0] == 1){
       // exponential covariance
       covExpo2(m, phi2, dm, det2, Sinv2);
@@ -1016,7 +1152,11 @@ void phi_gpp_MH(int *cov, double *phi2, double *dm, double *dnm,
        C2[i] = exp(-phi2[0]*dnm[i]);  // n x m
       }
     }
-    
+*/
+
+    covF(cov, m, m, phi2, nu, dm, Sinv2);
+    MInv(Sinv2, Sinv2, n, det2);    
+    covF(cov, n, m, phi2, nu, dnm, C2);
     MProd(Sinv2, m, m, C2, n, A2);  // n x m
 
      double *tA1, *tA2, *XB1, *z1, *zx, *er1, *er2; 
@@ -1052,7 +1192,6 @@ void phi_gpp_MH(int *cov, double *phi2, double *dm, double *dnm,
            }      
            MProd(zx, constant, n, tA1, m, er1); // m x 1
 //          MProd(er1, constant, m, AA1, m, er1); // m x 1
-           
            MProd(zx, constant, n, tA2, m, er2); // m x 1
 //           MProd(er2, constant, m, AA2, m, er2); // m x 1
 
@@ -1101,10 +1240,8 @@ void phi_gpp_MH(int *cov, double *phi2, double *dm, double *dnm,
 // with Gamma prior    
      tr1 = (a-1.0)*log(phi1[0])-b*phi1[0]-0.5*r1*T1*log(det1[0])- u;      
      tr2 = (a-1.0)*log(phi2[0])-b*phi2[0]-0.5*r1*T1*log(det2[0])- v;        
-
-
 //     Rprintf("for phi1: %f for phi2: %f\n", tr1, tr2);
-     ratio[0] = exp(tr2 - tr1);
+     ratio[0] = exp(tr2 + exp(tr2) - tr1 - exp(tr1));     
      ratio_fnc(ratio, constant, U);
      if(U[0] < ratio[0]){
           phip[0] = phi2[0];
@@ -1119,10 +1256,6 @@ void phi_gpp_MH(int *cov, double *phi2, double *dm, double *dnm,
     free(ratio); free(U); free(det2); 
     return;   
 }
-
-
-
-
 
 
 ///////////////////// THE END ///////////////////////////

@@ -41,19 +41,38 @@ spT.MCMC.stat<-function(x, nBurn=0)
      }
   r<-dim(x$mu_lp)[[1]]
   p<-dim(x$betap)[[1]]
+  #para<-rbind((x$betap[,(nBurn+1):nItr]),
+  #            t(x$rhop[(nBurn+1):nItr]),
+  #            t(x$sig2ep[(nBurn+1):nItr]),
+  #            t(x$sig2etap[(nBurn+1):nItr]),
+  #            (x$sig2lp[,(nBurn+1):nItr]),
+  #            (x$mu_lp[,(nBurn+1):nItr]),
+  #            t(x$phip[(nBurn+1):nItr]))
+  #para<-spT.Summary.Stat(para)
+  #dimnames(para)[[1]][1:(1+p+2)]<-c(dimnames(x$X)[[2]],"rho",
+  #   "sig2eps","sig2eta")
+  #dimnames(para)[[1]][(1+p+2+1):(1+p+2+r)] <- paste("sig2:", 1:r)  
+  #dimnames(para)[[1]][(1+p+2+r+1):(1+p+2+r+r)] <- paste("mu:", 1:r)  
+  #dimnames(para)[[1]][(1+p+2+r+r+1)] <-c("phi")
+  #
+  if(x$cov.fnc=="matern"){
   para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$rhop[(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
-              (x$sig2lp[,(nBurn+1):nItr]),
-              (x$mu_lp[,(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+  }
+  else{
+  para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$rhop[(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
+  }
+  #
   para<-spT.Summary.Stat(para)
-  dimnames(para)[[1]][1:(1+p+2)]<-c(dimnames(x$X)[[2]],"rho",
-     "sig2eps","sig2eta")
-  dimnames(para)[[1]][(1+p+2+1):(1+p+2+r)] <- paste("sig2:", 1:r)  
-  dimnames(para)[[1]][(1+p+2+r+1):(1+p+2+r+r)] <- paste("mu:", 1:r)  
-  dimnames(para)[[1]][(1+p+2+r+r+1)] <-c("phi")
+  dimnames(para)[[1]][1:(1+p+3)]<-c(dimnames(x$X)[[2]],"rho",
+     "sig2eps","sig2eta","phi")
   round(para,4)
   }
   else if(model == "GPP"){
@@ -66,11 +85,22 @@ spT.MCMC.stat<-function(x, nBurn=0)
      }
   r<-x$r
   p<-x$p
+  #
+  if(x$cov.fnc=="matern"){
+  para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$rhop[(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+  }
+  else{
   para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$rhop[(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
+  }
+  #
   para<-spT.Summary.Stat(para)
   dimnames(para)[[1]][1:(1+p+2+1)]<-c(dimnames(x$X)[[2]],"rho",
      "sig2eps","sig2eta","phi")
@@ -86,10 +116,20 @@ spT.MCMC.stat<-function(x, nBurn=0)
      }
   r<-x$r
   p<-x$p
+  #
+  if(x$cov.fnc=="matern"){
+  para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+  }
+  else{
   para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
+  }
+  #
   para<-spT.Summary.Stat(para)
   dimnames(para)[[1]]<-c(dimnames(x$X)[[2]],
      "sig2eps","sig2eta","phi")
@@ -142,17 +182,37 @@ spT.MCMC.plot<-function(x, nBurn=0, ACF="FALSE", PARTIAL.acf="FALSE")
      }
   r<-x$r
   p<-x$p
+  #para<-rbind((x$betap[,(nBurn+1):nItr]),
+  #            t(x$rhop[(nBurn+1):nItr]),
+  #            t(x$sig2ep[(nBurn+1):nItr]),
+  #            t(x$sig2etap[(nBurn+1):nItr]),
+  #            (x$sig2lp[,(nBurn+1):nItr]),
+  #            (x$mu_lp[,(nBurn+1):nItr]),
+  #            t(x$phip[(nBurn+1):nItr]))
+  #dimnames(para)[[1]][1:(1+p+2+r+r+1)]<-c(dimnames(x$X)[[2]],"rho",
+  #   "sig2eps","sig2eta",paste("sig2:", 1:r),paste("mu:", 1:r),"phi")
+  #initial_val<-c(x$initials[[7]],x$initials[6],x$initials[2],
+  #           x$initials[3],x$initials[5],x$initials[4],x$initials[1])
+  #
+  if(x$cov.fnc=="matern"){
   para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$rhop[(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
-              (x$sig2lp[,(nBurn+1):nItr]),
-              (x$mu_lp[,(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+  dimnames(para)[[1]][1:(1+p+2+1+1)]<-c(dimnames(x$X)[[2]],"rho",
+     "sig2eps","sig2eta","phi","nu")
+  }
+  else{
+  para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$rhop[(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
-  dimnames(para)[[1]][1:(1+p+2+r+r+1)]<-c(dimnames(x$X)[[2]],"rho",
-     "sig2eps","sig2eta",paste("sig2:", 1:r),paste("mu:", 1:r),"phi")
-  initial_val<-c(x$initials[[7]],x$initials[6],x$initials[2],
-             x$initials[3],x$initials[5],x$initials[4],x$initials[1])
+  dimnames(para)[[1]][1:(1+p+2+1)]<-c(dimnames(x$X)[[2]],"rho",
+     "sig2eps","sig2eta","phi")
+  }
+  #
   #
   }
   else if(model == "GPP"){
@@ -165,6 +225,26 @@ spT.MCMC.plot<-function(x, nBurn=0, ACF="FALSE", PARTIAL.acf="FALSE")
      }
   r<-dim(x$mu_lp)[[1]]
   p<-dim(x$betap)[[1]]
+  #para<-rbind((x$betap[,(nBurn+1):nItr]),
+  #            t(x$rhop[(nBurn+1):nItr]),
+  #            t(x$sig2ep[(nBurn+1):nItr]),
+  #            t(x$sig2etap[(nBurn+1):nItr]),
+  #            t(x$phip[(nBurn+1):nItr]))
+  #dimnames(para)[[1]][1:(1+p+2+1)]<-c(dimnames(x$X)[[2]],"rho",
+  #   "sig2eps","sig2eta","phi")
+  #initial_val<-c(x$initials[[7]],x$initials[4],x$initials[2],
+  #           x$initials[3],x$initials[1])
+  #
+  if(x$cov.fnc=="matern"){
+  para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$rhop[(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+  dimnames(para)[[1]][1:(1+p+2+1+1)]<-c(dimnames(x$X)[[2]],"rho",
+     "sig2eps","sig2eta","phi","nu")
+  }
+  else{
   para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$rhop[(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
@@ -172,8 +252,8 @@ spT.MCMC.plot<-function(x, nBurn=0, ACF="FALSE", PARTIAL.acf="FALSE")
               t(x$phip[(nBurn+1):nItr]))
   dimnames(para)[[1]][1:(1+p+2+1)]<-c(dimnames(x$X)[[2]],"rho",
      "sig2eps","sig2eta","phi")
-  initial_val<-c(x$initials[[7]],x$initials[4],x$initials[2],
-             x$initials[3],x$initials[1])
+  }
+  #
   }
   else if(model == "GP"){
   cat("\n")
@@ -185,15 +265,32 @@ spT.MCMC.plot<-function(x, nBurn=0, ACF="FALSE", PARTIAL.acf="FALSE")
      }
   r<-x$r
   p<-x$p
+  #para<-rbind((x$betap[,(nBurn+1):nItr]),
+  #            t(x$sig2ep[(nBurn+1):nItr]),
+  #            t(x$sig2etap[(nBurn+1):nItr]),
+  #            t(x$phip[(nBurn+1):nItr]))
+  #dimnames(para)[[1]]<-c(dimnames(x$X)[[2]],
+  #   "sig2eps","sig2eta","phi")
+  #initial_val<-c(x$initials[[4]],x$initials[2],
+  #             x$initials[3],x$initials[1])
+  #
+  if(x$cov.fnc=="matern"){
+  para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+  dimnames(para)[[1]][1:(1+p+2+1+1)]<-c(dimnames(x$X)[[2]],
+     "sig2eps","sig2eta","phi","nu")
+  }
+  else{
   para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
-  dimnames(para)[[1]]<-c(dimnames(x$X)[[2]],
+  dimnames(para)[[1]][1:(1+p+2+1)]<-c(dimnames(x$X)[[2]],
      "sig2eps","sig2eta","phi")
+  }
   #
-  initial_val<-c(x$initials[[4]],x$initials[2],
-               x$initials[3],x$initials[1])
   #
   }
   else{
@@ -203,8 +300,7 @@ spT.MCMC.plot<-function(x, nBurn=0, ACF="FALSE", PARTIAL.acf="FALSE")
   ##
    x11()
    for(i in 1:dim(para)[[1]]){
-    MCMC.plot.obj(para[i,],initial_val=unlist(initial_val)[[i]],
-    name=c(dimnames(para)[[1]][i]),ACF=ACF,PARTIAL.acf=PARTIAL.acf)
+    MCMC.plot.obj(para[i,],name=c(dimnames(para)[[1]][i]),ACF=ACF,PARTIAL.acf=PARTIAL.acf)
     par(ask=TRUE)
    }
 }
@@ -903,61 +999,18 @@ spT.validation <- function(z, zhat)
    unlist(out)
 }
 ##
-## To use in coda package
-##
-as.mcmc.spT<-function(x, ...){
-
-    model <- x$model
-    if (is.null(model) == TRUE) {
-        stop("\n# Error: need to define the model")
-    }
-    else if (model == "AR") {
-        r <- x$r
-        p <- x$p
-        para <- rbind((x$betap), t(x$rhop), t(x$sig2ep), t(x$sig2etap), (x$sig2lp), (x$mu_lp), 
-                t(x$phip))
-        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]],"rho", "sig2eps", "sig2eta",
-                paste("sig2:",1:r),paste("mu:", 1:r),"phi")
-        para<-t(para)
-        para<-mcmc(para)
-        para
-    }
-    else if (model == "GPP") {
-        r <- x$r
-        p <- x$p
-        para <- rbind((x$betap), t(x$rhop), t(x$sig2ep), t(x$sig2etap), t(x$phip))
-        dimnames(para)[[1]][1:(1 + p + 2 + 1)] <- c(dimnames(x$X)[[2]], 
-            "rho", "sig2eps", "sig2eta", "phi")
-        para<-t(para)
-        para<-mcmc(para)
-        para
-    }
-    else if (model == "GP") {
-        r <- x$r
-        p <- x$p
-        para <- rbind((x$betap), t(x$sig2ep), t(x$sig2etap), t(x$phip))
-        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]], "sig2eps", 
-            "sig2eta", "phi")
-        para<-t(para)
-        para<-mcmc(para)
-        para
-    }
-    else {
-    }
-}
-##
 ## MCMC plots for individual values (trace, density, acf)
 ##
-MCMC.plot.obj<-function(post_val, initial_val, nItr, nBurn=0, 
+MCMC.plot.obj<-function(post_val, nItr, nBurn=0, 
                 name=c('....'), ACF="FALSE", PARTIAL.acf="FALSE") 
   {
       nBurn=nBurn+1; x<-post_val;
-      if(missing(initial_val)){ 
-         y<-0
-      }
-      else{
-         y<-initial_val
-      } 
+      #if(missing(initial_val)){ 
+      #   y<-0
+      #}
+      #else{
+      #   y<-initial_val
+      #} 
       if(missing(nItr)){ 
          nItr<-length(post_val)
       }
@@ -965,12 +1018,16 @@ MCMC.plot.obj<-function(post_val, initial_val, nItr, nBurn=0,
         #windows()
         #x11()
         par(mfrow=c(1,2))
+        #plot(nBurn:nItr, x[nBurn:nItr], xlab = "Iterations", 
+        #   ylab = paste("Values of  (", name, ")", sep=''), type = "l",
+        #   ylim=c(min(y,x[nBurn:nItr]),max(y,x[nBurn:nItr])),main='Trace plot')
+        #abline(h = y, lty = 2,col="blue")
+        #plot(density(x[nBurn:nItr]),main='Density plot',xlim=c(min(y,x[nBurn:nItr]),max(y,x[nBurn:nItr])))
+        #abline(v = y, lty = 2,col="blue")
         plot(nBurn:nItr, x[nBurn:nItr], xlab = "Iterations", 
            ylab = paste("Values of  (", name, ")", sep=''), type = "l",
-           ylim=c(min(y,x[nBurn:nItr]),max(y,x[nBurn:nItr])),main='Trace plot')
-        abline(h = y, lty = 2,col="blue")
-        plot(density(x[nBurn:nItr]),main='Density plot',xlim=c(min(y,x[nBurn:nItr]),max(y,x[nBurn:nItr])))
-        abline(v = y, lty = 2,col="blue")
+           ylim=c(min(x[nBurn:nItr]),max(x[nBurn:nItr])),main='Trace plot')
+        plot(density(x[nBurn:nItr]),main='Density plot',xlim=c(min(x[nBurn:nItr]),max(x[nBurn:nItr])))
      }	
      else if(ACF==TRUE & PARTIAL.acf==TRUE){
       #windows()
@@ -978,10 +1035,10 @@ MCMC.plot.obj<-function(post_val, initial_val, nItr, nBurn=0,
       par(mfrow=c(1,4))
       plot(nBurn:nItr, x[nBurn:nItr], xlab = "Iterations", 
         ylab = paste("Values of  (", name, ")", sep=''), type = "l", 
-        ylim=c(min(y,x[nBurn:nItr]), max(y,x[nBurn:nItr])),main='Trace plot')
-      abline(h = y, lty = 2,col="blue")
-      plot(density(x[nBurn:nItr]),main='Density plot',xlim=c(min(y,x[nBurn:nItr]), max(y,x[nBurn:nItr])))
-      abline(v = y, lty = 2,col="blue")
+        ylim=c(min(x[nBurn:nItr]), max(x[nBurn:nItr])),main='Trace plot')
+      #abline(h = y, lty = 2,col="blue")
+      plot(density(x[nBurn:nItr]),main='Density plot',xlim=c(min(x[nBurn:nItr]), max(x[nBurn:nItr])))
+      #abline(v = y, lty = 2,col="blue")
       acf(x[nBurn:nItr],main='ACF plot',col="red")
       pacf(x[nBurn:nItr],main='Partial ACF plot',col="red")
      }
@@ -990,10 +1047,10 @@ MCMC.plot.obj<-function(post_val, initial_val, nItr, nBurn=0,
       par(mfrow=c(1,3))
       plot(nBurn:nItr, x[nBurn:nItr], xlab = "Iterations", 
         ylab = paste("Values of  (", name, ")", sep=''), type = "l", 
-        ylim=c(min(y,x[nBurn:nItr]), max(y,x[nBurn:nItr])),main='Trace plot')
-      abline(h = y, lty = 2, col="blue")
-      plot(density(x[nBurn:nItr]),main='Density plot',xlim=c(min(y,x[nBurn:nItr]), max(y,x[nBurn:nItr])))
-      abline(v = y, lty = 2, col="blue")
+        ylim=c(min(x[nBurn:nItr]), max(x[nBurn:nItr])),main='Trace plot')
+      #abline(h = y, lty = 2, col="blue")
+      plot(density(x[nBurn:nItr]),main='Density plot',xlim=c(min(x[nBurn:nItr]), max(x[nBurn:nItr])))
+      #abline(v = y, lty = 2, col="blue")
       acf(x[nBurn:nItr],main='ACF plot',col="red")
      }
      else {
@@ -1009,6 +1066,196 @@ MCMC.plot.obj<-function(post_val, initial_val, nItr, nBurn=0,
   #
 #  x<-amelia(x,m=1)$imputation[[1]]
 #  x
+#}
+##
+## To use in coda package
+##
+as.mcmc.spT<-function(x, ...){
+
+    model <- x$model
+    if (is.null(model) == TRUE) {
+        stop("\n# Error: need to define the model")
+    }
+    else if (model == "AR") {
+        r <- x$r
+        p <- x$p
+        #para <- rbind((x$betap), t(x$rhop), t(x$sig2ep), t(x$sig2etap), (x$sig2lp), (x$mu_lp), 
+        #        t(x$phip))
+        #dimnames(para)[[1]] <- c(dimnames(x$X)[[2]],"rho", "sig2eps", "sig2eta",
+        #        paste("sig2:",1:r),paste("mu:", 1:r),"phi")
+      #          
+      if(x$cov.fnc=="matern"){
+        para <- rbind((x$betap), t(x$rhop), t(x$sig2ep), t(x$sig2etap), t(x$phip), t(x$nup))
+        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]],"rho", "sig2eps", "sig2eta", "phi", "nu")
+      }
+      else {
+        para <- rbind((x$betap), t(x$rhop), t(x$sig2ep), t(x$sig2etap), t(x$phip))
+        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]],"rho", "sig2eps", "sig2eta", "phi")
+      }
+      #
+        para<-t(para)
+        para<-mcmc(para)
+        para
+    }
+    else if (model == "GPP") {
+        r <- x$r
+        p <- x$p
+      #          
+      if(x$cov.fnc=="matern"){
+        para <- rbind((x$betap), t(x$rhop), t(x$sig2ep), t(x$sig2etap), t(x$phip), t(x$nup))
+        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]],"rho", "sig2eps", "sig2eta", "phi", "nu")
+      }
+      else {
+        para <- rbind((x$betap), t(x$rhop), t(x$sig2ep), t(x$sig2etap), t(x$phip))
+        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]],"rho", "sig2eps", "sig2eta", "phi")
+      }
+      #
+        para<-t(para)
+        para<-mcmc(para)
+        para
+    }
+    else if (model == "GP") {
+        r <- x$r
+        p <- x$p
+      #          
+      if(x$cov.fnc=="matern"){
+        para <- rbind((x$betap), t(x$sig2ep), t(x$sig2etap), t(x$phip), t(x$nup))
+        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]], "sig2eps", "sig2eta", "phi", "nu")
+      }
+      else {
+        para <- rbind((x$betap), t(x$sig2ep), t(x$sig2etap), t(x$phip))
+        dimnames(para)[[1]] <- c(dimnames(x$X)[[2]], "sig2eps", "sig2eta", "phi")
+      }
+      #
+        para<-t(para)
+        para<-mcmc(para)
+        para
+    }
+    else {
+    }
+}
+##
+## use of model.frame
+##
+model.frame.spT<-function(formula, ...){
+#   tmp<-cbind(formula$Y,formula$X[,-1])
+#   dimnames(tmp)[[2]]<-dimnames(attr(terms(formula$call),"factors"))[[1]]
+#   tmp
+   if(formula$combined.fit.pred==TRUE){
+      stop("\n# Error: not useful for output with combined fit and predict \n")
+    }
+   else{
+      model.frame(formula$call,formula$data,na.action=na.pass)
+   }
+}
+##
+## use of model.matrix
+##
+model.matrix.spT<-function(object, ...){
+   if(object$combined.fit.pred==TRUE){
+      stop("\n# Error: not useful for output with combined fit and predict \n")
+    }
+   else{
+      Formula.matrix(object$call,object$data)[[2]]
+   }
+}
+##
+## use of summary
+##
+summary.spT<-function(object, pack="spTimer", ...){
+   if(pack=="coda"){
+    if(object$combined.fit.pred==TRUE){
+      stop("\n# Error: coda package is not useful for output with combined fit and predict \n")
+    }
+    else{
+     cat("\n#### MCMC summary statistics using coda package ####\n")
+     tmp<-as.mcmc(object)
+     summary(tmp)
+    }
+   }
+   else{
+   cat("Parameters:\n")
+   print(object$parameter); #cat("\n");
+   }
+}
+##
+## use of plot
+##
+plot.spT<-function(x, residuals=FALSE, ...){
+   if(as.logical(residuals)==FALSE){
+     if(x$combined.fit.pred==TRUE){
+      #cat("\n# Error: not useful to get MCMC plots for output with combined fit and predict \n#        use residuals=TRUE \n")
+      #cat("# ")
+      cat("\n## Only residual plots are available for output with combined fit and predict option \n\n")
+      plot(x$fitted[,1],residuals(x),ylab="Residuals",xlab="Fitted values");abline(h=0,lty=2);title("Residuals vs Fitted")
+      par(ask=TRUE)
+      qqnorm(residuals(x));qqline(residuals(x),lty=2)
+     }
+     else{
+      tmp<-as.mcmc(x)
+      plot(tmp)
+     } 
+   }
+   else{
+   plot(x$fitted[,1],residuals(x),ylab="Residuals",xlab="Fitted values");abline(h=0,lty=2);title("Residuals vs Fitted")
+   par(ask=TRUE)
+   qqnorm(residuals(x));qqline(residuals(x),lty=2)
+   }
+}
+##
+## use of coefficients
+##
+coef.spT<-function(object, ...){
+   t(object$parameter)[1,]
+}
+##
+## use of residuals
+##
+residuals.spT<-function(object, ...){
+   #if(object$combined.fit.pred==TRUE){
+   #   stop("\n# Error: not useful for output with combined fit and predict")
+   #}
+   #else{
+     if(object$scale.transform=="NONE"){
+     tmp<-object$Y-object$fitted[,1]
+     tmp
+     }
+     else if(object$scale.transform=="SQRT"){
+     tmp<-sqrt(object$Y)-object$fitted[,1]
+     tmp
+     }
+     else if(object$scale.transform=="LOG"){
+     tmp<-log(object$Y)-object$fitted[,1]
+     tmp
+     }
+     else{
+     }
+   #}
+}
+##
+## use of formula
+##
+formula.spT<-function(x, ...){
+  x$call
+}
+##
+## use of terms
+##
+terms.spT<-function(x, ...){
+  terms(x$call)
+}
+##
+## use of display
+##
+
+
+##
+## use of offset
+##
+#offset.spT<-function(object){
+#  Call<-object$call
+  #Coefficients<-coef(object)
+  #return(Call,Coefficients)
 #}
 ##
 ##

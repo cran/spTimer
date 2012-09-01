@@ -13,9 +13,9 @@
 
 void zlt_fore_ar_its_anysite(int *cov, int *its, int *K, int *nsite, int *n, 
      int *r, int *p, int *rT, int *T, int *rK, int *nrK, double *d, double *d12,
-     double *phip, double *sig_ep, double *sig_etap, double *rhop, 
-     double *foreX, double *betap, double *zpred_exist, int *constant, 
-     double *foreZ)
+     double *phip, double *nup, double *sig_ep, double *sig_etap, double *rhop, 
+     double *foreX, double *betap, double *zpred_exist, double *wp, 
+     int *constant, double *foreZ)
 {
      int i, j, its1, n1, ns, r1, T1, K1, p1, col;
      its1 = *its;
@@ -27,11 +27,12 @@ void zlt_fore_ar_its_anysite(int *cov, int *its, int *K, int *nsite, int *n,
      p1 =*p;
      col =*constant;     
 
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
 
-     double *phi, *sig_e, *sig_eta, *rho, *beta, *z, *fZ, *mu;
+     double *phi, *nu, *sig_e, *sig_eta, *rho, *beta, *z, *fZ, *mu, *w;
      phi = (double *) malloc((size_t)((col)*sizeof(double)));       
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));            
      sig_e = (double *) malloc((size_t)((col)*sizeof(double)));       
      sig_eta = (double *) malloc((size_t)((col)*sizeof(double)));       
 
@@ -40,9 +41,17 @@ void zlt_fore_ar_its_anysite(int *cov, int *its, int *K, int *nsite, int *n,
      z = (double *) malloc((size_t)((ns*r1*T1*col)*sizeof(double)));       
      fZ = (double *) malloc((size_t)((ns*r1*K1*col)*sizeof(double)));       
      mu = (double *) malloc((size_t)((col)*sizeof(double)));       
-     
+     w = (double *) malloc((size_t)((n1)*sizeof(double)));            
+
+     GetRNGstate();     
      for(i=0; i<its1; i++){
-     phi[0] = phip[i];         
+     phi[0] = phip[i];  
+         if(cov[0]==4){
+           nu[0] = nup[i];
+         }
+         else{
+           nu[0] = 0.0;
+         }
      sig_e[0] = sig_ep[i];
      sig_eta[0] = sig_etap[i];
      rho[0] = rhop[i];
@@ -55,18 +64,22 @@ void zlt_fore_ar_its_anysite(int *cov, int *its, int *K, int *nsite, int *n,
         mvrnormal(constant, mu, sig_e, constant, mu);
         z[j] = mu[0]; 
      }            
-              
-     zlt_fore_ar(cov, K, nsite, n, r, p, rT, T, rK, nrK, d, d12, phi, sig_e, 
-     sig_eta, rho, foreX, beta, z, constant, fZ);
+     //for(j=0; j<n1; j++){
+     //   w[j] = wp[j+i*n1];
+     //}
+             
+     zlt_fore_ar(cov, K, nsite, n, r, p, rT, T, rK, nrK, d, d12, phi, nu, sig_e, 
+     sig_eta, rho, foreX, beta, z, wp, constant, fZ);
      
      for(j=0; j < ns*r1*K1; j++){       
          foreZ[j+i*ns*r1*K1] = fZ[j];                                                
      }
      printR(i, its1); 
      } // end of iteration loop
-
-     free(phi); free(sig_e); free(sig_eta); free(rho);
-     free(beta); free(z); free(fZ); free(mu);
+     PutRNGstate();
+     
+     free(phi); free(nu); free(sig_e); free(sig_eta); free(rho);
+     free(beta); free(z); free(fZ); free(mu); free(w);
      
      return;
 }
@@ -75,8 +88,9 @@ void zlt_fore_ar_its_anysite(int *cov, int *its, int *K, int *nsite, int *n,
 // K-step Forecasts without its
 void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p, 
      int *rT, int *T, int *rK, int *nrK, double *d, double *d12, 
-     double *phi, double *sig_e, double *sig_eta, double *rho, 
-     double *foreX, double *beta, double *z, int *constant, double *foreZ)
+     double *phi, double *nu, double *sig_e, double *sig_eta, double *rho, 
+     double *foreX, double *beta, double *z, double *w, 
+     int *constant, double *foreZ)
 { 
      int l, k, t, i, T1, K1, r1, n1, ns, nns, col;
      T1 =*T;
@@ -95,7 +109,7 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
     S_eta12c = (double *) malloc((size_t)((n1*col)*sizeof(double)));
     det = (double *) malloc((size_t)((col)*sizeof(double))); 
 
-      
+/*      
       // exponential covariance
       if(cov[0] == 1){
         for(i = 0; i < (n1*n1); i++){
@@ -152,6 +166,11 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
           S_eta12[i] = (1.0+phi[0]*d12[i])*exp(-1.0*phi[0]*d12[i]);        
         }
       }
+*/
+
+    covF(cov, n, n, phi, nu, d, S_eta);
+    MInv(S_eta, Si_eta, n, det);    
+    covF(cov, n, nsite, phi, nu, d12, S_eta12);
 
      double *mu, *sig, *s21, *XB, *zT, *XB1, *eta, *eps, *zfore;
      mu = (double *) malloc((size_t)((col)*sizeof(double)));       
@@ -164,8 +183,6 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
      eps = (double *) malloc((size_t)((col)*sizeof(double)));       
      zfore = (double *) malloc((size_t)((ns*col)*sizeof(double)));       
 
-
-     mu[0] = 0.0;
      MProd(beta, constant, p, foreX, nrK, XB);  // nsiterK x 1     
      for(l=0; l<r1; l++){
        for(k=0; k<1; k++){     
@@ -174,13 +191,10 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
          extract_alt2(l, t, nsite, rT, T, z, zT); // nsite x 1
          extract_alt2(l, k, nsite, rK, K, XB, XB1); // nsite x 1
          for(i=0; i<ns; i++){
+/*
             if(ns == n1){
-            mvrnormal(constant, mu, sig_eta, constant, eta); 
-            mvrnormal(constant, mu, sig_e, constant, eps); 
-            zfore[i] = rho[0]*(zT[i]-eps[0])+XB1[i]+eta[0]+eps[0];    
-            }
-            else{
-            extn_12(i, n, S_eta12,S_eta12c); // n x 1
+            extn_12(i, n, S_eta,S_eta12c); // n x 1
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean            
             xTay(S_eta12c, Si_eta, S_eta12c, n, s21);            
             if(s21[0] > 1.0){
                 s21[0] = 1.0-pow(1,-320);
@@ -193,6 +207,22 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
             mvrnormal(constant, mu, sig_e, constant, eps);             
             zfore[i] = rho[0]*(zT[i]-eps[0])+XB1[i]+eta[0]+eps[0];                                 
             }
+            else{
+*/
+            extn_12(i, n, S_eta12,S_eta12c); // n x 1
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean            
+            xTay(S_eta12c, Si_eta, S_eta12c, n, s21);            
+            if(s21[0] > 1.0){
+                s21[0] = 1.0-pow(1,-320);
+            }
+            if(s21[0] == 1.0){ 
+                s21[0] = 1.0-pow(1,-320);
+            }
+            sig[0] = sig_eta[0] * (1.0 - s21[0]);
+            mvrnormal(constant, mu, sig, constant, eta); 
+            mvrnormal(constant, mu, sig_e, constant, eps);             
+            zfore[i] = rho[0]*(zT[i]-eps[0])+XB1[i]+eta[0]+eps[0];                                 
+//            }
          }
          put_together1(l, k, nsite, r, K, foreZ, zfore);
        }
@@ -202,13 +232,26 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
          extract_alt2(l, t, nsite, rT, T, z, zT); // nsite x 1
          extract_alt2(l, k, nsite, rK, K, XB, XB1); // nsite x 1
          for(i=0; i<ns; i++){
+/*
             if(ns == n1){
-            mvrnormal(constant, mu, sig_eta, constant, eta); 
-            mvrnormal(constant, mu, sig_e, constant, eps); 
+            extn_12(i, n, S_eta,S_eta12c); // n x 1
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean            
+            xTay(S_eta12c, Si_eta, S_eta12c, n, s21);            
+            if(s21[0] > 1.0){
+                s21[0] = 1.0-pow(1,-320);
+            }
+            if(s21[0] == 1.0){ 
+                s21[0] = 1.0-pow(1,-320);
+            }
+            sig[0] = sig_eta[0] * (1.0 - s21[0]);
+            mvrnormal(constant, mu, sig, constant, eta); 
+            mvrnormal(constant, mu, sig_e, constant, eps);             
             zfore[i] = rho[0]*(zT[i]-eps[0])+XB1[i]+eta[0]+eps[0];                                 
             }
             else{            
+*/
             extn_12(i, n, S_eta12,S_eta12c);
+            xTay(S_eta12c, Si_eta, w, n, mu); // 1 x 1 for mean            
             xTay(S_eta12c, Si_eta, S_eta12c, n, s21);            
             if(s21[0] > 1.0){
                 s21[0] = 1.0-pow(1,-320);
@@ -220,7 +263,7 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
             mvrnormal(constant, mu, sig, constant, eta); 
             mvrnormal(constant, mu, sig_e, constant, eps);             
             zfore[i] = rho[0]*(zfore[i]-eps[0])+XB1[i]+eta[0]+eps[0];                                 
-            }
+//            }
          }  
          put_together1(l, k, nsite, r, K, foreZ, zfore);
        }

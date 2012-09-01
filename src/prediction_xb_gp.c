@@ -11,7 +11,7 @@
 // Iteration and Prediction of O_lt for all sites and all time points "XB"
 void z_pr_its_gp(int *cov, int *its, int *nsite, int *n, int *r, int *rT, 
      int *T, int *p, int *N, int *valN, double *d, double *d12, 
-     double *phip, double *sig_ep, double *sig_etap, double *betap,   
+     double *phip, double *nup, double *sig_ep, double *sig_etap, double *betap,   
      double *X, double *valX, double *op, int *constant, double *zpred)
 {
      int its1, r1, rn, n1, T1, rT1, N1, col, i, j, k, ns, p1;
@@ -26,20 +26,28 @@ void z_pr_its_gp(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      ns = *nsite;
      p1 = *p;
      
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
      
-     double *phi, *sig_e, *sig_eta, *beta, *o, *zpr;
+     double *phi, *nu, *sig_e, *sig_eta, *beta, *o, *zpr;
 
      phi = (double *) malloc((size_t)((col)*sizeof(double)));       
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));            
      sig_e = (double *) malloc((size_t)((col)*sizeof(double)));            
      sig_eta = (double *) malloc((size_t)((col)*sizeof(double)));       
      beta = (double *) malloc((size_t)((p1*col)*sizeof(double)));       
      o = (double *) malloc((size_t)((N1*col)*sizeof(double)));       
      zpr = (double *) malloc((size_t)((rT1*col*ns)*sizeof(double)));       
-                                   
+
+     GetRNGstate();                                   
      for(i=0; i < its1; i++) {
-         phi[0] = phip[0];
+         phi[0] = phip[i];
+         if(cov[0]==4){
+           nu[0] = nup[i];
+         }
+         else{
+           nu[0] = 0.0;
+         }
          sig_e[0] = sig_ep[i];     
          sig_eta[0] = sig_etap[i];
          for(j=0; j < p1; j++) {
@@ -49,7 +57,7 @@ void z_pr_its_gp(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
          o[j] = op[j+i*N1];
          }
 
-         z_pr_gp(cov, nsite, n, r, rT, T, p, N, valN, d, d12, phi, 
+         z_pr_gp(cov, nsite, n, r, rT, T, p, N, valN, d, d12, phi, nu, 
          sig_e, sig_eta, beta, X, valX, o, constant, zpr);
      
          for(k=0; k < ns; k++){       
@@ -61,15 +69,17 @@ void z_pr_its_gp(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
        printR (i, its1); 
 
        } // end of iteration loop
-       
-       free(phi); free(sig_e); free(sig_eta); free(beta); free(o); free(zpr);
+       PutRNGstate();
+            
+       free(phi); free(nu); free(sig_e); 
+       free(sig_eta); free(beta); free(o); free(zpr);
        return;
 }       
 
 
 // Prediction for all sites for all time point "XB"
 void z_pr_gp(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p, 
-     int *N, int *valN, double *d, double *d12, double *phip, 
+     int *N, int *valN, double *d, double *d12, double *phip, double *nup, 
      double *sig_ep, double *sig_etap, double *betap, double *X, double *valX,
      double *op, int *constant, double *zpred)
 {
@@ -94,7 +104,11 @@ void z_pr_gp(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
     S_eta12c = (double *) malloc((size_t)((n1*col)*sizeof(double)));
     det = (double *) malloc((size_t)((col)*sizeof(double))); 
 
-        
+    covF(cov, n, n, phip, nup, d, S_eta);
+    MInv(S_eta, Si_eta, n, det);    
+    covF(cov, n, nsite, phip, nup, d12, S_eta12);
+    
+/*        
       // exponential covariance
       if(cov[0] == 1){
         for(i = 0; i < (n1*n1); i++){
@@ -151,7 +165,7 @@ void z_pr_gp(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
           S_eta12[i] = (1.0+phip[0]*d12[i])*exp(-1.0*phip[0]*d12[i]);        
         }
       }
-
+*/
 
     double *XB;
     XB = (double *) malloc((size_t)((N1*col)*sizeof(double))); 

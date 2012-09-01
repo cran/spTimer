@@ -7,24 +7,28 @@
 /****************************** From "covariance.c" file ***************************/
 /*****************************************************************************/
 
-void covFormat(int *cov, int *n, double *phi, double *d, double *sig2eta, 
-     double *S, double *det, double *Sinv, double *Qeta);
-void covFormat1(int *cov, int *n, double *phi, double *d, double *S);
-void covFormat2(int *cov, int *n, double *phi, double *d, double *det, 
-     double *Sinv);
-void covFormat3(int *cov, int *n, double *phi, double *d, double *sig_eta, 
-     double *det, double *Qeta);
-     
+void covFormat(int *cov, int *n, double *phi, double *nu, double *d, 
+     double *sig2eta, double *S, double *det, double *Sinv, double *Qeta);
+void covFormat2(int *cov, int *n, double *phi, double *nu, double *d, 
+     double *sig_eta, double *det, double *Qeta);
 void covExpo(int *n, double *phi, double *d, double *sig2eta, double *S, 
      double *det, double *Sinv, double *Qeta);
 void covGaus(int *n, double *phi, double *d, double *sig2eta, double *S, 
      double *det, double *Sinv, double *Qeta);
 void covSphe(int *n, double *phi, double *d, double *sig2eta, double *S, 
      double *det, double *Sinv, double *Qeta);
-void covMatern32(int *n, double *phi, double *d, double *sig2eta, double *S, 
-     double *det, double *Sinv, double *Qeta);
-void covMatern(int *n, double *phi, double *d, double *sig2eta, double *S, 
-     double *det, double *Sinv, double *Qeta);
+void covMatern(int *n, double *phi, double *nu, double *d, double *sig2eta, 
+     double *S, double *det, double *Sinv, double *Qeta);
+
+void covF(int *cov, int *n1, int *n2, double *phi, double *nu, double *d, double *S);
+void covExp(int *n1, int *n2, double *phi, double *d, double *S);
+void covGau(int *n1, int *n2, double *phi, double *d, double *S);
+void covSph(int *n1, int *n2, double *phi, double *d, double *S);
+void covMat(int *n1, int *n2, double *phi, double *nu, double *d, double *S);
+
+
+//////////////////////////////////////////////////////////////////////////////
+
      
 void covExpo1(int *n, double *phi, double *d, double *S);
 void covGaus1(int *n, double *phi, double *d, double *S);

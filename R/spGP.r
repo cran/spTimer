@@ -10,6 +10,7 @@
      x$phi<-(3/max(c(d)))#(-log(0.05)/max(c(d)))
      x$sig2eps <- 0.01; x$sig2eta <- 0.1
      lm.coef<-lm(c(o) ~ X-1)$coef
+     lm.coef[is.na(lm.coef)]<-0
      x$beta<-lm.coef[1:(dim(X)[[2]])]
      x
      }
@@ -25,6 +26,7 @@
      }
      if(is.null(x$beta)){
       lm.coef<-lm(c(o) ~ X -1)$coef
+      lm.coef[is.na(lm.coef)]<-0
       x$beta<-lm.coef[1:(dim(X)[[2]])]
      }
      x
@@ -41,9 +43,9 @@
        x$prior_omu<-NULL; x$prior_osig<-NULL 
        x$prior_a<-2; x$prior_b<-1;
        x$prior_mubeta<-0
-       x$prior_sigbeta<-10^4
+       x$prior_sigbeta<-10^10
        x$prior_omu<-0
-       x$prior_osig<-10^4
+       x$prior_osig<-10^10
        x
      }
      else{
@@ -57,13 +59,13 @@
        x$prior_mubeta<-0
      }
      if(is.null(x$prior_sigbeta)){
-       x$prior_sigbeta<-10^4
+       x$prior_sigbeta<-10^10
      }
      if(is.null(x$prior_omu)){
        x$prior_omu<-0
      }
      if(is.null(x$prior_osig)){
-       x$prior_osig<-10^4
+       x$prior_osig<-10^10
      }
      x 
      }
@@ -121,6 +123,14 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
    }
    else{
      coords.D <- as.matrix(dist(coords, method, diag = TRUE, upper = TRUE))
+   }
+   #
+   # check time.data
+   if(is.null(time.data)){
+     time.data<-c(1,0,length(Y)/length(coords[,1]))
+   }
+   else{
+     time.data<-time.data
    }
    #
          n <- length(coords[,1])            # number of sites
@@ -224,10 +234,10 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          as.double(initials$sig2eps), as.double(initials$sig2eta),
          as.double(initials$beta),as.double(X),as.double(zm[,1]),  
          as.double(o),as.integer(1),phip=double(nItr),
-         accept=double(1),sig2ep=double(nItr),
+         accept=double(1),nup=double(nItr),sig2ep=double(nItr),
          sig2etap=double(nItr),betap=matrix(double(p*nItr),p,nItr), 
          op=matrix(double(N*nItr),N,nItr),fit=matrix(double(N*2),N,2), 
-         gof=double(1),penalty=double(1))[33:41]
+         gof=double(1),penalty=double(1))[33:42]
     #
       accept <- round(out$accept/nItr*100,2)
     #
@@ -244,10 +254,14 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
       output$call <- formula
     #
            output$phip <- as.matrix(out$phip[(nBurn+1):nItr])
+           if(cov==4){
+           output$nup <- as.matrix(out$nup[(nBurn+1):nItr])
+           }
            output$sig2ep <- as.matrix(out$sig2ep[(nBurn+1):nItr])
            output$sig2etap <- as.matrix(out$sig2etap[(nBurn+1):nItr])
            output$betap <- matrix(out$betap[1:p,(nBurn+1):nItr],p,length((nBurn+1):nItr))
            output$op <- out$op[1:N,(nBurn+1):nItr]
+           output$wp <- output$op-output$X%*%output$betap
            dimnames(out$fit)[[2]] <- c("Mean","SD")
            output$fitted <- out$fit
            output$tol.dist<-tol.dist
@@ -451,6 +465,12 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     #
        #
            phip<-posteriors$phip[(nBurn+1):nItr,]
+           if(cov==4){
+           nup<-posteriors$nup[(nBurn+1):nItr,]
+           }
+           else{
+           nup<-0
+           } 
            sig_ep<-posteriors$sig2ep[(nBurn+1):nItr,]
            sig_etap<-posteriors$sig2etap[(nBurn+1):nItr,]
            betap<-posteriors$betap[,(nBurn+1):nItr]
@@ -459,7 +479,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
        out<-matrix(.C('z_pr_its_gp',as.integer(cov),as.integer(itt),as.integer(nsite), 
             as.integer(n),as.integer(r),as.integer(rT),as.integer(T),
             as.integer(p),as.integer(N),as.integer(predN),as.double(d), 
-            as.double(d12),as.double(phip),as.double(sig_ep),as.double(sig_etap),
+            as.double(d12),as.double(phip),as.double(nup),as.double(sig_ep),as.double(sig_etap),
             as.double(betap),as.double(fitted.X),
             as.double(pred.x),as.double(op),as.integer(1),
             out=double(itt*predN))$out,predN,itt)
@@ -467,15 +487,16 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
        output <- NULL
           #
           if(scale.transform=="NONE"){ 
-       output$predicted.samples <- out          }
+       output$pred.samples <- out          }
           if(scale.transform=="SQRT"){ 
-       output$predicted.samples <- out^2
+       output$pred.samples <- out^2
           }
           if(scale.transform=="LOG"){ 
-       output$predicted.samples <- exp(out)
+       output$pred.samples <- exp(out)
           }
           # 
        out<-NULL
+       output$pred.coords <- pred.coords
        output$distance.method <- posteriors$distance.method
        output$Distance.matrix.pred <- dns
        output$cov.fnc <- posteriors$cov.fnc
@@ -501,7 +522,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           cat("# Predicted samples and summary statistics are given.\n# nBurn = ",nBurn+posteriors$nBurn,". Iterations = ",posteriors$iterations,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$predicted.samples[,])
+          szp<-spT.Summary.Stat(output$pred.samples[,])
           # 
           output$Mean <- matrix(szp$Mean,r*T, nsite)
           output$Median <- matrix(szp$Median,r*T, nsite)
@@ -557,7 +578,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            n <- posteriors$n
            r <- posteriors$r
            T <- posteriors$T
-           N <- n*r*T
+           N <- n*posteriors$r*T
            p <- posteriors$p
       #
       #
@@ -572,6 +593,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
        }
       #
            nsite <- dim(fore.coords)[[1]]
+
       #
       if(posteriors$cov.fnc=="exponential"){
          cov <- 1
@@ -596,49 +618,21 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
       }
       call.f<-posteriors$call  
       call.f<-as.formula(paste("tmp~",paste(call.f,sep="")[[3]]))
+
+      newr<-r
+
       if(is.data.frame(fore.data)){
-      if((nsite*r*K)!=dim(fore.data)[[1]]){
+       if((nsite*newr*K)!=dim(fore.data)[[1]]){
         stop("\n# Check the fore.data and/or fore.coords and/or spT.time function#\n")
-        #print("## Check the fore.data and/or fore.coords ##")
-      }
-      fore.data$tmp<-rep(1,nsite*r*K)
+       }
+       fore.data$tmp<-rep(1,nsite*newr*K)
       }
       if(is.null(fore.data)){
-        fore.data<-data.frame(tmp=rep(1,nsite*r*K))
+        fore.data<-data.frame(tmp=rep(1,nsite*newr*K))
       }
-      forecast.x<-Formula.matrix(call.f,data=fore.data)[[2]]
+      fore.x<-Formula.matrix(call.f,data=fore.data)[[2]]
     #
     #
-#        if (is.null(forecast.X)){
-#           if(dimnames(posteriors$X)[[2]][1]=="(Intercept)"){
-#           forecast.x <- matrix(rep(1,nsite*r*K))
-#           }
-#           else{ 
-#           stop("\n Error: need to specify the forecast covariates \n ...")
-#           }
-#        }
-#      #
-#        if (!is.null(forecast.X)){
-#        if (!is.matrix(forecast.X)) {
-#           stop("Error: forecast.X must be a MATRIX.")
-#        }
-#      #
-#        if(dimnames(posteriors$X)[[2]][1]=="(Intercept)"){
-#           Intercept <- rep(1,dim(forecast.X)[1])
-#           forecast.x <- cbind(Intercept,forecast.X)
-#        } 
-#      #
-#        if(dimnames(posteriors$X)[[2]][1] != "(Intercept)"){
-#           forecast.x <- forecast.X
-#        } 
-#      #
-#        }
-#        forecast.X <- NULL
-#      #
-#      if(length(c(forecast.x)) != (nsite*r*K*p)){
-#           stop("Error: number of observations in forecast.X mismatches with the fore.coords.")
-#      }  	
-      #
       #
            method <- posteriors$distance.method
            coords <- posteriors$coords             
@@ -667,37 +661,42 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
       #
       #
            phip<-posteriors$phip[(nBurn+1):nItr]
+           if(cov==4){
+           nup<-posteriors$nup[(nBurn+1):nItr,]
+           }
+           else{
+           nup<-0
+           } 
            sig_ep<-posteriors$sig2ep[(nBurn+1):nItr]
            sig_etap<-posteriors$sig2etap[(nBurn+1):nItr]
            betap<-matrix(posteriors$betap,p,nItr)
            betap<-betap[,(nBurn+1):nItr]
       #
-       #if(n == nsite){
-       #  node<-1
-       #}
-       #else{
-       #  node<-2
-       #}
+      #
+        w<-apply(posteriors$wp,1,median)
+        w<-matrix(w,r*T,n)
+        w<-apply(w,2,median)
+        #w<-apply(posteriors$wp[,(nBurn+1):nItr],2,function(x)apply(matrix(x,r*T,n),2,median))
       #
       out<-matrix(.C('zlt_fore_gp_its',as.integer(cov),
            as.integer(itt),as.integer(K),as.integer(nsite),as.integer(n),
-           as.integer(r),as.integer(p),as.integer(r*T),as.integer(T),
-           as.integer(r*K),as.integer(nsite*r*K), #as.integer(node),
-           as.double(coords.D),as.double(coords.f.D),as.double(phip),
-           as.double(sig_ep),as.double(sig_etap),as.double(forecast.x),
-           as.double(betap),as.integer(1),
-           foreZ=double(nsite*r*K*itt))$foreZ,nsite*r*K,itt)
+           as.integer(newr),as.integer(p),as.integer(newr*T),as.integer(T),
+           as.integer(newr*K),as.integer(nsite*newr*K), 
+           as.double(coords.D),as.double(t(coords.f.D)),as.double(phip),as.double(nup),
+           as.double(sig_ep),as.double(sig_etap),as.double(fore.x),
+           as.double(betap),as.double(w),as.integer(1),
+           foreZ=double(nsite*newr*K*itt))$foreZ,nsite*newr*K,itt)
       #
       output <- NULL
           #
           if(scale.transform=="NONE"){ 
-      output$forecast.samples <- out
+      output$fore.samples <- out
           }
           if(scale.transform=="SQRT"){ 
-      output$forecast.samples <- out^2
+      output$fore.samples <- out^2
           }
           if(scale.transform=="LOG"){ 
-      output$forecast.samples <- exp(out)
+      output$fore.samples <- exp(out)
           }
           # 
       out<-NULL
@@ -726,13 +725,13 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           cat("# Forecast samples and summary statistics are given.\n# nBurn = ",nBurn,". Iterations = ",nItr,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$forecast.samples[,])
+          szp<-spT.Summary.Stat(output$fore.samples[,])
           # 
-          output$Mean <- matrix(szp$Mean,r*K, nsite)
-          output$Median <- matrix(szp$Median,r*K, nsite)
-          output$SD <- matrix(szp$SD,r*K, nsite)
-          output$Low <- matrix(szp[,4],r*K, nsite)
-          output$Up <- matrix(szp[,5],r*K, nsite)
+          output$Mean <- matrix(szp$Mean,newr*K, nsite)
+          output$Median <- matrix(szp$Median,newr*K, nsite)
+          output$SD <- matrix(szp$SD,newr*K, nsite)
+          output$Low <- matrix(szp[,4],newr*K, nsite)
+          output$Up <- matrix(szp[,5],newr*K, nsite)
     #
    end.time <- proc.time()[3]
    comp.time<-end.time-start.time
@@ -793,6 +792,14 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     else {
        coords.D <- as.matrix(dist(coords, method, diag = T, upper = T))
     }  
+   #
+   # check time.data
+   if(is.null(time.data)){
+     time.data<-c(1,0,length(Y)/length(coords[,1]))
+   }
+   else{
+     time.data<-time.data
+   }
    #
          n <- length(coords[,1])            # number of sites
          r <- time.data[1]                  # number of years
@@ -993,13 +1000,18 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
            tmp<-read.table('OutGP_Values_Parameter.txt',sep='',header=FALSE)
            tmp<-tmp[(nBurn+1):nItr,]
            tmp<-spT.Summary.Stat(t(tmp))
+           if(cov==4){
+           row.names(tmp)<- c(x.names,"sig2eps","sig2eta","phi","nu")
+           }
+           else{
            row.names(tmp)<- c(x.names,"sig2eps","sig2eta","phi")
+           } 
            out$parameters<-round(tmp, 4)
            tmp<-NULL
      #
            tmp<-read.table('OutGP_Stats_FittedValue.txt', sep=',',header=FALSE)
            names(tmp)<- c("Mean","SD")
-           out$fit<-round(tmp, 4)
+           out$fitted<-round(tmp, 4)
            tmp<-NULL
      #
            tmp<-read.table('OutGP_Stats_PredValue.txt', sep=',',header=FALSE)
@@ -1045,6 +1057,7 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
            out$pred.n<-nsite
            out$r <- r
            out$T <- T
+           out$Y <- Y
            out$initials <- initials	
            out$priors <- priors 
            out$iterations <- nItr 

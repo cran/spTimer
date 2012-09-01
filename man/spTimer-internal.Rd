@@ -13,6 +13,7 @@
 \alias{initials.checking.gpp}
 \alias{print.spT}
 \alias{print.spTpred}
+\alias{print.spTprd}
 \alias{print.spTfore}
 \alias{priors.checking.ar}
 \alias{priors.checking.gp}
@@ -34,6 +35,14 @@
 \alias{spT.keep.morethan.dist}
 \alias{as.mcmc.spT}
 \alias{MCMC.plot.obj}
+\alias{coef.spT}
+\alias{model.frame.spT}
+%\alias{plot.spT}
+\alias{residuals.spT}
+%\alias{summary.spT}
+\alias{formula.spT}
+\alias{terms.spT}
+\alias{model.matrix.spT}
 %\alias{imputation.z}
 \description{Internal spTimer functions}
 \keyword{internal}

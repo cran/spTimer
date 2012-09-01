@@ -2,9 +2,14 @@
 ## prior function for spTimer
 ##
 spT.priors<-function(model="GP",var.prior=Gam(a = 2,b = 1), 
-           beta.prior=Nor(0,10^4), rho.prior=Nor(0,10^4),
+           beta.prior=Nor(0,10^10), rho.prior=Nor(0,10^10),
            phi.prior=Gam(a = 2, b = 1))
 {
+   #
+   #if(!model %in% c("GP", "AR", "GPP")){
+   # stop("\n# Error: correctly define model \n")
+   #}
+   #
    if(model=="GP"){
      #
      if(is.na(var.prior[,1])){
@@ -210,6 +215,11 @@ spT.initials<-function(model="GP", sig2eps=0.01,
             sig2eta=NULL, rho=NULL, beta=NULL, phi=NULL)
 {
    #
+   #if(!model %in% c("GP", "AR", "GPP")){
+   # stop("\n# Error: correctly define model \n")
+   #}
+   #
+   #
    if(model=="GP"){
    ##
    ## Initial values for the GPP models
@@ -334,43 +344,27 @@ print.spT<-function(x, ...) {
     #cat("PMCC: "); cat("\n");
     print(x$PMCC); 
     cat("-----------------------------------------------------"); cat('\n');
-    cat("Parameters:\n")
-    print(x$parameter); #cat("\n");
-    cat("-----------------------------------------------------"); cat('\n');
+    #cat("Parameters:\n")
+    #print(x$parameter); #cat("\n");
+    #cat("-----------------------------------------------------"); cat('\n');
     cat("Computation time: "); cat(x$computation.time); cat("\n")
 }
 ##
 spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
-         time.data, coords, knots.coords, 
-         pred.coords=NULL, pred.data=NULL, 
-         priors, initials, nItr, nBurn=0, report=1, 
+         time.data=NULL, coords, knots.coords, 
+         newcoords=NULL, newdata=NULL, 
+         priors=NULL, initials=NULL, nItr=13000, nBurn=3000, report=1, 
          tol.dist=2, distance.method="geodetic:km", 
          cov.fnc="exponential", scale.transform="NONE", 
          spatial.decay=spT.decay(type="MH",tuning=0.1),
          annual.aggrn="NONE")
 {
    ##
-   sum.stat<-function(x, nBurn=0)
+   sum.stat<-function(x)
    {
      model<-x$model
-     nItr<-x$iterations
-     if(!is.null(nBurn)){
-       if(nBurn == 0){
-       nBurn<-0
-       nItr<-nItr-x$nBurn
-       }
-       if(nBurn != 0){ 
-       nBurn<-nBurn
-       nItr<-nItr-x$nBurn
-       }
-     }
-     if((nBurn+x$nBurn) >= (nItr+x$nBurn)){
-      cat("# Number of Iterations:            ", nItr+x$nBurn, "\n")
-      cat("# Number of Burn-in (fitted model):", x$nBurn, "\n")
-      cat("# More Burn-in:                    ", nBurn, "\n")
-      cat("# Total Number of Burn-in:         ", nBurn+x$nBurn, "\n")
-      stop("\n# Error: iteration (",nItr+x$nBurn,") is less than or equal to total burn-in (",nBurn+x$nBurn,") \n")
-     }
+     nItr<-x$iterations-x$nBurn
+     nBurn<-0
      cat("\n")
      cat("# Model:", model, "\n")
      if(is.null(model)==TRUE){
@@ -382,19 +376,24 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
         }
      r<-dim(x$mu_lp)[[1]]
      p<-dim(x$betap)[[1]]
+     if(cov.fnc=="matern"){
      para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$rhop[(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
-              (x$sig2lp[,(nBurn+1):nItr]),
-              (x$mu_lp[,(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+     para<-spT.Summary.Stat(para)
+     dimnames(para)[[1]][1:(1+p+4)]<-c(dimnames(x$X)[[2]],"rho","sig2eps","sig2eta", "phi", "nu")
+     }
+     else {
+     para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$rhop[(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
      para<-spT.Summary.Stat(para)
-     dimnames(para)[[1]][1:(1+p+2)]<-c(dimnames(x$X)[[2]],"rho",
-        "sig2eps","sig2eta")
-     dimnames(para)[[1]][(1+p+2+1):(1+p+2+r)] <- paste("sig2:", 1:r)  
-     dimnames(para)[[1]][(1+p+2+r+1):(1+p+2+r+r)] <- paste("mu:", 1:r)  
-     dimnames(para)[[1]][(1+p+2+r+r+1)] <-c("phi")
+     dimnames(para)[[1]][1:(1+p+3)]<-c(dimnames(x$X)[[2]],"rho","sig2eps","sig2eta", "phi")
+     }
      round(para,4)
      }
      else if(model == "GPP"){
@@ -403,14 +402,24 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
         }
      r<-x$r
      p<-x$p
+     if(cov.fnc=="matern"){
+     para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$rhop[(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+     para<-spT.Summary.Stat(para)
+     dimnames(para)[[1]][1:(1+p+2+1+1)]<-c(dimnames(x$X)[[2]],"rho","sig2eps","sig2eta","phi","nu")
+     }
+     else {
      para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$rhop[(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
      para<-spT.Summary.Stat(para)
-     dimnames(para)[[1]][1:(1+p+2+1)]<-c(dimnames(x$X)[[2]],"rho",
-        "sig2eps","sig2eta","phi")
+     dimnames(para)[[1]][1:(1+p+2+1)]<-c(dimnames(x$X)[[2]],"rho","sig2eps","sig2eta","phi")
+     }
      round(para,4)
      }
      else if(model == "GP"){
@@ -419,13 +428,22 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
         }
      r<-x$r
      p<-x$p
+     if(cov.fnc=="matern"){
+     para<-rbind((x$betap[,(nBurn+1):nItr]),
+              t(x$sig2ep[(nBurn+1):nItr]),
+              t(x$sig2etap[(nBurn+1):nItr]),
+              t(x$phip[(nBurn+1):nItr]),t(x$nup[(nBurn+1):nItr]))
+     para<-spT.Summary.Stat(para)
+     dimnames(para)[[1]]<-c(dimnames(x$X)[[2]],"sig2eps","sig2eta","phi","nu")
+     }
+     else {
      para<-rbind((x$betap[,(nBurn+1):nItr]),
               t(x$sig2ep[(nBurn+1):nItr]),
               t(x$sig2etap[(nBurn+1):nItr]),
               t(x$phip[(nBurn+1):nItr]))
      para<-spT.Summary.Stat(para)
-     dimnames(para)[[1]]<-c(dimnames(x$X)[[2]],
-        "sig2eps","sig2eta","phi")
+     dimnames(para)[[1]]<-c(dimnames(x$X)[[2]],"sig2eps","sig2eta","phi")
+     }
      round(para,4)
      }
      else{
@@ -433,7 +451,7 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
      }
    }
    ##
-   if(is.null(pred.coords) | is.null(pred.data)) {
+   if(is.null(newcoords) | is.null(newdata)) {
    # 
    if (missing(formula)) {
           stop("\n# Error: formula must be specified \n")
@@ -476,13 +494,17 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
       if(class(initials) != "spGP" & class(initials) != "NULL"){
         stop("\n# Error: correctly define the GP models for function spT.initials.")
       }
+      if(!missing(knots.coords)){
+        stop("\n# Error: please check options for the GP model and/or knots.coords \n")
+      }
       out<- spGP.Gibbs(formula=formula, data=data, time.data=time.data, coords=coords, 
             priors=priors, initials=initials, nItr=nItr, nBurn=nBurn, report=report, tol.dist=tol.dist,   
             distance.method=distance.method, cov.fnc=cov.fnc, scale.transform=scale.transform, spatial.decay=spatial.decay,
             X.out=TRUE, Y.out=TRUE)
       out$combined.fit.pred<-FALSE
       out$model<-model
-      out$parameter<-sum.stat(out,nBurn=0)
+      out$parameter<-sum.stat(out)
+      out$data<-data
       class(out)<-"spT"
       out
    }
@@ -495,13 +517,17 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
       if(class(initials) != "spAR" & class(initials) != "NULL"){
         stop("\n# Error: correctly define the AR models for function spT.initials.")
       }
+      if(!missing(knots.coords)){
+        stop("\n# Error: please check options for the AR model and/or knots.coords \n")
+      }
       out<- spAR.Gibbs(formula=formula, data=data, time.data=time.data, coords=coords, 
             priors=priors, initials=initials, nItr=nItr, nBurn=nBurn, report=report, tol.dist=tol.dist,   
             distance.method=distance.method, cov.fnc=cov.fnc, scale.transform=scale.transform, spatial.decay=spatial.decay,
             X.out=TRUE, Y.out=TRUE)
       out$combined.fit.pred<-FALSE
       out$model<-model
-      out$parameter<-sum.stat(out,nBurn=0)
+      out$parameter<-sum.stat(out)
+      out$data<-data
       class(out)<-"spT"
       out
    }
@@ -516,7 +542,6 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
       }
       if(class(initials) != "spGPP" & class(initials) != "NULL"){
         stop("\n# Error: correctly define the GPP models for function spT.initials.")
-
       }
       out<- spGPP.Gibbs(formula=formula, data=data, time.data=time.data, 
             knots.coords=knots.coords, coords=coords, priors=priors, initials=initials, 
@@ -526,7 +551,8 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
             X.out=TRUE, Y.out=TRUE)
       out$combined.fit.pred<-FALSE
       out$model<-model
-      out$parameter<-sum.stat(out,nBurn=0)
+      out$parameter<-sum.stat(out)
+      out$data<-data
       class(out)<-"spT"
       out
    }
@@ -539,15 +565,21 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
    ##
    ## for both fit and pred
    ##
-   else if (!is.null(pred.coords) & !is.null(pred.data)) {
+   else if (!is.null(newcoords) & !is.null(newdata)) {
      #
      if(!annual.aggrn %in% c("NONE", "ave", "an4th", "w126")){
       stop("\n# Error: correctly define annual.aggrn \n")
      }
+     if(is.null(newcoords)){
+      stop("\n# Error: correctly define newcoords \n")
+     }
+     if(is.null(newdata)){
+      stop("\n# Error: correctly define newdata \n")
+     }
      #
     out<-spT.fit.pred(formula=formula, data=data, model=model, time.data=time.data, coords=coords, 
-            knots.coords=knots.coords, pred.coords=pred.coords, priors=priors,
-            initials=initials, pred.data=pred.data, nItr=nItr, nBurn=nBurn, report=report,
+            knots.coords=knots.coords, pred.coords=newcoords, priors=priors,
+            initials=initials, pred.data=newdata, nItr=nItr, nBurn=nBurn, report=report,
             tol.dist=tol.dist, distance.method=distance.method, cov.fnc=cov.fnc, scale.transform=scale.transform,
             spatial.decay=spatial.decay, annual.aggrn=annual.aggrn)
     class(out)<-"spT"
@@ -561,7 +593,7 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
 ## Prediction function for spTimer
 ##
 ##
-print.spTpred<-function(x, ...) {
+print.spTprd<-function(x, ...) {
     cat("--------------------------------------"); cat('\n');
     cat("Prediction with Models:", x$model, "\n")
     cat("Covariance function:", x$cov.fnc, "\n")
@@ -593,7 +625,7 @@ spT.prediction<-function(nBurn=0, pred.data=NULL, pred.coords,
       out<-spGP.prediction(nBurn=nBurn, pred.data=pred.data, pred.coords=pred.coords, 
            posteriors=posteriors, tol.dist=tol.dist, Summary=Summary)
       out$model<-model
-      class(out)<-"spTpred"
+      class(out)<-"spTprd"
       out
    }
    else if(model=="AR"){
@@ -601,7 +633,7 @@ spT.prediction<-function(nBurn=0, pred.data=NULL, pred.coords,
       out<-spAR.prediction(nBurn=nBurn, pred.data=pred.data, pred.coords=pred.coords, 
            posteriors=posteriors, tol.dist=tol.dist, Summary=Summary)
       out$model<-model
-      class(out)<-"spTpred"
+      class(out)<-"spTprd"
       out
    }
    else if(model=="GPP"){
@@ -609,7 +641,7 @@ spT.prediction<-function(nBurn=0, pred.data=NULL, pred.coords,
       out<-spGPP.prediction(nBurn=nBurn, pred.data=pred.data, pred.coords=pred.coords, 
            posteriors=posteriors, Summary=Summary)
       out$model<-model
-      class(out)<-"spTpred"
+      class(out)<-"spTprd"
       out
    }
    else {
@@ -654,7 +686,7 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
    #
    else if(model=="AR"){
       if(missing(pred.samples.ar)){
-        stop("Error: define pred.samples.ar by value or by NULL.")
+        stop("Error: define predAR by value or by NULL.")
       }
       cat("\n Forecast: AR models \n")
       out<-spAR.forecast(nBurn=nBurn, K=K, fore.data=fore.data, fore.coords=fore.coords, 
@@ -676,6 +708,60 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
    else {
     stop("\n# Error: model is not correctly defined \n")
    }
+}
+##
+## use of predict function
+##
+predict.spT<-function(object, newdata=NULL, newcoords, foreStep=NULL, type="spatial", nBurn=0, 
+          tol.dist=2, predAR=NULL, ...)
+{
+     if(type=="spatial"){
+        if(is.null(newcoords)){
+          stop("Error: define newcoords.")
+        }
+     out<-spT.prediction(nBurn=nBurn, pred.data=newdata, pred.coords=newcoords,
+          posteriors=object, tol.dist=2, Summary=TRUE)
+     out$type<-"spatial"
+     class(out)<-"spTpred" 
+     out
+     }
+     else if(type=="temporal"){
+        if(is.null(newcoords)){
+          stop("Error: define newcoords.")
+        }
+        if(is.null(foreStep)){
+          stop("Error: define foreStep.")
+        }
+     out<-spT.forecast(nBurn=nBurn, K=foreStep, fore.data=newdata, fore.coords=newcoords, 
+            posteriors=object, pred.samples.ar=predAR, Summary=TRUE)
+     out$type<-"temporal"
+     class(out)<-"spTpred"
+     out
+     }
+     else{
+       stop("\n# Error: prediction type is not correctly defined \n")
+     }
+}
+#
+print.spTpred<-function(x, ...) {
+    if(x$type=="spatial"){
+    cat("--------------------------------------"); cat('\n');
+    cat("Spatial prediction with Model:", x$model, "\n")
+    cat("Covariance function:", x$cov.fnc, "\n")
+    cat("Distance method:", x$distance.method, "\n")
+    cat("Computation time: ",x$computation.time, "\n")
+    cat("--------------------------------------"); cat('\n');
+    }
+    else if(x$type=="temporal"){
+    cat("--------------------------------------"); cat('\n');
+    cat("Temporal prediction/forecast with Model:", x$model, "\n")
+    cat("Covariance function:", x$cov.fnc, "\n")
+    cat("Distance method:", x$distance.method, "\n")
+    cat("Computation time: ",x$computation.time, "\n")
+    cat("--------------------------------------"); cat('\n');
+    }
+    else{
+    }
 }
 ##
 ## Fit and prediction function for AR and GPP

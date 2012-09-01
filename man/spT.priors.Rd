@@ -5,7 +5,7 @@
 }
 \usage{
 spT.priors(model,var.prior=Gam(a=2,b=1),
-  beta.prior=Nor(0,10^4), rho.prior=Nor(0,10^4),
+  beta.prior=Nor(0,10^10), rho.prior=Nor(0,10^10),
   phi.prior=Gam(a=2,b=1))
 }
 \arguments{
@@ -16,10 +16,11 @@ spT.priors(model,var.prior=Gam(a=2,b=1),
 \item{phi.prior}{The hyper-parameter for the Gamma prior distribution (with mean = a/b) of the spatial decay (\eqn{\phi}) parameter.}
 }
 \note{
-If no prior information are given (assigned as NULL), then it use flat prior values of the corresponding distributions. 
+If no prior information are given (assigned as NULL), then it use flat prior values of the corresponding distributions. \cr
+\code{Gam} and \code{Nor} refers to Gamma and Normal distributions respectively.
 }
 \seealso{
-\code{\link{spT.Gibbs}, \link{spT.prediction}, \link{spT.forecast}, \link{spT.initials}}.
+\code{\link{spT.Gibbs}, \link{predict.spT}, \link{spT.prediction}, \link{spT.forecast}, \link{spT.initials}}.
 }
 \examples{
 \dontrun{

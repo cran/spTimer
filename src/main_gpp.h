@@ -17,7 +17,7 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      double *sig2e, double *sig2eta, double *sig2l, double *beta, 
      double *rho, double *mu_l, double *X, double *z, double *w0, double *w,
      int *nsite, int *nsiterT, double *dnsm, double *Xpred, int *transform, 
-     double *accept_f, double *gof, double *penalty);    
+     double *accept_f, double *gof, double *penalty);   
 
 
 void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, int *burnin,
@@ -29,7 +29,7 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      double *dm, double *dnm, int *constant, 
      double *sig2e, double *sig2eta, double *sig2l, double *beta, 
      double *rho, double *mu_l, double *X, double *z, double *w0, double *w,
-     int *transform, double *phi_etaf, double *accept_etaf,
+     int *transform, double *phi_etaf, double *accept_etaf, double *nupf,
      double *sig2ef, double *sig2etaf, double *betaf, double *rhof, 
      double *mu_lf, double *sig2lf, double *w0f, double *wf, 
      double *gof, double *penalty, double *z_mean_sd);
@@ -43,12 +43,13 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
      double *shape_l, double *prior_a, double *prior_b, double *mu_beta, 
      double *delta2_beta, double *mu_rho,  double *delta2_rho, double *alpha_l, 
      double *delta2_l, double *phi, double *tau, double *phis, int *phik,
-     double *dm, double *dnm, int *constant, 
+     double *nu, double *dm, double *dnm, int *constant, 
      double *sig2e, double *sig2eta, double *sig2l, double *beta, 
      double *rho, double *mu_l, double *X, double *z, double *w0, double *w,
-     double *phip, double *accept,
+     double *phip, double *accept, double *nup,
      double *sig2ep, double *sig2etap, double *betap, double *rhop, 
-     double *mu_lp, double *sig2lp, double *w0p, double *wp, double *zfit);
+     double *mu_lp, double *sig2lp, double *w0p, double *wp, 
+     double *zfit);
 
 
 void sig_e_gpp(int *n, int *rT, int *N, double *shape, double *prior_b, 
@@ -76,9 +77,11 @@ void mu_l_gpp(int *m, int *r, double *sig2l, double *alpha_l, double *delta2_l,
 void Z_fit_gpp(double *flag, int *n, int *m, int *T, int *r, int *rT, 
      double *sig2e, double *Aw, double *XB, double *z, int *constant, 
      double *zfit);
+     
+void o_fit_gpp(double *flag, int *n, int *m, int *T, int *r, int *rT, 
+     double *Aw, double *XB, double *z, int *constant, 
+     double *zfit);
 
-
-/************************** From "wlt_gpp.c" file *****************************/
 /*****************************************************************************/
 
 void wlt_gpp_s(int *n, int *m, int *r, int *T, int *rT, int *p, double *dm, 
@@ -100,11 +103,10 @@ void ww_gpp(int *n, int *m, int *r, int *T, int *rT, int *p, int *N,
      double *sig2eta, double *sig2l, double *mu_l, double *rho, double *beta, 
      double *w, double *X, double *z, int *constant, double *wp);
 
-/*********************** From "phiratio_gpp.c" file ***************************/
 /*****************************************************************************/
 
 void phi_gpp_DIS2(int *cov, double *Qeta1, double *det1, double *phi1,    
-     double *phis, int *phik, int *m, int *r, int *T, int *rT, 
+     double *phis, int *phik, double *nu, int *m, int *r, int *T, int *rT, 
      double *prior_a, double *prior_b, double *dm, double *rho, 
      double *sig2eta, double *mu_l, double *w0, double *w, int *constant, 
      double *accept, double *phip);
@@ -113,21 +115,38 @@ void phiden_gpp(double *phi, double *Qeta, double *det, int *m, int *r,
      int *T, int *rT, double *prior_a, double *prior_b, double *rho, 
      double *w0, double *w, int *constant, double *out);
 
+void nu_gpp_DIS(int *cov, double *Qeta1, double *det1, double *phi, double *nu1, 
+     int *m, int *r, int *T, int *rT, double *dm, double *rho, double *sig2eta, 
+     double *mu_l, double *w0, double *w, int *constant, double *nup);
+
+void nuden_gpp(double *Qeta, double *det, int *m, int *r, int *T, int *rT, 
+     double *rho, double *w0, double *w, int *constant, double *out);
+     
 void phi_gpp_MH2(double *Qeta1, double *Qeta2, double *det1, double *det2,
      double *phi1, double *phi2,   
      int *m, int *r, int *T, int *rT, double *prior_a, double *prior_b, 
      double *rho, double *mu_l, double *w0, double *w, int *constant, 
      double *accept, double *phip);
 
-void phi_gpp_MH(int *cov, double *phi2, double *dm, double *dnm,
+void phi_gpp_MH(int *cov, double *phi2, double *nu, double *dm, double *dnm,
      double *Sinv1, double *det1, double *phi1, double *A1,   
      int *n, int *m, int *r, int *T, int *rT, double *prior_a, double *prior_b, 
      double *rho, double *mu_l, double *w0, double *w, double *z, double *XB, 
      int *constant, double *accept, double *phip);
-
+     
 
 /******************* From "prediction_xb_gpp.c" file **************************/
 /*****************************************************************************/
+void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, int *r, 
+     int *T, int *rT, int *p, int *nsiterT, double *phi_etap, double *nup, double *dm, 
+     double *dnsm, double *wp, double *sig2ep, double *betap, double *Xpred, 
+     int *constant, double *zpred);
+
+void z_pr_gpp1(int *cov, int *nsite, int *n, int *m, int *r, int *T, 
+     int *rT, int *p, int *nsiterT, double *phi_etap, double *nup, double *dm, 
+     double *dnsm, double *wp, double *sig2ep, double *betap, 
+     double *Xpred, int *constant, double *zpred);
+
 void z_pr_its_gpp_wtilde(int *cov, int *scale, int *its, int *nsite, 
      int *n, int *m, int *r, int *T, int *rT, int *p, int *nsiterT, 
      double *phi_etap, double *dm, double *dnsm, double *w0p, double *wp, 
@@ -140,16 +159,6 @@ void z_pr_gpp_wtilde(int *cov, int *nsite,
      double *sig2ep, double *sig2etap, double *sig2lp, double *rhop, 
      double *betap, double *Xpred, int *constant, double *zpred);
           
-void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, int *r, 
-     int *T, int *rT, int *p, int *nsiterT, double *phi_etap, double *dm, 
-     double *dnsm, double *wp, double *sig2ep, double *betap, double *Xpred, 
-     int *constant, double *zpred);
-
-void z_pr_gpp1(int *cov, int *nsite, int *n, int *m, int *r, int *T, 
-     int *rT, int *p, int *nsiterT, double *phi_etap, double *dm, 
-     double *dnsm, double *wp, double *sig2ep, double *betap, 
-     double *Xpred, int *constant, double *zpred);
-
 void z_pr_its_gpp(int *cov, int *scale, 
      int *its, int *nsite, int *n, int *m, int *r, int *T, 
      int *rT, int *p, int *nsiterT, double *phi_etap, double *phi_0p, 
@@ -188,13 +197,14 @@ void w0_pr_gpp(int *nsite, int *m, int *r, double *w0p, double *mu_lp,
 /************************* From forecast_xb_ar.c ***************************/
 /*****************************************************************************/
 
-void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m, int *r, int *p, 
-     int *rT, int *T, int *rK, int *nrK, double *dnm, double *dm, double *phip, 
+void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m, 
+     int *r, int *p, int *rT, int *T, int *rK, int *nrK, double *dnm, double *dm, 
+     double *phip, double *nup,  
      double *sig_ep, double *sig_etap, double *betap, double *rhop, double *wp, 
      double *foreX, int *constant, double *foreZ);
-
+            
 void zlt_fore_gpp(int *cov, int *K, int *n, int *m, int *r, int *p, int *rT, int *T, 
-     int *rK, int *nrK, double *dnm, double *dm, double *phi, double *sig_e, 
+     int *rK, int *nrK, double *dnm, double *dm, double *phi, double *nu, double *sig_e, 
      double *sig_eta, double *beta, double *rho, double *wp, double *foreX, 
      int *constant, double *foreZ);
 

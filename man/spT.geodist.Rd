@@ -26,35 +26,31 @@ spT.geo_dist(points)
 \code{spT.geo_dist} is only used to get geodetic distance in kilometers with a different format.
 }
 \seealso{
-\code{\link{NYsite}}, \code{\link{NYdata}}, \code{\link{spT.grid.coords}}.
+\code{\link{NYdata}}, \code{\link{spT.grid.coords}}.
 }
 \examples{
 \dontrun{
 ##
 
-# Load 29 ozone monitoring locations of New York.
-
-data(NYsite)	
-head(NYsite)	
+# Load 28 ozone monitoring locations of New York.
+data(NYdata)	
+head(NYdata)
+NYsite<-unique(NYdata[,1:3])	
 
 # Find the geodetic distance in km
-
 spT.geodist(Lon=NYsite$Longitude, Lat=NYsite$Latitude, KM=TRUE)
    
 # Find the geodetic distance in miles
-
 spT.geodist(Lon=NYsite$Longitude, Lat=NYsite$Latitude, KM=FALSE)
 
 ##
 
 # using spT.geo.dist
-
 point1<-c(-73.757,42.681)
 point2<-c(-73.881,40.866)
 spT.geo.dist(point1,point2)
 
 # using spT.geo_dist
-
 points<-c(point1,point2)
 spT.geo_dist(points)
 

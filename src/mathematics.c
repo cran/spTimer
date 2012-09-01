@@ -7,9 +7,16 @@
 #include "mathematics.h"
 #include "randgenerator.h"
 
+#ifdef USE_MKL
+#include <mkl_blas.h>
+#include <mkl_lapack.h>
+#include <mkl_vml_functions.h>
+#include <mkl_vml_defines.h>
+#endif
+
+
 //double w126_from_daily(); 
 //double max_pos(); 
-
 double max_pos(double *x, int n)
 { 
   int i; 
@@ -615,14 +622,18 @@ void IdentityM(int *n, double *I)
      
      return;
 }            
+
          
                        
 
 // some of the following code are taken from GDLM software of Dou, Le, Zedak
 // Calculate the matrix addition of X (m x n) and Y (m x n)
+// LPACK, BLAS version is modified by Rohan Shah
 void MAdd(double *x, int *xrow, int *xcol, double *y, double *out)
 {
- 
+#ifdef USE_MKL
+	vdAdd((*xrow) * (*xcol), x, y, out);
+#else
  int m, n, i, j;
  double tmp;
 
@@ -636,13 +647,40 @@ void MAdd(double *x, int *xrow, int *xcol, double *y, double *out)
    }
  }
  return;
+ #endif
 }
 
+/*
+void MAdd2(double *x, int *xrow, int *xcol, double *y, double *out)
+{
+#ifdef USE_MKL
+	vdAdd((*xrow) * (*xcol), x, y, out);
+#else
+ int m, n, i, j;
+ double tmp;
+
+ m = *xrow;
+ n = *xcol;
+
+ for(i = 0; i < m; i++) {
+   for(j =0; j < n; j++) {
+    tmp = x[i*n+j] + y[i*n+j];
+    out[i*n+j] = tmp;
+   }
+ }
+ return;
+#endif
+}
+
+*/
 
 // Calculate the matrix subtraction of X (m x n) and Y (m x n)
+// LPACK, BLAS version is modified by Rohan Shah
 void MSub(double *x, int *xrow, int *xcol, double *y, double *out)
 {
-      
+#ifdef USE_MKL
+	vdSub((*xrow) * (*xcol), x, y, out);
+#else      
  int nn, pp, i, j;
  double tmp;
 
@@ -656,8 +694,10 @@ void MSub(double *x, int *xrow, int *xcol, double *y, double *out)
    }
  }  
  return;
+ #endif
 }
 
+/*
 // Calculate the matrix product of X (q x p) and Y (p x r), 
 void MProd(double *y, int *nycol, int *nyrow, double *x, 
      int *nxrow, double *out)
@@ -678,6 +718,34 @@ void MProd(double *y, int *nycol, int *nyrow, double *x,
     }
   }
   return;
+}
+*/
+
+// Calculate the matrix product of X (q x p) and Y (p x r), 
+// LPACK, BLAS version is modified by Rohan Shah
+void MProd(double *y, int *nycol, int *nyrow, double *x, 
+     int *nxrow, double *out)
+{ 
+#ifdef USE_MKL
+	double one = 1, zero = 0;
+	dgemm("N", "N", nxrow, nycol, nyrow, &one, x, nxrow, y, nyrow, &zero, out, nxrow);
+#else
+     double tmp;
+     int i, j, k, r, p, q;
+
+  r=*nycol;    
+  p=*nyrow;       // nyrow = nxcol
+  q=*nxrow;
+
+  for(i = 0; i < r; i ++){ 
+    for(j = 0; j < q; j ++){ 
+         tmp = 0;
+         for(k = 0; k < p; k++) { tmp += y[i*p+k]*x[k*q+j]; }
+         out[i*q+j] = tmp; 
+    }
+  }
+  return;
+#endif
 }
 
 // Transpose of a matrix
@@ -861,6 +929,7 @@ void MInv(double *S, double *inv, int *pp, double *det)
 free(t1);
 free(t);
 }
+
 // This is used in "invMatrix"
 void sq_rt(double *a, double *t, int p, double *det)
 {
@@ -998,6 +1067,51 @@ void MProd2(double *ma1, double *ma2, double *mul, double *no,
    }
   return;
 }
+
+/*
+// Inverse using LAPACK
+
+#include <cstdio>
+
+extern "C" {
+    // LU decomoposition of a general matrix
+    void dgetrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO);
+
+    // generate inverse of a matrix given its LU decomposition
+    void dgetri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO);
+}
+
+void inverse(double* A, int N)
+{
+    int *IPIV = new int[N+1];
+    int LWORK = N*N;
+    double *WORK = new double[LWORK];
+    int INFO;
+
+    dgetrf_(&N,&N,A,&N,IPIV,&INFO);
+    dgetri_(&N,A,&N,IPIV,WORK,&LWORK,&INFO);
+
+    delete IPIV;
+    delete WORK;
+}
+
+int main(){
+
+    double A [2*2] = {
+        1,2,
+        3,4
+    };
+
+    inverse(A, 2);
+
+    printf("%f %f\n", A[0], A[1]);
+    printf("%f %f\n", A[2], A[3]);
+
+    return 0;
+}
+
+*/
+
 
 ///////////////////////////////////////////////////
 

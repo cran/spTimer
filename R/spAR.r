@@ -49,6 +49,15 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
      coords.D <- as.matrix(dist(coords, method, diag = TRUE, upper = TRUE))
    }
    #
+   # check time.data
+   if(is.null(time.data)){
+     time.data<-c(1,0,length(Y)/length(coords[,1]))
+   }
+   else{
+     time.data<-time.data
+   }
+   #
+   #
          n <- length(coords[,1])            # number of sites
          r <- time.data[1]                  # number of years
          T <- time.data[3]                  # number of days
@@ -168,9 +177,10 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            as.double(initials$sig2eta),as.double(initials$sig_l0),as.double(initials$mu_l),
            as.double(initials$rho),as.double(initials$beta),
            as.double(X),as.double(zm[,1]),as.double(o), 
-           phip=double(nItr),accept=double(1),sig_ep=double(nItr),sig_etap=double(nItr), 
+           phip=double(nItr),accept=double(1),nup=double(nItr),sig_ep=double(nItr),sig_etap=double(nItr), 
            rhop=double(nItr),betap=matrix(double(nItr*p),p,nItr),mu_lp=matrix(double(r*nItr),r,nItr),
-           sig_l0p=matrix(double(r*nItr),r,nItr),op=matrix(double(nItr*N),N,nItr),fit=matrix(double(2*N),N,2),gof=double(1),penalty=double(1))[34:45]
+           sig_l0p=matrix(double(r*nItr),r,nItr),op=matrix(double(nItr*N),N,nItr),wp=matrix(double(nItr*N),N,nItr),
+           fit=matrix(double(2*N),N,2),gof=double(1),penalty=double(1))[34:47]
     #
       accept <- round(out$accept/nItr*100,2)
     #
@@ -187,6 +197,9 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
       output$call<-formula
     #
            output$phip <- as.matrix(out$phip[(nBurn+1):nItr])
+           if(cov==4){
+           output$nup <- as.matrix(out$nup[(nBurn+1):nItr])
+           }
            output$sig2ep <- as.matrix(out$sig_ep[(nBurn+1):nItr])
            output$sig2etap <- as.matrix(out$sig_etap[(nBurn+1):nItr])
            output$sig2lp <- matrix(out$sig_l0p[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
@@ -194,6 +207,7 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            output$betap <- matrix(out$betap[1:p,(nBurn+1):nItr],p,length((nBurn+1):nItr))
            output$mu_lp <- matrix(out$mu_lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
            output$op <- out$op[1:N,(nBurn+1):nItr]
+           output$wp <- out$wp[1:N,(nBurn+1):nItr]
            dimnames(out$fit)[[2]] <- c("Mean","SD")
            output$fitted <- out$fit
            output$tol.dist<-tol.dist
@@ -431,6 +445,12 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     #
     #
            phip<-posteriors$phip[(nBurn+1):nItr,]
+           if(cov==4){
+           nup<-posteriors$nup[(nBurn+1):nItr,]
+           }
+           else{
+           nup<-0
+           } 
            sig_ep<-posteriors$sig2ep[(nBurn+1):nItr,]
            sig_etap<-posteriors$sig2etap[(nBurn+1):nItr,]
            rhop<-posteriors$rhop[(nBurn+1):nItr,]
@@ -442,7 +462,7 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
        out<-matrix(.C('z_pr_its_ar',as.integer(cov),as.integer(itt),as.integer(nsite), 
             as.integer(n),as.integer(r),as.integer(rT),as.integer(T),
             as.integer(p),as.integer(N),as.integer(predN),as.double(d), 
-            as.double(d12),as.double(phip),as.double(sig_ep),as.double(sig_etap),
+            as.double(d12),as.double(phip),as.double(nup),as.double(sig_ep),as.double(sig_etap),
             as.double(sig_l0p),as.double(rhop),as.double(betap),
             as.double(mu_lp),as.double(fitted.X),
             as.double(pred.x),as.double(op),as.integer(1),
@@ -451,16 +471,17 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
        output <- NULL
           #
           if(scale.transform=="NONE"){ 
-           output$predicted.samples <- out          
+           output$pred.samples <- out          
           }
           if(scale.transform=="SQRT"){ 
-           output$predicted.samples <- out^2
+           output$pred.samples <- out^2
           }
           if(scale.transform=="LOG"){ 
-           output$predicted.samples <- exp(out)
+           output$pred.samples <- exp(out)
           }
           # 
        out<-NULL
+       output$pred.coords <- pred.coords
        output$distance.method <- posteriors$distance.method
        output$Distance.matrix.pred <- dns
        output$cov.fnc <- posteriors$cov.fnc
@@ -485,7 +506,7 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           cat("# Predicted samples and summary statistics are given.\n# nBurn = ",nBurn+posteriors$nBurn,". Iterations = ",posteriors$iterations,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$predicted.samples[,])
+          szp<-spT.Summary.Stat(output$pred.samples[,])
           # 
           output$Mean <- matrix(szp$Mean,r*T, nsite)
           output$Median <- matrix(szp$Median,r*T, nsite)
@@ -573,35 +594,41 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
       #
       #
       if(is.null(pred.samples.ar)[1]) {
-         if(dim(posteriors$coords)[[1]] != dim(fore.coords)[[1]]){
-           stop("\n# Error: need to provide the MCMC samples for predictions.\n  Or correctly define the forecast coords.\n")
-         }
-         else{
-           predN <- n*r*T
-           nsite <- predN/(r*T)
+         #if(dim(posteriors$coords)[[1]] != dim(fore.coords)[[1]]){
+         #  stop("\n# Error: need to provide the MCMC samples for predictions.\n  Or correctly define the forecast coords.\n")
+         #}
+         #else{
+           nsite <- dim(fore.coords)[[1]]
+           predN <- nsite*r*T
+           #nsite <- predN/(r*T)
            coords.D <- posteriors$Distance.matrix
            coords.f.D<-as.matrix(spT.geodist(Lon=c(fore.coords[,1],coords[,1]),
                                  Lat=c(fore.coords[,2],coords[,2]),KM=TRUE))
            coords.f.D<-coords.f.D[1:nsite,(nsite+1):(nsite+n)] 
-         }
+         #}
       }
       #
       if(!is.null(pred.samples.ar)[1]){
-        if (!is.matrix(pred.samples.ar$predicted.samples[,])) {
+        if (!is.matrix(pred.samples.ar$pred.samples[,])) {
            stop("\n# Error: MCMC samples of predictions must be a (samples x iterations) matrix.")
         }
         #
-        if(itt != dim(pred.samples.ar$predicted.samples)[[2]]){
+        if(itt != dim(pred.samples.ar$pred.samples)[[2]]){
            stop("\n# Error: number of nBurn should be same as the number of nBurn in the predictions.")
         }  	
-           predN <- length(pred.samples.ar$predicted.samples[,])/itt
+           predN <- length(pred.samples.ar$pred.samples[,])/itt
            nsite <- predN/(r*T)
+           if(nsite!=dim(fore.coords)[[1]]){
+              stop("#\n# Error: predAR should be equal to NULL for insite temporal forecast. \n  Or correctly define the forecast coords.\n#")
+           }
            #coords.D <- pred.samples.ar$Distance.matrix.pred
            coords.D <- posteriors$Distance.matrix
            coords.f.D<-as.matrix(spT.geodist(Lon=c(fore.coords[,1],coords[,1]),
                                  Lat=c(fore.coords[,2],coords[,2]),KM=TRUE))
            coords.f.D<-coords.f.D[1:nsite,(nsite+1):(nsite+n)] 
       }
+      #
+      #
       #
            nsite <- predN/(r*T)
       #
@@ -613,68 +640,81 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
       call.f<-posteriors$call  
       call.f<-as.formula(paste("tmp~",paste(call.f,sep="")[[3]]))
       if(is.data.frame(fore.data)){
-      if((nsite*r*K)!=dim(fore.data)[[1]]){
-        stop("\n# Check the fore.data and/or fore.coords and/or spT.time function#\n")
-        #stop("\n# Check the fore.data and/or spT.time function#\n")
-      }
-      fore.data$tmp<-rep(1,nsite*r*K)
+        if((nsite*r*K)!=dim(fore.data)[[1]]){
+          stop("\n# Check the fore.data and/or fore.coords and/or spT.time function#\n")
+          #stop("\n# Check the fore.data and/or spT.time function#\n")
+        }
+        fore.data$tmp<-rep(1,nsite*r*K)
       }
       if(is.null(fore.data)){
         fore.data<-data.frame(tmp=rep(1,nsite*r*K))
       }
-      forecast.x<-Formula.matrix(call.f,data=fore.data)[[2]]
+      fore.x<-Formula.matrix(call.f,data=fore.data)[[2]]
     #
     #
            phip<-posteriors$phip[(nBurn+1):nItr]
+           if(cov==4){
+           nup<-posteriors$nup[(nBurn+1):nItr,]
+           }
+           else{
+           nup<-0
+           } 
            sig_ep<-posteriors$sig2ep[(nBurn+1):nItr]
            sig_etap<-posteriors$sig2etap[(nBurn+1):nItr]
            rhop<-posteriors$rhop[(nBurn+1):nItr]
            betap<-matrix(posteriors$betap,p,nItr)
            betap<-betap[,(nBurn+1):nItr]
       #
-      if(predN == N){
+        w<-apply(posteriors$wp,1,median)
+        w<-matrix(w,r*T,n)
+        w<-apply(w,2,median)
+        #w<-apply(posteriors$wp[,(nBurn+1):nItr],2,function(x)apply(matrix(x,r*T,n),2,median))
+      #
+      #if(predN == N){
+      if(is.null(pred.samples.ar)[1]){
       out<-matrix(.C('zlt_fore_ar_its_anysite',as.integer(cov),
            as.integer(itt),as.integer(K),as.integer(nsite),as.integer(n),
            as.integer(r),as.integer(p),as.integer(r*T),as.integer(T),
-           as.integer(r*K),as.integer(nsite*r*K),as.double(coords.D),as.double(coords.f.D),
-           as.double(phip),as.double(sig_ep),as.double(sig_etap),
-           as.double(rhop),as.double(forecast.x),as.double(betap),
-           as.double(posteriors$op[,]),
+           as.integer(r*K),as.integer(nsite*r*K),as.double(coords.D),as.double(t(coords.f.D)),
+           as.double(phip),as.double(nup),as.double(sig_ep),as.double(sig_etap),
+           as.double(rhop),as.double(fore.x),as.double(betap),
+           as.double(posteriors$op[,]),as.double(w),
            as.integer(1),foreZ=double(nsite*r*K*itt))$foreZ,nsite*r*K,itt)
       }
       #
-      if(predN != N){
+      #if(predN != N){
+      if(!is.null(pred.samples.ar)[1]){
       #
           if(posteriors$scale.transform=="NONE"){ 
-pred.samples<-pred.samples.ar$predicted.samples[,]
+pred.samples<-pred.samples.ar$pred.samples[,]
           }
           if(posteriors$scale.transform=="SQRT"){ 
-pred.samples<-sqrt(pred.samples.ar$predicted.samples[,])          
+pred.samples<-sqrt(pred.samples.ar$pred.samples[,])          
           }
           if(posteriors$scale.transform=="LOG"){ 
-pred.samples<-log(pred.samples.ar$predicted.samples[,])
+pred.samples<-log(pred.samples.ar$pred.samples[,])
           }
       # 
       out<-matrix(.C('zlt_fore_ar_its_anysite',as.integer(cov),
            as.integer(itt),as.integer(K),as.integer(nsite),as.integer(n),
            as.integer(r),as.integer(p),as.integer(r*T),as.integer(T),
-           as.integer(r*K),as.integer(nsite*r*K),as.double(coords.D),as.double(coords.f.D),
-           as.double(phip),as.double(sig_ep),as.double(sig_etap),
-           as.double(rhop),as.double(forecast.x),as.double(betap),
-           as.double(pred.samples),
+           as.integer(r*K),as.integer(nsite*r*K),as.double(coords.D),as.double(t(coords.f.D)),
+           as.double(phip),as.double(nup),as.double(sig_ep),as.double(sig_etap),
+           as.double(rhop),as.double(fore.x),as.double(betap),
+           as.double(pred.samples),as.double(w),
            as.integer(1),foreZ=double(nsite*r*K*itt))$foreZ,nsite*r*K,itt)
       }
       #
       output <- NULL
           #
           if(posteriors$scale.transform=="NONE"){ 
-      output$forecast.samples <- out
+      output$fore.samples <- out
           }
           if(posteriors$scale.transform=="SQRT"){ 
-      output$forecast.samples <- out^2
+      output$fore.samples <- out^2
           }
           if(posteriors$scale.transform=="LOG"){ 
-      output$forecast.samples <- exp(out)
+      output$fore.samples <- exp(out)
           }
           # 
       out<-NULL
@@ -702,7 +742,7 @@ pred.samples<-log(pred.samples.ar$predicted.samples[,])
           cat("# Forecast samples and summary statistics are given.\n# nBurn = ",nBurn,". Iterations = ",nItr,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$forecast.samples[,])
+          szp<-spT.Summary.Stat(output$fore.samples[,])
           # 
           output$Mean <- matrix(szp$Mean,r*K, nsite)
           output$Median <- matrix(szp$Median,r*K, nsite)
@@ -783,6 +823,14 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     else {
        coords.D <- as.matrix(dist(coords, method, diag = T, upper = T))
     }  
+   #
+   # check time.data
+   if(is.null(time.data)){
+     time.data<-c(1,0,length(Y)/length(coords[,1]))
+   }
+   else{
+     time.data<-time.data
+   }
    #
          n <- length(coords[,1])            # number of sites
          r <- time.data[1]                  # number of years
@@ -1033,14 +1081,21 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
            #tmp<-tmp[(nBurn+1):nItr,-length(tmp[1,])]
            tmp<-tmp[(nBurn+1):nItr,]
            tmp<-spT.Summary.Stat(t(tmp))
-           row.names(tmp)<- c(x.names,"rho","sig2eps","sig2eta",
-           paste("sig2",1:r),paste("mu",1:r),"phi")
+           if(cov==4){
+           tmp<-tmp[1:length(c(x.names,"rho","sig2eps","sig2eta","phi","nu")),]
+           row.names(tmp)<- c(x.names,"rho","sig2eps","sig2eta","phi","nu")
+           }
+           else{
+           tmp<-tmp[1:length(c(x.names,"rho","sig2eps","sig2eta","phi")),]
+           row.names(tmp)<- c(x.names,"rho","sig2eps","sig2eta","phi")
+           } 
+           #row.names(tmp)<- c(x.names,"rho","sig2eps","sig2eta", paste("sig2",1:r),paste("mu",1:r),"phi") # when to get summary of sigl and mul
            out$parameters<-round(tmp, 4)
            tmp<-NULL
 #
            tmp<-read.table('OutAR_Stats_FittedValue.txt', sep=',',header=FALSE)
            names(tmp)<- c("Mean","SD")
-           out$fit<-round(tmp, 4)
+           out$fitted<-round(tmp, 4)
            tmp<-NULL
 #
            tmp<-read.table('OutAR_Stats_PredValue.txt', sep=',',header=FALSE)
@@ -1086,6 +1141,7 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
            out$pred.n<-nsite
            out$r <- r
            out$T <- T
+           out$Y <- Y
            out$initials <- initials	
            out$priors <- priors 
            out$iterations <- nItr 
@@ -1127,6 +1183,7 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
      }
      }
      lm.coef<-lm(c(o) ~ c(o1) + X-1)$coef
+     lm.coef[is.na(lm.coef)]<-0
      x$rho<-lm.coef[[1]]
      x$beta<-lm.coef[2:(dim(X)[[2]]+1)]
      x
@@ -1158,6 +1215,7 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
        }
       }
       lm.coef<-lm(c(o) ~ c(o1) + X -1)$coef
+      lm.coef[is.na(lm.coef)]<-0
       x$rho<-lm.coef[[1]]
       x$beta<-lm.coef[2:(dim(X)[[2]]+1)]
      }
@@ -1173,7 +1231,7 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
        x$prior_a<-NULL; x$prior_b<-NULL;
        x$prior_sig<-NULL 
        x$prior_a<-2; x$prior_b<-1;
-       x$prior_sig<-10^4
+       x$prior_sig<-10^10
        x
      }
      else{
@@ -1184,10 +1242,11 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
        x$prior_b<-1
      } 
      if(is.null(x$prior_sig)){
-       x$prior_sig<-10^4
+       x$prior_sig<-10^10
      }
      x 
      }
 }
 ##
 ## 
+##

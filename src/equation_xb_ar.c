@@ -12,13 +12,13 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
      int *cov, int *spdecay,
      double *shape_e, double *shape_eta, double *shape_0,  
      double *prior_a, double *prior_b, double *prior_sig, double *phi, 
-     double *tau, double *phis, int *phik, double *d, int *constant, 
+     double *tau, double *phis, int *phik, double *nu, double *d, int *constant, 
      double *sig_e, double *sig_eta, 
      double *sig_l0, double *mu_l,  
      double *rho, double *beta, double *X, double *z, double *o, 
-     double *phip, double *accept,
+     double *phip, double *accept, double *nup, 
      double *sig_ep, double *sig_etap, double *rhop, double *betap, 
-     double *mu_lp, double *sig_l0p, double *op)
+     double *mu_lp, double *sig_l0p, double *op, double *w)
 {     
      int n1, nn, r1, p1, rn, N1, col; 
      n1 = *n;
@@ -45,25 +45,36 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
    phi2 = (double *) malloc((size_t)((1)*sizeof(double)));   
 
    
-   covFormat(cov, n, phi, d, sig_eta, S, det, Sinv, Qeta);   
+   covFormat(cov, n, phi, nu, d, sig_eta, S, det, Sinv, Qeta);   
    MProd(beta, constant, p, X, N, XB);
    o0_ar(n, r, T, rT, p, sig_eta, sig_l0, rho, mu_l, Sinv, XB, o, 
    constant, O_l0);
+
+// check nu 
+   if(cov[0]==4){
+      nu_ar_DIS(cov, Qeta, det, phi, nu, n, r, T, rT, N, d, sig_eta, rho, 
+      mu_l, O_l0, XB, o, constant, nup);
+   }
+   else {
+      nup[0] = nu[0];
+   }  
+
 // fixed values for phi 
    if(spdecay[0] == 1){
     accept[0] =0.0;
     phip[0] = phi[0];
+    covFormat(cov, n, phip, nup, d, sig_eta, S, det, Sinv, Qeta);   
    }
 // discrete sampling for phi 
    else if(spdecay[0] == 2){
 
-     phi_ar_DIS(cov, Qeta, det, phi, phis, phik, n, r, T, rT, N, 
+     phi_ar_DIS(cov, Qeta, det, phi, phis, phik, nup,  n, r, T, rT, N, 
      prior_a, prior_b, d, sig_eta, rho, mu_l, O_l0, XB, o, constant, 
      accept, phip);
-
-     if(accept[0] == 1.0){    
-     covFormat(cov, n, phip, d, sig_eta, S, det, Sinv, Qeta);   
-     }
+     covFormat(cov, n, phip, nup, d, sig_eta, S, det, Sinv, Qeta);   
+//     if(accept[0] == 1.0){    
+//     covFormat(cov, n, phip, nu, d, sig_eta, S, det, Sinv, Qeta);   
+//     }
    }
 // Random-Walk MH-within-Gibbs sampling for phi
    else if(spdecay[0] == 3){
@@ -79,15 +90,15 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
       tmp[0] = -log(phi[0]); 
       mvrnormal(constant, tmp, tau, constant, phi2);
       phi2[0]= exp(-phi2[0]);
+      //phi2[0]= exp(-phi2[0]-exp(-phi2[0]));      
 
-      covFormat3(cov, n, phi2, d, sig_eta, det2, Qeta2);
-//     covFormat(cov, n, phi2, d, sig_eta, S, det2, Sinv, Qeta2);   
+      covFormat2(cov, n, phi2, nup, d, sig_eta, det2, Qeta2);
 //     Rprintf("det2 %f phi2 %f\n", det2[0], phi2[0]);
 
     phi_ar_MH(Qeta, Qeta2, det, det2, phi, phi2, n, r, T, rT, p, N, 
     prior_a, prior_b, rho, mu_l, O_l0, XB, o, constant, accept, phip);
     if(accept[0] == 1.0){
-    covFormat(cov, n, phip, d, sig_eta, S, det, Sinv, Qeta);   
+    covFormat(cov, n, phip, nup, d, sig_eta, S, det, Sinv, Qeta);   
     }
      free(Qeta2); free(det2); free(tmp); free(phi2);
    }
@@ -114,12 +125,72 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
    constant, O_l0);
    o_ar(n, r, T, rT, p, sig_ep, sig_etap, rhop, S, Qeta, O_l0, XB, 
    z, o, constant, op);
-
+   w_ar(n, r, T, rT, p, O_l0, X, o, thetap, constant, w);
+     
    free(Qeta); free(XB); free(Sinv); free(det); 
    free(S); free(O_l0); free(thetap);
 
    return;
 }
+
+// w
+void w_ar(int *n, int *r, int *T, int *rT, int *p, double *O_l0, 
+     double *X, double *o, double *thetap, int *constant, double *w) 
+{
+     int t, l, i, n1, p1, r1, T1, col;
+     n1 =*n;
+     p1 =*p;
+     r1 =*r;
+     T1 =*T;
+     col =*constant;
+     
+     int *p1n;
+     p1n = (int *) malloc((size_t)((col)*sizeof(int)));
+     
+     *p1n = (p1+1);
+     
+     double *ot, *ot1, *out, *w1, *X1, *y, *mu;
+     ot = (double *) malloc((size_t)((n1*col)*sizeof(double)));     
+     ot1 = (double *) malloc((size_t)((n1*col)*sizeof(double)));
+     out = (double *) malloc((size_t)((n1*col)*sizeof(double)));     
+     w1 = (double *) malloc((size_t)((n1*col)*sizeof(double)));     
+     X1 = (double *) malloc((size_t)((n1*p1)*sizeof(double)));
+     y = (double *) malloc((size_t)((n1*(p1+1))*sizeof(double)));
+     mu = (double *) malloc((size_t)(((p1+1)*col)*sizeof(double)));     
+                    
+     for(l=0; l<r1; l++){
+     for(t=0; t<T1; t++){
+          if(t == 0){
+                 for(i=0; i<n1; i++){
+                  ot1[i] = O_l0[i+l*n1];
+                 }      
+          }
+          else {       
+            extract_alt2(l, t-1, n, rT, T, o, ot1);  // n x 1
+          }
+          extract_X(t, l, n, r, T, p, X, X1);        // n x p
+
+          for(i=0; i<n1; i++){
+              y[i] = ot1[i];     
+          }              
+          for(i=0; i<n1*p1; i++){
+              y[i+n1] = X1[i];
+          }     
+          MProd(thetap, constant, p1n, y, n, out);   // n x 1
+          extract_alt2(l, t, n, rT, T, o, ot);  // n x 1
+          for(i=0; i<n1; i++){
+              w1[i] = ot[i]-out[i];     
+          }              
+     put_together1(l, t, n, r, T, w, w1);
+     }
+     }
+
+     free(p1n);
+     free(ot); free(ot1); free(out); free(w1); 
+     free(X1); free(y); free(mu);
+     
+     return;
+}     
 
 
 
@@ -137,7 +208,7 @@ void sig2_ar(int *n, int *r,  int *T, int *rT, int *p,
      p1 =*p;
      col =*constant;
      
-    double *A, *SinvA, *det, *o2, *z1, *o1, *XB1, *ov, *oz, *out1, *out2, *out3;
+    double *A, *SinvA, *det, *o2, *z1, *o1, *XB1, *ov, *oz, *out1, *out2, *out3, *tmp;
     A = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
     SinvA = (double *) malloc((size_t)((n1*n1)*sizeof(double)));     
     det = (double *) malloc((size_t)((col)*sizeof(double)));
@@ -150,7 +221,8 @@ void sig2_ar(int *n, int *r,  int *T, int *rT, int *p,
     out1 = (double *) malloc((size_t)((n1*col)*sizeof(double)));
     out2 = (double *) malloc((size_t)((n1*col)*sizeof(double)));
     out3 = (double *) malloc((size_t)((col)*sizeof(double)));
-                    
+    tmp = (double *) malloc((size_t)((col)*sizeof(double)));
+                        
 // Create an indentity matrix
      for(i=0; i <n1*n1; i++){
          if(i == (i+n1*i)){
@@ -184,7 +256,10 @@ void sig2_ar(int *n, int *r,  int *T, int *rT, int *p,
 
              for(i=0; i < n1; i++) {
                  ov[i] = o1[i]-rho[0]*o2[i]-XB1[i];
-                 oz[i] = z1[i]-o1[i];
+                 out3[0] = z1[i]-o1[i];  
+                 tmp[0] = 0.005;
+                 mvrnormal(constant, out3, tmp, constant, out3);                              
+                 oz[i]=out3[0]; 
              }
              MProd(ov, constant, n, Sinv, n, out1);
              MProd(out1, constant, n, ov, constant, out1);
@@ -209,7 +284,7 @@ void sig2_ar(int *n, int *r,  int *T, int *rT, int *p,
     
      free(A); free(SinvA); free(det); free(o2); free(z1); 
      free(o1); free(XB1); free(ov); free(oz); free(out1); free(out2);
-     free(out3);
+     free(out3); free(tmp);
 
      return;
 }
@@ -416,7 +491,7 @@ void theta_ar(int *n, int *r, int *T, int *rT, int *p, double *prior_sig,
      
      *p1n = (p1+1);
      
-     double *del, *chi, *ot1, *X1, *y, *ty, *out, *tyQy, *ot2, *tyQo, *det, *mu;
+     double *del, *chi, *ot1, *X1, *y, *ty, *out, *tyQy, *ot2, *tyQo, *det, *mu, *I;
      del = (double *) malloc((size_t)(((p1+1)*(p1+1))*sizeof(double)));
      chi = (double *) malloc((size_t)(((p1+1)*col)*sizeof(double)));     
      ot1 = (double *) malloc((size_t)((n1*col)*sizeof(double)));
@@ -429,7 +504,7 @@ void theta_ar(int *n, int *r, int *T, int *rT, int *p, double *prior_sig,
      tyQo = (double *) malloc((size_t)(((p1+1)*col)*sizeof(double)));
      det = (double *) malloc((size_t)((col)*sizeof(double)));
      mu = (double *) malloc((size_t)(((p1+1)*col)*sizeof(double)));     
-                    
+     I = (double *) malloc((size_t)(((p1+1)*(p1+1))*sizeof(double)));                         
      
      for(i=0; i<(p1+1)*(p1+1); i++){
            del[i] = 0.0;
@@ -471,10 +546,11 @@ void theta_ar(int *n, int *r, int *T, int *rT, int *p, double *prior_sig,
      }
      }
 
-
+     IdentityM(p1n, I);
      for(i=0; i<(p1+1)*(p1+1); i++){
-     del[i] = del[i] + 1.0/prior_sig[0];
+     del[i] = del[i] + I[i]*(1.0/prior_sig[0]);
      }
+     free(I);
      MInv(del, del, p1n, det);
      MProd(chi, constant, p1n, del, p1n, mu);  // (p+1) x 1      
      mvrnormal(constant, mu, del, p1n, thetap);
@@ -966,7 +1042,7 @@ void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
      tr2 = (a-1.0)*log(phi2[0])-b*phi2[0]-0.5*rT1*log(det2[0])-v; 
 //     Rprintf("for u: %f for v: %f\n", u, v);
 //     Rprintf("for phi1: %f for phi2: %f\n", tr1, tr2);
-     ratio[0] = exp(tr2 - tr1);
+     ratio[0] = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
      ratio_fnc(ratio, constant, U);     
      if(U[0] < ratio[0]){
           phip[0] = phi2[0];
@@ -987,7 +1063,7 @@ void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
 
 // Discrete Phi sample
 void phi_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi1, 
-     double *phis, int *phik, int *n, int *r, int *T, int *rT, int *N, 
+     double *phis, int *phik, double *nu, int *n, int *r, int *T, int *rT, int *N, 
      double *prior_a, double *prior_b, double *d, double *sig2eta, 
      double *rho, double *mu_l, double *O_l0, double *XB, double *o, 
      int *constant, double *accept, double *phip)
@@ -1012,7 +1088,7 @@ void phi_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi1,
           
      for(i=0; i< *phik; i++){
         phitmp[0] = phis[i];
-        covFormat3(cov, n, phitmp, d, sig2eta, det, Qeta);
+        covFormat2(cov, n, phitmp, nu, d, sig2eta, det, Qeta);
         phidens_ar(phitmp, Qeta, det, n, r, T, rT, N, prior_a, prior_b, XB, 
         rho, O_l0, o, constant, out);
         pden[i] = out[0];
@@ -1123,6 +1199,140 @@ void phidens_ar(double *phi, double *Qeta, double *det, int *n, int *r,
      return;
 }
 
+
+// Discrete nu sample
+void nu_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi, double *nu1, 
+     int *n, int *r, int *T, int *rT, int *N, double *d, double *sig2eta, 
+     double *rho, double *mu_l, double *O_l0, double *XB, double *o, 
+     int *constant, double *nup)
+{
+     int row, col, i, r1, T1, N1, rT1;
+     row = *n;
+     col = *constant;
+     r1 = *r;
+     T1 = *T;
+     N1 = row*r1*T1;
+     rT1 = *rT;
+     int nuk;
+     nuk=20;
+
+     double *nus;
+     nus = (double *) malloc((size_t)((nuk)*sizeof(double)));             
+     nus[0]=0.05; nus[1]=0.10; nus[2]=0.15; nus[3]=0.20; nus[4]=0.25;  
+     nus[5]=0.30; nus[6]=0.35; nus[7]=0.40; nus[8]=0.45; nus[9]=0.50;  
+     nus[10]=0.55; nus[11]=0.60; nus[12]=0.65; nus[13]=0.70; nus[14]=0.75; 
+     nus[15]=0.80; nus[16]=0.85; nus[17]=0.90; nus[18]=0.95; nus[19]=1.0; 
+
+     double *nutmp, *pden, *Qeta, *det, *out;
+     nutmp = (double *) malloc((size_t)((col)*sizeof(double)));             
+     pden = (double *) malloc((size_t)((nuk)*sizeof(double)));             
+     Qeta = (double *) malloc((size_t)((row*row)*sizeof(double)));             
+     det = (double *) malloc((size_t)((col)*sizeof(double)));             
+     out = (double *) malloc((size_t)((col)*sizeof(double))); 
+     double u;
+     u =0.0;     
+          
+     for(i=0; i< nuk; i++){
+        nutmp[0] = nus[i];
+        covFormat2(cov, n, phi, nutmp, d, sig2eta, det, Qeta);
+        nudens_ar(Qeta, det, n, r, T, rT, N, XB, rho, O_l0, o, constant, out);
+        pden[i] = out[0];
+        u += out[0];
+     }     
+     free(nutmp); free(Qeta); free(det); free(out);
+
+     double *pprob, *U, *tr2;
+     pprob = (double *) malloc((size_t)((nuk)*sizeof(double)));             
+     U = (double *) malloc((size_t)((col)*sizeof(double)));
+     tr2 = (double *) malloc((size_t)((col)*sizeof(double)));             
+
+     pprob[0] = pden[0]/u;         
+
+     for(i=0; i< (nuk-1); i++){
+        pprob[i+1] = pprob[i] + pden[i+1]/u;
+     }
+     runif_val(constant, constant, U);
+     if ( U[0] >  pprob[0]){
+     i = 0 ;
+     do{
+       i = i + 1;
+       } while ( ( U[0] > pprob[i] ) & ( i< nuk - 1 ) ) ;   
+     }
+     else i=0;
+     tr2[0] = pden[i];  
+     
+     free(pprob);
+
+     double *ratio, *tr1;
+     ratio = (double *) malloc((size_t)((col)*sizeof(double)));             
+     tr1 = (double *) malloc((size_t)((col)*sizeof(double)));             
+     nudens_ar(Qeta1, det1, n, r, T, rT, N, XB, rho, O_l0, o, constant, tr1);
+     ratio[0] = exp(tr2[0] + exp(tr2[0]) - tr1[0] - exp(tr1[0]));
+     ratio_fnc(ratio, constant, U);
+     if(U[0] < ratio[0]){
+          nup[0] = nus[i];
+     }             
+     else {
+          nup[0] = nu1[0];
+     }     
+
+     free(ratio); free(tr2); free(tr1); free(pden); free(U);
+     
+     return;
+}     
+
+
+void nudens_ar(double *Qeta, double *det, int *n, int *r, int *T, int *rT, 
+     int *N, double *XB, double *rho, double *O_l0, double *o, int *constant, 
+     double *out)
+{
+     int row, col, l, i, j, r1, T1, N1, rT1;
+     row = *n;
+     col = *constant;
+     r1 = *r;
+     T1 = *T;
+     N1 = row*r1*T1;
+     rT1 = *rT;
+     
+     double *ov, *o1, *o2, *XB1;     
+     o1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
+     o2 = (double *) malloc((size_t)((row*col)*sizeof(double)));
+     ov = (double *) malloc((size_t)((row*col)*sizeof(double)));
+     XB1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
+
+     double u;
+     u = 0.0;
+     for(l=0; l < r1; l++) {
+         for(i=0; i < T1; i++) {                                
+             if(i == 0){
+                   for(j=0; j<row; j++){
+                   o2[j] = O_l0[j+l*row];
+                   }      
+             }
+             else {       
+             extract_alt2(l, i-1, n, rT, T, o, o2);
+             }
+             extract_alt2(l, i, n, rT, T, o, o1);
+             extract_alt2(l, i, n, rT, T, XB, XB1);
+             for(j=0; j < row; j++) {
+                 ov[j]=o1[j]-rho[0]*o2[j]-XB1[j];
+             }       
+             u += xTay2(ov, Qeta, ov, row);
+         }
+     }
+     free(ov); free(o1); free(o2); free(XB1);
+
+     u =  0.5 * u;
+     if(det[0] <= 0){
+        det[0] = pow(1,-320);
+     }
+     double tr;
+     tr = 0.0;        
+     tr = -0.5*rT1*log(det[0])-u; 
+     out[0] = tr;
+
+     return;
+}
 
 
 

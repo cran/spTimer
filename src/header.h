@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include <R.h>
+#include <Rmath.h>
 #include <Rinternals.h>
 
 //#define PI    3.14159265358979323846 

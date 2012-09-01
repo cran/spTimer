@@ -22,8 +22,8 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      int *nsite, int *predN, double *d12, double *predX, int *transform,
      double *accept_f, double *gof, double *penalty)    
 {
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
      
      int its1, col, i, j, n1, r1, T1, p1, N1, nr, rep1, nsite1, brin, trans1;
      its1 = *its;
@@ -42,7 +42,7 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      double *phip, *sig_ep, *sig_etap, *rhop, *betap;
      double *mu_lp, *sig_0p, *op;
      double *phi1, *sig_e1, *sig_eta1, *rho1, *beta1;
-     double *mu_l1, *sig_01, *o1;
+     double *mu_l1, *sig_01, *o1, *w;
      double *oo, *ot, *acc;
 
      double accept1, *mn_rep, *var_rep; //*tr_mn, *tr_var, 
@@ -79,7 +79,8 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      mu_l1 = (double *) malloc((size_t)((r1)*sizeof(double)));    
      sig_01 = (double *) malloc((size_t)((r1)*sizeof(double))); 
      o1 = (double *) malloc((size_t)((N1)*sizeof(double)));
-     
+     w = (double *) malloc((size_t)((N1)*sizeof(double)));
+          
      oo = (double *) malloc((size_t)((col)*sizeof(double)));
      ot = (double *) malloc((size_t)((col)*sizeof(double)));
      acc = (double *) malloc((size_t)((col)*sizeof(double)));
@@ -87,7 +88,12 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      double *zp, *anf;
      zp = (double *) malloc((size_t)((nsite1*r1*T1)*sizeof(double)));      
      anf = (double *) malloc((size_t)((nsite1*r1)*sizeof(double)));      
-          
+ 
+     double *nu, *nup;
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));
+     nup = (double *) malloc((size_t)((col)*sizeof(double)));     
+     nu[0] = 0.5;
+        
      
        ext_sige(phi, phi1);
        ext_sige(sig_e, sig_e1);
@@ -140,16 +146,16 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
        textan = fopen("OutAR_Annual_w126_Prediction.txt", "w");
      }
 
-                 
+     GetRNGstate();            
      for(i=0; i < its1; i++) {
 
      JOINT_ar(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta, shape_0,  
-     prior_a, prior_b, prior_sig, phi1, tau, phis, phik, d, constant, 
+     prior_a, prior_b, prior_sig, phi1, tau, phis, phik, nu, d, constant, 
      sig_e1, sig_eta1, sig_01, mu_l1, rho1, beta1, X, z, o1, 
-     phip, acc, sig_ep, sig_etap, rhop, betap, mu_lp, sig_0p, op);
+     phip, acc, nup, sig_ep, sig_etap, rhop, betap, mu_lp, sig_0p, op, w);
 
-     z_pr_ar(cov, nsite, n, r, rT, T, p, N, predN, d, d12, phip, sig_ep, sig_etap, 
-     sig_0p, rhop, betap, mu_lp, X, predX, op, constant, zp);
+     z_pr_ar(cov, nsite, n, r, rT, T, p, N, predN, d, d12, phip, nup, sig_ep, 
+     sig_etap, sig_0p, rhop, betap, mu_lp, X, predX, op, constant, zp);
      
      accept1 += acc[0];
 
@@ -159,13 +165,16 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      fprintf(parafile, "%f ", rhop[0]);
      fprintf(parafile, "%f ", sig_ep[0]);
      fprintf(parafile, "%f ", sig_etap[0]);
+     fprintf(parafile, "%f ", phip[0]);
+     if(cov[0]==4){
+      fprintf(parafile, "%f ", nup[0]);
+     }     
      for(j=0; j < r1; j++) {
      fprintf(parafile, "%f ", sig_0p[j]);
      }
      for(j=0; j < r1; j++) {  
      fprintf(parafile, "%f ", mu_lp[j]);
      }
-     fprintf(parafile, "%f ", phip[0]);
 
      fprintf(parafile, "\n");
 
@@ -210,7 +219,12 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      }
      fprintf(predfile, "\n");
 
+     if(cov[0]==4){
+     para_printRnu (i, its1, rep1, p1, accept1, phip, nup, rhop, sig_ep, sig_etap, betap); 
+     }                   
+     else {              
      para_printR (i, its1, rep1, p1, accept1, phip, rhop, sig_ep, sig_etap, betap); 
+     }
 
       if(i >= brin){
         annual_aggregate(aggtype, nsite, r, T, zp, anf);
@@ -222,6 +236,7 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
       } // end of loop i >= brin
 
        ext_sige(phip, phi1);
+       ext_sige(nup, nu);       
        ext_sige(sig_ep, sig_e1);
        ext_sige(sig_etap, sig_eta1);
        ext_rho(rhop, rho1); 
@@ -242,15 +257,16 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      }
 
      } // end of iteration loop
+     PutRNGstate();
 
      fclose(parafile);
      fclose(predfile);
      fclose(textan);
 
-     free(phip); free(sig_ep); free(sig_etap); free(rhop); free(betap); 
-     free(mu_lp); free(sig_0p); free(op); free(phi1); free(sig_e1); 
+     free(phip); free(nu); free(nup); free(sig_ep); free(sig_etap); free(rhop); 
+     free(betap); free(mu_lp); free(sig_0p); free(op); free(phi1); free(sig_e1); 
      free(sig_eta1); free(rho1); free(beta1); free(mu_l1); free(sig_01); 
-     free(o1); free(oo); free(ot); free(acc);    
+     free(o1); free(w); free(oo); free(ot); free(acc);    
 
      free(zp); free(anf); 
 
@@ -324,18 +340,18 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      double *tau, double *phis, int *phik, double *d, int *constant, 
      double *sig_e, double *sig_eta, double *sig_0, double *mu_l,  
      double *rho, double *beta, double *X, double *z, double *o, 
-     double *phipf, double *accept, double *sig_epf, double *sig_etapf, 
+     double *phipf, double *accept, double *nupf, double *sig_epf, double *sig_etapf, 
      double *rhopf, double *betapf, double *mu_lpf, double *sig_0pf, 
-     double *opf, double *zlt_mean_sd, double *gof, double *penalty)
+     double *opf, double *wf, double *zlt_mean_sd, double *gof, double *penalty)
 {
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
      
      int its1, brin, col, i, j, n1, r1, T1, p1, N1, nr, rep1;
      double *phip, *sig_ep, *sig_etap, *rhop, *betap;
      double *mu_lp, *sig_0p, *op;
      double *phi1, *sig_e1, *sig_eta1, *rho1, *beta1;
-     double *mu_l1, *sig_01, *o1;
+     double *mu_l1, *sig_01, *o1, *w;
      double *z1, *oo, *ot, *acc;
 
     
@@ -375,11 +391,17 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      mu_l1 = (double *) malloc((size_t)((r1)*sizeof(double)));    
      sig_01 = (double *) malloc((size_t)((r1)*sizeof(double))); 
      o1 = (double *) malloc((size_t)((N1)*sizeof(double)));
-     
+     w = (double *) malloc((size_t)((N1)*sizeof(double)));
+          
      z1 = (double *) malloc((size_t)((N1)*sizeof(double)));
      oo = (double *) malloc((size_t)((col)*sizeof(double)));
      ot = (double *) malloc((size_t)((col)*sizeof(double)));
      acc = (double *) malloc((size_t)((col)*sizeof(double)));
+
+     double *nu, *nup;
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));
+     nup = (double *) malloc((size_t)((col)*sizeof(double)));     
+     nu[0] = 0.5;
                
        ext_sige(phi, phi1);
        ext_sige(sig_e, sig_e1);
@@ -402,18 +424,20 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
           z1[j] = z1[j];
           }     
      }
-       
+
+     GetRNGstate();       
      for(i=0; i < its1; i++) {
 
      JOINT_ar(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta, shape_0,  
-     prior_a, prior_b, prior_sig, phi1, tau, phis, phik, d, constant, 
+     prior_a, prior_b, prior_sig, phi1, tau, phis, phik, nu, d, constant, 
      sig_e1, sig_eta1, sig_01, mu_l1, rho1, beta1, X, z1, o1, 
-     phip, acc, sig_ep, sig_etap, rhop, betap, mu_lp, sig_0p, op);
+     phip, acc, nup, sig_ep, sig_etap, rhop, betap, mu_lp, sig_0p, op, w);
      
      accept1 += acc[0];
      
 
      phipf[i] = phip[0];
+     nupf[i] = nup[0];     
      sig_epf[i] = sig_ep[0];
      sig_etapf[i] = sig_etap[0];
      rhopf[i] = rhop[0];
@@ -428,9 +452,11 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      }
      for(j=0; j < N1; j++) {
          opf[j+i*N1] = op[j];     
+         wf[j+i*N1] = w[j];     
      }
 
        ext_sige(phip, phi1);
+       ext_sige(nup, nu);       
        ext_sige(sig_ep, sig_e1);
        ext_sige(sig_etap, sig_eta1);
        ext_rho(rhop, rho1); 
@@ -462,9 +488,17 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      }
 
     
+     if(cov[0]==4){
+     para_printRnu (i, its1, rep1, p1, accept1, phip, nup, rhop, sig_ep, sig_etap, betap); 
+     }                   
+     else {              
      para_printR (i, its1, rep1, p1, accept1, phip, rhop, sig_ep, sig_etap, betap); 
+     }
+
+
 
      } // end of iteration loop
+     PutRNGstate();
      
      accept[0] = accept1;
 
@@ -502,10 +536,10 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      gof[0] = go;
      penalty[0] = pen;
           
-     free(phip); free(sig_ep); free(sig_etap); free(rhop); free(betap); 
-     free(mu_lp); free(sig_0p); free(op);
+     free(phip); free(nu); free(nup); free(sig_ep); free(sig_etap); free(rhop); 
+     free(betap); free(mu_lp); free(sig_0p); free(op);
      free(phi1); free(sig_e1); free(sig_eta1); free(rho1); free(beta1); 
-     free(mu_l1); free(sig_01); free(o1); 
+     free(mu_l1); free(sig_01); free(o1); free(w);
      free(z1); free(oo); free(ot); free(acc);
          
      return;

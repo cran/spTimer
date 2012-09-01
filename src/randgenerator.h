@@ -8,7 +8,7 @@
 /*****************************************************************************/
 
 double drand48 (void);
-double runif(int constant);
+double myrunif(int constant);
 double rexpon (double scale);
 double rnormal(double mu, double sigma);
 double rgammaa (double shape, double rate);

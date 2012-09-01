@@ -12,7 +12,7 @@ void ratio_fnc(double *ratio, int *constant, double *U)
 {
      if(ratio[0] < 1.0){
          ratio[0] = ratio[0];
-     }                 
+     }
      else {
           ratio[0] = 1.0;
      }     
@@ -124,6 +124,20 @@ void test_RW(int *its, int *constant)
    return;    
 }
 
+
+// test in R
+void test(int *i, int *its, int *burnin, double *x, double *alt)
+{
+     int j, its1, burn1, i1;
+     i1 =*i;
+     its1 = *its;
+     burn1 = *burnin;
+     for(j=0; j<(its1-burn1); j++){
+        alt[j] = x[j+burn1+i1*its1];
+     }
+     return;
+}         
+
 */
 
 // to print in the R interface for GP models
@@ -156,6 +170,37 @@ void GP_para_printR (int i, int iteration, int report, int p, double accept,
     }
     return;
 }    
+// to print in the R interface for GP models
+void GP_para_printRnu (int i, int iteration, int report, int p, double accept, 
+     double *phi, double *nu, double *sig2e, double *sig2eta, double *beta) 
+{
+    int j, k;
+    double phi1, nu1, sig2e1, sig2eta1, x, intpart, fractional, ii;
+    phi1 = *phi;
+    nu1 =*nu;
+    sig2e1 = *sig2e;
+    sig2eta1 = *sig2eta;
+
+    x =  (iteration/report); 
+    fractional = modf(x, &intpart);
+
+    for(j=0; j<report; j++){
+    if(i==(intpart*(j+1)-1)){
+      ii = (double) i;
+      Rprintf("---------------------------------------------------------------\n");
+      Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
+      i+1, iteration, 100.0*(i+1)/iteration, 100.0*(accept/ii));
+      Rprintf(" Checking Parameters: \n");
+      Rprintf("   phi: %4.4f, nu: %4.4f, sig2eps: %4.4f, sig2eta: %4.4f\n", 
+      phi1, nu1, sig2e1, sig2eta1);
+      for(k=0; k<p; k++){
+      Rprintf("   beta[%d]: %4.4f", k+1, beta[k]);
+      }
+      Rprintf("\n---------------------------------------------------------------\n");
+    }
+    }
+    return;
+}
 
 
 // to print in the R interface for AR and GPP
@@ -190,6 +235,38 @@ void para_printR (int i, int iteration, int report, int p, double accept,
     return;
 }    
 
+// to print in the R interface for AR and GPP
+void para_printRnu (int i, int iteration, int report, int p, double accept, 
+     double *phi, double *nu, double *rho, double *sig2e, double *sig2eta, double *beta) 
+{
+    int j, k;
+    double phi1, nu1, rho1, sig2e1, sig2eta1, x, intpart, fractional, ii;
+    phi1 = *phi;
+    nu1=*nu;
+    rho1 = *rho;
+    sig2e1 = *sig2e;
+    sig2eta1 = *sig2eta;
+
+    x =  (iteration/report); 
+    fractional = modf(x, &intpart);
+
+    for(j=0; j<report; j++){
+    if(i==(intpart*(j+1)-1)){
+      ii = (double) i;
+      Rprintf("---------------------------------------------------------------\n");
+      Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
+      i+1, iteration, 100.0*(i+1)/iteration, 100.0*(accept/ii));
+      Rprintf(" Checking Parameters: \n");
+      Rprintf("   phi: %4.4f, nu: %4.4f, rho: %4.4f, sig2eps: %4.4f, sig2eta: %4.4f\n", 
+      phi1, nu1, rho1, sig2e1, sig2eta1);
+      for(k=0; k<p; k++){
+      Rprintf("   beta[%d]: %4.4f", k+1, beta[k]);
+      }
+      Rprintf("\n---------------------------------------------------------------\n");
+    }
+    }
+    return;
+}    
 
 void para_print_spTR (int i, int iteration, int report, int p, double accept, 
      double *phi, double *sig2e, double *sig2eta, double *beta) 
@@ -264,18 +341,6 @@ void ext_sumstat_burnin(int i, int *its, int *burnin, double *x, double *alt)
      }
      return;
 }         
-// test in R
-void test(int *i, int *its, int *burnin, double *x, double *alt)
-{
-     int j, its1, burn1, i1;
-     i1 =*i;
-     its1 = *its;
-     burn1 = *burnin;
-     for(j=0; j<(its1-burn1); j++){
-        alt[j] = x[j+burn1+i1*its1];
-     }
-     return;
-}         
 
 
 // Used in predictioin_xb_ar
@@ -309,6 +374,34 @@ void extract_X(int t, int l, int *n, int *r, int *T, int *p,
      return;
 }            
 
+// Used in fm
+// extract p x T into p x 1 matrix
+void extract_beta_t(int t, int *T, int *p, double *beta, double *alt)
+{
+     int i, k, T1, p1;
+     p1=*p;
+     T1=*T;
+     
+     for(i=0; i< p1; i++){
+        k = i + t*T1;
+        alt[k] = beta[k];
+     }      
+     return;
+}
+
+// extract p x r into p x 1 matrix
+void extract_beta_l(int l, int *r, int *p, double *beta, double *alt)
+{
+     int i, k, r1, p1;
+     p1=*p;
+     r1=*r;
+     
+     for(i=0; i< p1; i++){
+        k = i + l*r1;
+        alt[k] = beta[k];
+     }      
+     return;
+}
     
 // Used in forecast_xb_ar
 // extract the nrT x P covariates into nr x p matrix

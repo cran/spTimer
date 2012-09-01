@@ -18,7 +18,8 @@ spT.prediction(nBurn, pred.data, pred.coords, posteriors,
 %\item{fitted.X}{Optional: To provide covariate values for the fitted sites.}
 }
 \value{
-\item{predicted.samples}{Predicted MCMC samples.}
+\item{pred.samples}{Predicted MCMC samples.}
+\item{pred.coords}{Prediction coordinates.}
 \item{distance.method}{Name of the distance calculation method.}.
 \item{Distance.matrix.pred}{The distance matrix for the prediction locations.}
 \item{cov.fnc}{Name of the covariance function used in models.}
@@ -32,7 +33,7 @@ spT.prediction(nBurn, pred.data, pred.coords, posteriors,
 \item{model}{The model method used for prediction.}
 }
 \seealso{
-\code{\link{spT.Gibbs}}, \code{\link{spT.forecast}}.
+\code{\link{predict.spT}}, \code{\link{spT.Gibbs}}, \code{\link{spT.forecast}}.
 }
 \examples{
 \dontrun{
@@ -46,199 +47,172 @@ spT.prediction(nBurn, pred.data, pred.coords, posteriors,
 ## Prediction for GP models
 ##
 
-# define prediction coordinates and variables
-pred.coords<-as.matrix(val.site[,2:3])
+# Read data
+data(DataValPred)
+
+# Define prediction coordinates
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 
 # GP prediction
-pred.gp <- spT.prediction(nBurn=100, pred.data=val.dat, 
+set.seed(11)
+pred.gp <- spT.prediction(nBurn=2000, pred.data=DataValPred, 
          pred.coords, posteriors=post.gp, tol.dist=2, 
          Summary=TRUE)
-
+print(pred.gp)
 names(pred.gp)
 
 # validation criteria and plots
-spT.validation(val.dat$o8hrmax,c(pred.gp$Mean)) # 
-spT.pCOVER(val.dat$o8hrmax,c(pred.gp$Up),c(pred.gp$Low)) #
-spT.segment.plot(val.dat$o8hrmax,c(pred.gp$Mean),
+spT.validation(DataValPred$o8hrmax,c(pred.gp$Mean)) # 
+spT.pCOVER(DataValPred$o8hrmax,c(pred.gp$Up),c(pred.gp$Low)) #
+spT.segment.plot(DataValPred$o8hrmax,c(pred.gp$Mean),
       c(pred.gp$Up),c(pred.gp$Low))
 abline(a=0,b=1)
 
-
 ##
-## Fit and Prediction simultaneously
+## Fit and spatially prediction simultaneously
 ##
 
+# Read data 
+data(DataFit); 
+data(DataValPred)
 
-pred.coords<-as.matrix(val.site[,2:3])
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 
-coords<-as.matrix(fit.site[,2:3])
-time.data<-spT.time(t.series=61,segment=1)
+# MCMC via Gibbs will provide output in *.txt format  
+# from C routine to avoide large data problem in R
+set.seed(11)
+post.gp.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="GP", coords=coords, 
+         newcoords=pred.coords, newdata=DataValPred,
+         scale.transform="SQRT")
+print(post.gp.fitpred)
+summary(post.gp.fitpred)
+coef(post.gp.fitpred)
+plot(post.gp.fitpred,residuals=TRUE)
 
-priors<-spT.priors(model="GP",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
-initials<-spT.initials(model="GP", sig2eps=0.01, 
-            sig2eta=0.5, beta=NULL, phi=0.001)
+names(post.gp.fitpred)
 
-# input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.08)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
-
-nItr<-5000 
-
-# MCMC via Gibbs
-post.gp.fit.pred <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=fit.dat, model="GP", time.data=time.data, 
-         coords=coords, pred.coords=pred.coords, pred.data=val.dat,
-         priors=priors, initials=initials, 
-         nItr=nItr, nBurn=1000, report=nItr, 
-         tol.dist=2, distance.method="geodetic:km", 
-         cov.fnc="exponential", scale.transform="SQRT", 
-         spatial.decay=spatial.decay,
-         annual.aggregation="NONE")
-
-names(post.gp.fit.pred)
-
-post.gp.fit.pred$parameter
-
+# validation criteria
+spT.validation(DataValPred$o8hrmax,c(post.gp.fitpred$prediction[,1]))  
 
 ###########################
 ## The AR models:
 ###########################
 
-
 ##
 ## Prediction for AR models
 ##
 
-# define prediction coordinates and variables
-pred.coords<-as.matrix(val.site[,2:3])
+# Read data
+data(DataValPred)
+
+# Define prediction coordinates
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 
 # AR prediction
-pred.ar <- spT.prediction(nBurn=100, pred.data=val.dat, 
+set.seed(11)
+pred.ar <- spT.prediction(nBurn=100, pred.data=DataValPred, 
          pred.coords=pred.coords, 
          posteriors=post.ar, tol.dist=2, Summary=TRUE)
-
-names(pred.ar)
+print(pred.ar)
 
 # validation criteria and plots
-spT.validation(val.dat$o8hrmax,c(pred.ar$Mean)) # 
-spT.pCOVER(val.dat$o8hrmax,c(pred.ar$Up),c(pred.ar$Low)) # 
-spT.segment.plot(val.dat$o8hrmax,c(pred.ar$Mean),
+spT.validation(DataValPred$o8hrmax,c(pred.ar$Mean)) # 
+spT.pCOVER(DataValPred$o8hrmax,c(pred.ar$Up),c(pred.ar$Low)) # 
+spT.segment.plot(DataValPred$o8hrmax,c(pred.ar$Mean),
       c(pred.ar$Up),c(pred.ar$Low))
 abline(a=0,b=1)
 
-
 ##
-## fit and predict combinedly for AR models with text output
+## Fit and spatially prediction simultaneously
 ##
 
-pred.coords<-as.matrix(val.site[,2:3])
+# Read data 
+data(DataFit); 
+data(DataValPred)
 
-coords<-as.matrix(fit.site[,2:3])
-time.data<-spT.time(t.series=61,segment=1)
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 
-priors<-spT.priors(model="AR",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
+# MCMC via Gibbs will provide output in *.txt format  
+# from C routine to avoide large data problem in R
+set.seed(11)
+post.ar.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="AR", coords=coords, 
+         newcoords=pred.coords, newdata=DataValPred,
+         scale.transform="SQRT")
+print(post.ar.fitpred)
+summary(post.ar.fitpred)
+coef(post.ar.fitpred)
 
-initials<-spT.initials(model="AR", sig2eps=0.01, 
-            sig2eta=0.5, beta=NULL, phi=0.001)
+names(post.ar.fitpred)
 
-# input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.08)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
-
-nItr<-500
-nBurn<-100
-
-# MCMC via Gibbs
-post.ar.fit.pred <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=fit.dat, model="AR", time.data=time.data, 
-         coords=coords, pred.coords=pred.coords, pred.data=val.dat,
-         priors=priors, initials=initials, 
-         nItr=nItr, nBurn=nBurn, report=nItr, 
-         tol.dist=2, distance.method="geodetic:km", 
-         cov.fnc="exponential", scale.transform="SQRT", 
-         spatial.decay=spatial.decay,
-         annual.aggregation="an4th")
-
-names(post.ar.fit.pred)
-
-post.ar.fit.pred$para
-
+# validation criteria
+spT.validation(DataValPred$o8hrmax,c(post.ar.fitpred$prediction[,1]))  
 
 ###########################
-## Models with GPP approximations:
+## The GPP approximations models:
 ###########################
-
 
 ##
 ## prediction for the GPP
 ##
 
-# define prediction coordinates and variables
-pred.coords<-as.matrix(val.site[,2:3])
+# Read data
+data(DataValPred)
+
+# Define prediction coordinates
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 
 # GPP prediction
-pred.gpp <- spT.prediction(nBurn=100, pred.data=val.dat, 
+set.seed(11)
+pred.gpp <- spT.prediction(nBurn=100, pred.data=DataValPred, 
        pred.coords=pred.coords, posteriors=post.gpp, tol.dist=2, 
        Summary=TRUE)
  
 names(pred.gpp)
 
-
 # validation criteria and plots
-spT.validation(val.dat$o8hrmax,c(pred.gpp$Mean)) #
-spT.pCOVER(val.dat$o8hrmax,c(pred.gpp$Up),c(pred.gpp$Low)) #
-spT.segment.plot(val.dat$o8hrmax,c(pred.gpp$Mean),
+spT.validation(DataValPred$o8hrmax,c(pred.gpp$Mean)) #
+spT.pCOVER(DataValPred$o8hrmax,c(pred.gpp$Up),c(pred.gpp$Low)) #
+spT.segment.plot(DataValPred$o8hrmax,c(pred.gpp$Mean),
       c(pred.gpp$Up),c(pred.gpp$Low))#,limit=c(0,100))
 abline(a=0,b=1)
 
-
 ##
-## fit and predict together for the GPP with text output
+## Fit and spatially prediction simultaneously
 ##
 
-pred.coords<-as.matrix(val.site[,2:3])
+# Read data 
+data(DataFit); 
+data(DataValPred)
 
-coords<-as.matrix(fit.site[,2:3])
+# Define the coordinates
+coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 knots.coords<-spT.grid.coords(Longitude=c(max(coords[,1]),
               min(coords[,1])),Latitude=c(max(coords[,2]),
               min(coords[,2])), by=c(4,4))
-time.data<-spT.time(t.series=61,segment=1)
 
-priors<-spT.priors(model="GPP",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
-#priors<-NULL
-initials<-spT.initials(model="GPP", sig2eps=0.01, 
-            sig2eta=0.5, beta=NULL, phi=0.001)
-#initials<-NULL
+# MCMC via Gibbs will provide output in *.txt format  
+# from C routine to avoide large data problem in R
+set.seed(11)
+post.gpp.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="GP", coords=coords, knots.coords=knots.coords,
+         newcoords=pred.coords, newdata=DataValPred,
+         scale.transform="SQRT")
+print(post.gpp.fitpred)
+summary(post.gpp.fitpred)
+coef(post.gpp.fitpred)
+plot(post.gpp.fitpred, residuals=TRUE)
 
-# input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.0008)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.001,0.002),segments=5)
+names(post.gpp.fitpred)
 
-
-nItr<-500 
-
-# MCMC via Gibbs
-post.gpp.fit.pred <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=fit.dat, model="GPP", time.data=time.data, 
-         coords=coords, knots.coords=knots.coords,
-         pred.coords=pred.coords, pred.data=val.dat,
-         priors=priors, initials=initials, 
-         nItr=nItr, nBurn=100, report=nItr, 
-         tol.dist=2, distance.method="geodetic:km", 
-         cov.fnc="exponential", scale.transform="SQRT", 
-         spatial.decay=spatial.decay,
-         annual.aggregation="NONE")
-
-names(post.gpp.fit.pred)
-
-post.gpp.fit.pred$para
-
+# validation criteria
+spT.validation(DataValPred$o8hrmax,c(post.gpp.fitpred$prediction[,1]))  
 
 ##
 }

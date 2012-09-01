@@ -19,9 +19,14 @@ void test_RW(int *its, int *constant);
 
 void GP_para_printR (int i, int iteration, int report, int p, double accept, 
      double *phi, double *sig2e, double *sig2eta, double *beta);
+void GP_para_printRnu (int i, int iteration, int report, int p, double accept, 
+     double *phi, double *nu, double *sig2e, double *sig2eta, double *beta);
      
 void para_printR (int i, int iteration, int report, int p, double accept, 
      double *phi, double *rho, double *sig2e, double *sig2eta, double *beta);
+void para_printRnu (int i, int iteration, int report, int p, double accept, 
+     double *phi, double *nu, double *rho, double *sig2e, double *sig2eta, 
+     double *beta);
 
 void para_print_spTR (int i, int iteration, int report, int p, double accept, 
      double *phi, double *sig2e, double *sig2eta, double *beta);
@@ -37,6 +42,8 @@ void extn_12(int j, int *n, double *S_12, double *S_12c);
 void extract_X(int t, int l, int *n, int *r, int *T, int *p, 
      double *x, double *alt);
 
+void extract_beta_t(int t, int *T, int *p, double *beta, double *alt);
+void extract_beta_l(int l, int *r, int *p, double *beta, double *alt);
 
 void extract_X5(int t, int *n, int *r, int *T, int *p, double *x, double *alt);
 void extract_X4(int i, int l, int *n, int *r, int *p, double *x, double *alt);

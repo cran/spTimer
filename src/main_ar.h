@@ -22,9 +22,9 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      double *tau, double *phis, int *phik, double *d, int *constant, 
      double *sig_e, double *sig_eta, double *sig_0, double *mu_l,  
      double *rho, double *beta, double *X, double *z, double *o, 
-     double *phipf, double *accept, double *sig_epf, double *sig_etapf, 
+     double *phipf, double *accept, double *nupf, double *sig_epf, double *sig_etapf, 
      double *rhopf, double *betapf, double *mu_lpf, double *sig_0pf, 
-     double *opf, double *zlt_mean_sd, double *gof, double *penalty);
+     double *opf, double *wf, double *zlt_mean_sd, double *gof, double *penalty);
 
 
   
@@ -36,14 +36,16 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
      int *cov, int *spdecay,
      double *shape_e, double *shape_eta, double *shape_0,  
      double *prior_a, double *prior_b, double *prior_sig, double *phi, 
-     double *tau, double *phis, int *phik, double *d, int *constant, 
+     double *tau, double *phis, int *phik, double *nu, double *d, int *constant, 
      double *sig_e, double *sig_eta, 
      double *sig_l0, double *mu_l,  
      double *rho, double *beta, double *X, double *z, double *o, 
-     double *phip, double *accept,
+     double *phip, double *nup, double *accept,
      double *sig_ep, double *sig_etap, double *rhop, double *betap, 
-     double *mu_lp, double *sig_l0p, double *op);
+     double *mu_lp, double *sig_l0p, double *op, double *w);
      
+void w_ar(int *n, int *r, int *T, int *rT, int *p, double *O_l0, 
+     double *X, double *o, double *thetap, int *constant, double *w);
 
 void sig2_ar(int *n, int *r,  int *T, int *rT, int *p,
      double *shape_e, double *shape_eta, double *prior_b, 
@@ -81,7 +83,6 @@ void Z_fitfnc(int *its, int *N, double *sig_ep, double *o_p,
                 int *constant, double *z_p);
 
 
-/************************** From "olt_ar.c" file *****************************/
 /*****************************************************************************/
 
 void o0_ar(int *n, int *r, int *T, int *rT, int *p, double *sig_eta, 
@@ -94,7 +95,6 @@ void o_ar(int *n, int *r, int *T, int *rT, int *p, double *sig_e,
      int *constant, double *opost);
           
 
-/*********************** From "phiratio_ar.c" file ***************************/
 /*****************************************************************************/
 
 void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
@@ -105,7 +105,7 @@ void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
      int *constant, double *accept, double *phip);
 
 void phi_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi1, 
-     double *phis, int *phik, int *n, int *r, int *T, int *rT, int *N, 
+     double *phis, int *phik, double *nu, int *n, int *r, int *T, int *rT, int *N, 
      double *prior_a, double *prior_b, double *d, double *sig2eta, 
      double *rho, double *mu_l, double *O_l0, double *XB, double *o, 
      int *constant, double *accept, double *phip);
@@ -114,6 +114,15 @@ void phidens_ar(double *phi, double *Qeta, double *det, int *n, int *r,
      int *T, int *rT, int *N, double *prior_a, double *prior_b, double *XB, 
      double *rho, double *O_l0, double *o, int *constant, double *out);
 
+void nu_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi1, double *nu, 
+     int *n, int *r, int *T, int *rT, int *N, double *d, double *sig2eta, 
+     double *rho, double *mu_l, double *O_l0, double *XB, double *o, 
+     int *constant, double *nup);
+
+void nudens_ar(double *Qeta, double *det, int *n, int *r, int *T, int *rT, 
+     int *N, double *XB, double *rho, double *O_l0, double *o, int *constant, 
+     double *out);
+     
 /******************* From "dic_ar.c" file **************************/
 /*****************************************************************************/
 
@@ -128,12 +137,12 @@ void deviance_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
 
 void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT, 
      int *T, int *p, int *N, int *valN, double *d, double *d12, 
-     double *phip, double *sig_ep, double *sig_etap, double *sig_0p, 
-     double *rhop, double *betap, double *mu_lp,   
+     double *phip, double *nup, double *sig_ep, double *sig_etap, double *sig_l0p, 
+     double *rhop, double *betap, double *mu_lp,  
      double *X, double *valX, double *op, int *constant, double *zpred);
 
 void z_pr_ar(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p, 
-     int *N, int *valN, double *d, double *d12, double *phip, 
+     int *N, int *valN, double *d, double *d12, double *phip, double *nup,
      double *sig_ep, double *sig_etap, double *sig_l0p, double *rhop, 
      double *betap, double *mu_lp,  double *X, double *valX,
      double *op, int *constant, double *zpred);
@@ -144,15 +153,16 @@ void z_pr_ar(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
 
 void zlt_fore_ar_its_anysite(int *cov, int *its, int *K, int *nsite, int *n, 
      int *r, int *p, int *rT, int *T, int *rK, int *nrK, double *d, double *d12,
-     double *phip, double *sig_ep, double *sig_etap, double *rhop, 
-     double *foreX, double *betap, double *zpred_exist, int *constant, 
-     double *foreZ);
+     double *phip, double *nup, double *sig_ep, double *sig_etap, double *rhop, 
+     double *foreX, double *betap, double *zpred_exist, double *wp, 
+     int *constant, double *foreZ);
 
 void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p, 
      int *rT, int *T, int *rK, int *nrK, double *d, double *d12, 
-     double *phi, double *sig_e, double *sig_eta, double *rho, 
-     double *foreX, double *beta, double *z, int *constant, double *foreZ);
-
+     double *phi, double *nu, double *sig_e, double *sig_eta, double *rho, 
+     double *foreX, double *beta, double *z, double *w, 
+     int *constant, double *foreZ);
+     
 /////////////////////////////////////////////////////////////////////////////////
 
 

@@ -19,7 +19,7 @@
 
 void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m, 
      int *r, int *p, int *rT, int *T, int *rK, int *nrK, double *dnm, double *dm, 
-     double *phip, 
+     double *phip, double *nup,  
      double *sig_ep, double *sig_etap, double *betap, double *rhop, double *wp, 
      double *foreX, int *constant, double *foreZ)
 {
@@ -33,11 +33,12 @@ void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m,
      p1 =*p;
      col =*constant;     
 
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
 
-     double *phi, *sig_e, *sig_eta, *rho, *beta, *w, *fZ;
+     double *phi, *nu, *sig_e, *sig_eta, *rho, *beta, *w, *fZ;
      phi = (double *) malloc((size_t)((col)*sizeof(double)));       
+     nu = (double *) malloc((size_t)((col)*sizeof(double)));            
      sig_e = (double *) malloc((size_t)((col)*sizeof(double)));       
      sig_eta = (double *) malloc((size_t)((col)*sizeof(double)));       
      rho = (double *) malloc((size_t)((col)*sizeof(double)));       
@@ -45,10 +46,16 @@ void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m,
      w = (double *) malloc((size_t)((m1*r1*T1)*sizeof(double)));       
      fZ = (double *) malloc((size_t)((n1*r1*K1*col)*sizeof(double)));       
      
-     
+     GetRNGstate();     
      for(i=0; i<its1; i++){
 
-     phi[0] = phip[i];         
+     phi[0] = phip[i];  
+         if(cov[0]==4){
+           nu[0] = nup[i];
+         }
+         else{
+           nu[0] = 0.0;
+         }
      sig_e[0] = sig_ep[i];
      sig_eta[0] = sig_etap[i];
      rho[0] = rhop[i];
@@ -59,7 +66,7 @@ void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m,
         w[j] = wp[j+i*m1*r1*T1];
      }            
               
-     zlt_fore_gpp(cov, K, n, m, r, p, rT, T, rK, nrK, dnm, dm, phi, sig_e, sig_eta, 
+     zlt_fore_gpp(cov, K, n, m, r, p, rT, T, rK, nrK, dnm, dm, phi, nu, sig_e, sig_eta, 
      beta, rho, w, foreX, constant, fZ);
     
      for(j=0; j < n1*r1*K1; j++){       
@@ -67,8 +74,9 @@ void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m,
      }
           printR(i, its1); 
      }// end of iteration loop
-
-     free(phi); free(sig_e); free(sig_eta);
+     PutRNGstate();
+     
+     free(phi); free(nu); free(sig_e); free(sig_eta);
      free(rho); free(beta); free(w); free(fZ);
      
      return;
@@ -77,7 +85,7 @@ void zlt_fore_gpp_its(int *cov, int *its, int *K, int *n, int *m,
 
 // K-step Forecasts without its
 void zlt_fore_gpp(int *cov, int *K, int *n, int *m, int *r, int *p, int *rT, int *T, 
-     int *rK, int *nrK, double *dnm, double *dm, double *phi, double *sig_e, 
+     int *rK, int *nrK, double *dnm, double *dm, double *phi, double *nu, double *sig_e, 
      double *sig_eta, double *beta, double *rho, double *wp, double *foreX, 
      int *constant, double *foreZ)
 { 
@@ -111,7 +119,8 @@ void zlt_fore_gpp(int *cov, int *K, int *n, int *m, int *r, int *p, int *rT, int
      C12c = (double *) malloc((size_t)((m1*col)*sizeof(double)));       
      s21 = (double *) malloc((size_t)((col)*sizeof(double)));       
      sig = (double *) malloc((size_t)((col)*sizeof(double)));       
-     
+
+/*     
       // exponential covariance
       if(cov[0] == 1){
         for(i = 0; i < (m1*m1); i++){
@@ -174,6 +183,9 @@ void zlt_fore_gpp(int *cov, int *K, int *n, int *m, int *r, int *p, int *rT, int
           C[i] = (1.0+phi[0]*dnm[i])*exp(-1.0*phi[0]*dnm[i]);        
         }
       }
+*/
+    covF(cov, m, m, phi, nu, dm, S);
+    covF(cov, n, m, phi, nu, dnm, C);
 
    MInv(S, S, m, det); // m x m
    MProd(S, m, m, C, n, A);  // n x m
