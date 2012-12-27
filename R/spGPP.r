@@ -1345,7 +1345,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
 
            tmp<-read.table('OutGPP_Stats_PredValue.txt', sep=',',header=FALSE)
            names(tmp)<- c("Mean","SD")
-           out$pred<-round(tmp, 4)
+           out$prediction<-round(tmp, 4)
            tmp<-NULL
 #
        if(annual.aggregation=="ave"){

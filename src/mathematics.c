@@ -505,7 +505,7 @@ void GeoDist_miles(int *n, double *Lat, double *Long, double *out)
         if(u > 1.0){
         tmp = 0.0;
         }
-        if(u < -1.0){
+        else if(u < -1.0){
         tmp = 0.0;
         }
         else{     
@@ -547,7 +547,7 @@ void GeoDist_km(int *n, double *Lat, double *Long, double *out)
         if(u > 1.0){
         tmp = 0.0;
         }
-        if(u < -1.0){
+        else if(u < -1.0){
         tmp = 0.0;
         }
         else{     

@@ -1,10 +1,10 @@
-42e6853a90faa36d5271ae29752509d7 *DESCRIPTION
-8739afba42a3c44c4bccba91e5def0fc *NAMESPACE
+97a859bc64ef7f5221fa890b51389103 *DESCRIPTION
+71224eb98fba7e00b5a767be56052326 *NAMESPACE
 7a467d162994173fbe3a76b783c5556c *R/spAR.r
 796e6f640fb88fa1904ff356c82d297d *R/spGP.r
-9b2e2d6f38f5de071af56693215d1cf5 *R/spGPP.r
+5ca59098251e17d7704764315152186d *R/spGPP.r
 bd353a2d8554b55d51c6651939cdf494 *R/spTfnc.R
-18173395acb1524710b9203de4561b6d *R/spTimer.R
+5e2bb8aa20df991b64f31cabd73d526e *R/spTimer.R
 95c659bca3ff8b22a369e8ebff6726fe *R/useful_commands.R
 ab7298dfae1d14eef735b272183cdba1 *data/DataFit.txt.gz
 5f00cbc7f3f8d291832e1805cfe0da44 *data/DataFitFore.txt.gz
@@ -56,7 +56,7 @@ e02dd75c81e88de9d1c64c95890a4b5d *src/header.h
 c4cf035999a50a87282409b9664e691e *src/main_ar.h
 a226445c6fb3a2b19446318e1916c515 *src/main_gp.h
 3a85ab6580ffd78b9a757f87e67a48b1 *src/main_gpp.h
-fd3ff5b54a9fedfdc5ee30f47f522487 *src/mathematics.c
+ac202b65b19912c88570d920beba073d *src/mathematics.c
 e2b3f132ac3e5a7d071edb960178c872 *src/mathematics.h
 c0f5cbab79129081541e009cb2610d82 *src/prediction_xb_ar.c
 8d5b16d6a986963882d38be8ae2fc7ad *src/prediction_xb_gp.c
