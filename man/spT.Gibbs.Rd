@@ -106,7 +106,7 @@ OutGPP_Annual_4th_Highest_Prediction.txt: (nItr x (predsites*r)) matrix. \cr
 %\note{
 %}
 \seealso{
-\code{\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{spT.MCMC.stat}, \link{spT.MCMC.plot}, \link{predict.spT}, \link{spT.prediction}, \link{spT.forecast}}.
+\code{\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{summary.spT}, \link{plot.spT}, \link{predict.spT}, \link{spT.prediction}, \link{spT.forecast}}.
 }
 \examples{
 \dontrun{

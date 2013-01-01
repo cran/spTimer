@@ -15,7 +15,7 @@ spT.segment.plot(obs, est, up, low, limit = NULL)
 \item{limit}{x-axis and y-axis limits.}
 }
 \seealso{
-\code{\link{spT.MCMC.plot}, \link{spT.MCMC.stat}}.
+\code{\link{summary.spT}, \link{plot.spT}}.
 }
 \examples{
 \dontrun{

@@ -15,6 +15,8 @@ spT.validation(z, zhat)
 \item{VMSE}{Validation Mean Squared Error.}
 \item{RMSE}{Root Mean Squared Error.}
 \item{MAE}{Mean Absolute Error.}
+%\item{MAPE}{Mean Absolute Percentage Error.}
+%\item{BIAS}{Bias.}
 \item{rBIAS}{Relative Bias.}
 \item{rMSEP}{Relative Mean Separation.}
 }

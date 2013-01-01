@@ -1,3 +1,7 @@
+
+####################################################################################
+
+
 library(coda)
 
 
@@ -21,36 +25,3 @@ library(coda)
 
 
 ####################################################################################
-
-#.onAttach <-
-#    function(libname, pkgname)
-#{
-#	library.dynam(pkgname, pkgname, lib.loc=libname)
-#}
-#.First.lib <-
-#    function(libname, pkgname)
-#{
-#	## figureout this year automatically
-#	#this.year <- substr(as.character(Sys.Date()),1,4)
-#
-#	## output to screen
-#	#cat("##\n## Spatio-Temporal Bayesian Modelling using R \n")
-#	#cat("## 2010-", this.year, 
-#	#	", License: GPL\n##\n", sep="")
-#	#library.dynam(pkgname, pkgname, lib.loc=libname)
-#	library.dynam("coda", pkgname, lib.loc=libname)
-#}
-#.onLoad <-
-#    function(libname, pkgname)
-#{
-#	## figureout this year automatically
-#	this.year <- substr(as.character(Sys.Date()),1,4)
-#
-#	## output to screen
-#	cat("##\n## Spatio-Temporal Bayesian Modelling using R \n")
-#	cat("## 2010-", this.year, 
-#		", License: GPL\n##\n", sep="")
-#	#cat("##\n## Spatio-Temporal Bayesian Modelling using R \n##\n")
-#	library.dynam(pkgname, pkgname, lib.loc=libname)
-#}
-

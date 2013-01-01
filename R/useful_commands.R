@@ -519,13 +519,14 @@ spT.geo_dist <- function(points)
 ##
 ## To keep the long lat positions based on tol.dist
 ##
- spT.keep.morethan.dist <- function(long.lat, tol.dist=100)  
+ spT.keep.morethan.dist <- function(coords, tol.dist=100)  
 {
  #
- # long.lat must have two columns named long and lat 
+ # coords must have two columns named long and lat 
  #
-   a <- long.lat
-   n <- nrow(long.lat)
+   a <- as.data.frame(coords)
+   names(a) <- c("long","lat")
+   n <- nrow(coords)
    c1 <- rep(1:n, each=n)
    c2 <- rep(1:n, n)
    b <- matrix(NA, nrow=n, ncol=n)
@@ -544,7 +545,7 @@ spT.geo_dist <- function(points)
    w <- ubmat[v<tol.dist, ]
 
    z <- unique(w[,1])
-   a <- long.lat[-z,  ]
+   a <- coords[-z,  ]
    a
 }
 ##
@@ -945,7 +946,7 @@ spT.validation <- function(z, zhat)
        round(sum(u^2)/length(u), 4)
  }
  ##
- ## Root Mean Squared Error (RMSE) for all site
+ ## Root Mean Squared Error (RMSE) 
  ##
  RMSE<-function (z,zhat) 
  {
@@ -963,6 +964,29 @@ spT.validation <- function(z, zhat)
     z<-as.matrix(z)
     zhat<-as.matrix(zhat)
     x <- abs(c(zhat-z))
+    u <- x[!is.na(x)]
+    round(sum(u)/length(u), 4)
+ }
+ ##
+ ## Mean Absolute Percentage Error (MAPE) 
+ ##
+ MAPE<-function (z,zhat) 
+ {
+    z<-as.matrix(z)
+    zhat<-as.matrix(zhat)
+    x <- abs(c(zhat-z))/z
+    u <- x[!is.na(x)]
+    u <- u[!is.infinite(u)]
+    round(sum(u)/length(u)*100, 4)
+ }
+ ##
+ ## Bias (BIAS) 
+ ##
+ BIAS<-function (z,zhat) 
+ {
+    z<-as.matrix(z)
+    zhat<-as.matrix(zhat)
+    x <- c(zhat-z)
     u <- x[!is.na(x)]
     round(sum(u)/length(u), 4)
  }
@@ -986,14 +1010,19 @@ spT.validation <- function(z, zhat)
     zhat<-as.matrix(zhat)
     x <- c(zhat-z)
     u <- x[!is.na(x)]
-    y <- c(mean(zhat)-z)
+    y <- c(mean(zhat,na.rm=TRUE)-z)
     v <- y[!is.na(y)]
     round(sum(u^2)/sum(v^2), 4)
  }
+ ##
+ cat("##\n Mean Squared Error (MSE) \n Root Mean Squared Error (RMSE) \n Mean Absolute Error (MAE) \n Mean Absolute Percentage Error (MAPE) \n Bias (BIAS) \n Relative Bias (rBIAS) \n Relative Mean Separation (rMSEP)\n##\n") 
+ ##
    out<-NULL
    out$VMSE<-VMSE(z, zhat)
    out$RMSE<-RMSE(z, zhat)
    out$MAE<-MAE(z, zhat)
+   #out$MAPE<-MAPE(z, zhat)
+   #out$BIAS<-BIAS(z, zhat)
    out$rBIAS<-rBIAS(z, zhat)
    out$rMSEP<-rMSEP(z, zhat)
    unlist(out)

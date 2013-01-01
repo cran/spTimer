@@ -1214,14 +1214,28 @@ void nu_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi, double *nu1,
      N1 = row*r1*T1;
      rT1 = *rT;
      int nuk;
-     nuk=20;
 
+     nuk=30;
      double *nus;
      nus = (double *) malloc((size_t)((nuk)*sizeof(double)));             
      nus[0]=0.05; nus[1]=0.10; nus[2]=0.15; nus[3]=0.20; nus[4]=0.25;  
      nus[5]=0.30; nus[6]=0.35; nus[7]=0.40; nus[8]=0.45; nus[9]=0.50;  
      nus[10]=0.55; nus[11]=0.60; nus[12]=0.65; nus[13]=0.70; nus[14]=0.75; 
      nus[15]=0.80; nus[16]=0.85; nus[17]=0.90; nus[18]=0.95; nus[19]=1.0; 
+     nus[20]=1.05; nus[21]=1.10; nus[22]=1.15; nus[23]=1.20; nus[24]=1.25; 
+     nus[25]=1.30; nus[26]=1.35; nus[27]=1.40; nus[28]=1.45; nus[29]=1.50;      
+//     nus[20]=1.25; nus[21]=1.50; nus[22]=1.75; nus[23]=2.00; nus[24]=2.5; 
+//     nus[25]=3.00; nus[26]=4.00; nus[27]=5.00; nus[28]=10.00; nus[29]=20.00;      
+
+/*
+     nuk=20;
+     double *nus;
+     nus = (double *) malloc((size_t)((nuk)*sizeof(double)));             
+     nus[0]=0.05; nus[1]=0.10; nus[2]=0.15; nus[3]=0.20; nus[4]=0.25;  
+     nus[5]=0.30; nus[6]=0.35; nus[7]=0.40; nus[8]=0.45; nus[9]=0.50;  
+     nus[10]=0.55; nus[11]=0.60; nus[12]=0.65; nus[13]=0.70; nus[14]=0.75; 
+     nus[15]=0.80; nus[16]=0.85; nus[17]=0.90; nus[18]=0.95; nus[19]=1.0; 
+*/
 
      double *nutmp, *pden, *Qeta, *det, *out;
      nutmp = (double *) malloc((size_t)((col)*sizeof(double)));             

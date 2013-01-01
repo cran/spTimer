@@ -32,18 +32,24 @@
 \alias{spGPP.prediction}
 \alias{spT.fit.pred}
 \alias{spT.hit.false}
-\alias{spT.keep.morethan.dist}
+\alias{spT.forecast}
+\alias{spT.prediction}
+\alias{spT.Summary.Stat}
+\alias{spT.MCMC.plot}
+\alias{spT.MCMC.stat}
 \alias{as.mcmc.spT}
 \alias{MCMC.plot.obj}
 \alias{coef.spT}
 \alias{model.frame.spT}
-%\alias{plot.spT}
 \alias{residuals.spT}
-%\alias{summary.spT}
 \alias{formula.spT}
 \alias{terms.spT}
 \alias{model.matrix.spT}
+\alias{NYgrid}
 %\alias{imputation.z}
+%\alias{spT.keep.morethan.dist}
+%\alias{summary.spT}
+%\alias{plot.spT}
 \description{Internal spTimer functions}
 \keyword{internal}
 

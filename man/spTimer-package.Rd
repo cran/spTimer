@@ -7,7 +7,6 @@ Spatio-Temporal Bayesian Modelling using R
 }
 \description{
 This package uses different hierarchical Bayesian spatio-temporal modelling strategies, namely the gaussian processes (GP) models, the autoregressive (AR) models, and models using Gaussian predictive processes (GPP) approximation 
-%and the dynamic linear models (DLM),  the fusion models (FM) 
 to analyse space-time observations.
 }
 \details{
@@ -18,7 +17,7 @@ Type: \tab Package\cr
 The back-end code of this package is built under c language.\cr
 Main functions used: \cr
 \code{> \link{spT.Gibbs}} \cr
-\code{> \link{predict}} \cr
+\code{> \link{predict.spT}} \cr
 Some other important functions: \cr
 \code{> \link{spT.priors}} \cr
 \code{> \link{spT.initials}} \cr
@@ -44,11 +43,3 @@ Packages 'spBayes'; 'maps'; 'MBA'; 'coda'; website: \code{http://www.r-project.o
 %\examples{
 %~~ simple examples of the most important functions ~~
 %}
-%\code{> \link{spT.geodist}} \cr
-%\code{> \link{spT.grid.coords}} \cr
-%\code{> \link{spT.data.selection}} \cr
-%\code{> \link{spT.MCMC.stat}} \cr
-%\code{> \link{spT.MCMC.plot}} \cr
-%\code{> \link{spT.validation}} \cr
-%\code{> \link{spT.pCOVER}} \cr
-%\code{> \link{spT.segment.plot}} \cr
