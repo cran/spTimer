@@ -1018,13 +1018,13 @@ spT.validation <- function(z, zhat)
  cat("##\n Mean Squared Error (MSE) \n Root Mean Squared Error (RMSE) \n Mean Absolute Error (MAE) \n Mean Absolute Percentage Error (MAPE) \n Bias (BIAS) \n Relative Bias (rBIAS) \n Relative Mean Separation (rMSEP)\n##\n") 
  ##
    out<-NULL
-   out$VMSE<-VMSE(z, zhat)
-   out$RMSE<-RMSE(z, zhat)
-   out$MAE<-MAE(z, zhat)
-   #out$MAPE<-MAPE(z, zhat)
-   #out$BIAS<-BIAS(z, zhat)
-   out$rBIAS<-rBIAS(z, zhat)
-   out$rMSEP<-rMSEP(z, zhat)
+   out$MSE<-VMSE(c(z), c(zhat))
+   out$RMSE<-RMSE(c(z), c(zhat))
+   out$MAE<-MAE(c(z), c(zhat))
+   out$MAPE<-MAPE(c(z), c(zhat))
+   out$BIAS<-BIAS(c(z), c(zhat))
+   out$rBIAS<-rBIAS(c(z), c(zhat))
+   out$rMSEP<-rMSEP(c(z), c(zhat))
    unlist(out)
 }
 ##

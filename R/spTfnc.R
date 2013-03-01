@@ -720,7 +720,7 @@ predict.spT<-function(object, newdata=NULL, newcoords, foreStep=NULL, type="spat
           stop("Error: define newcoords.")
         }
      out<-spT.prediction(nBurn=nBurn, pred.data=newdata, pred.coords=newcoords,
-          posteriors=object, tol.dist=2, Summary=TRUE)
+          posteriors=object, tol.dist=tol.dist, Summary=TRUE)
      out$type<-"spatial"
      class(out)<-"spTpred" 
      out

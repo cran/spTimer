@@ -1,11 +1,11 @@
-644a5e09228e96b3304b0d59a13d870f *DESCRIPTION
+86920545f9799e03620f21eb8005e1a5 *DESCRIPTION
 71224eb98fba7e00b5a767be56052326 *NAMESPACE
-7a467d162994173fbe3a76b783c5556c *R/spAR.r
-796e6f640fb88fa1904ff356c82d297d *R/spGP.r
-5ca59098251e17d7704764315152186d *R/spGPP.r
-bd353a2d8554b55d51c6651939cdf494 *R/spTfnc.R
+75d8e7eca75bf45eb6088676eb0fea75 *R/spAR.r
+113ca75085388fdbeb93368dc5513121 *R/spGP.r
+724fb1424aa698ee85bc132d1527ecb4 *R/spGPP.r
+5809e384adedbb3ee48f5959309b9a5e *R/spTfnc.R
 6fc2a7b2f1ce0b4b537528d169faf07e *R/spTimer.R
-0c492bdf50a495c2ffa16674c7fd8a93 *R/useful_commands.R
+f937caacb14a3f7244d196fa84673ff8 *R/useful_commands.R
 ab7298dfae1d14eef735b272183cdba1 *data/DataFit.txt.gz
 5f00cbc7f3f8d291832e1805cfe0da44 *data/DataFitFore.txt.gz
 0b0852ed5d88ff8d7d637f0a94db6664 *data/DataValFore.txt.gz
@@ -31,7 +31,7 @@ da7af7fc57e4d93e87e530530e16aa43 *man/spT.data.selection.Rd
 07ebab1190370e5615c1e7c7db0c90e4 *man/spT.priors.Rd
 ffd479c774af2c7f0fbb1ad7cc6e931d *man/spT.segment.plot.Rd
 97add1510cd696a4cfb1e33554027c49 *man/spT.time.Rd
-c8c514a8ce6c10459f5836964230e95c *man/spT.validation.Rd
+e187b052f5f81c99f1dca79f83104380 *man/spT.validation.Rd
 f53266f1532c18130a5da695b9dc13cf *man/spTimer-internal.Rd
 7b8ec355eda46c1e3a28ce0c9333f799 *man/spTimer-package.Rd
 1ee8b2356547454ba64500000e3e87a0 *man/summary.spT.Rd

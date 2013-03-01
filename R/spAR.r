@@ -35,6 +35,9 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     if ( !is.matrix(coords) ) {
          stop("\n Error: coords must be a (n x 2) matrix of xy-coordinate locations \n")
     }
+    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+         stop("\n Error: coords columns should be numeric \n")
+    }
    #
      method <- distance.method
      spT.check.sites.inside(coords, method)
@@ -369,6 +372,9 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
         if (!is.matrix(pred.coords)) {
            stop("Error: prediction coords must be a (n x 2) matrix of xy-coordinate locations.")
         }
+        if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
+           stop("\n Error: prediction coords columns should be numeric \n")
+        }
       #
            coords.all <- rbind(coords,pred.coords)
            spT.check.locations(coords, pred.coords, method, tol=tol.dist)
@@ -566,6 +572,9 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
        }
        if ( !is.matrix(fore.coords) ) {
          stop("\n# Error: fore.coords must be a matrix of xy-coordinate locations")
+       }
+       if ( (!is.numeric(fore.coords[,1])) | (!is.numeric(fore.coords[,2]))) {
+         stop("\n Error: fore.coords columns should be numeric \n")
        }
       #
       #
@@ -822,7 +831,10 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     }
     else {
        coords.D <- as.matrix(dist(coords, method, diag = T, upper = T))
-    }  
+    }
+    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+         stop("\n Error: coords columns should be numeric \n")
+    }
    #
    # check time.data
    if(is.null(time.data)){
@@ -955,6 +967,9 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
         }
         if (!is.matrix(pred.coords)) {
            stop("Error: prediction coords must be a (n x 2) matrix of xy-coordinate locations.")
+        }
+        if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
+           stop("\n Error: prediction coords columns should be numeric \n")
         }
       #
       #

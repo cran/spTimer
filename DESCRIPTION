@@ -1,8 +1,8 @@
 Package: spTimer
 Type: Package
 Title: Spatio-Temporal Bayesian Modelling Using R
-Version: 0.05
-Date: 2013-01-01
+Version: 0.6
+Date: 2013-03-01
 Author: K. Shuvo Bakar & Sujit K. Sahu
 Maintainer: Khandoker Shuvo Bakar <shuvo.bakar@csiro.au>
 URL: http://www.southampton.ac.uk/~sks/research
@@ -15,6 +15,7 @@ Description: The package is able to fit, spatially predict and
         Predictive Processes (GPP) based AR Models.
 License: GPL (>= 2)
 LazyLoad: yes
-Packaged: 2013-01-21 23:18:39 UTC; bak18b
+Packaged: 2013-03-01 12:22:14 UTC; bak18b
+NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2013-01-22 08:27:45
+Date/Publication: 2013-03-01 13:41:11

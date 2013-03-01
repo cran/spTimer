@@ -153,12 +153,18 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     if ( !is.matrix(coords) ) {
          stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
     }
+    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+         stop("\n Error: coords columns should be numeric \n")
+    }
    #
     if (missing(knots.coords)) {
          stop("Error: need to specify the knots.coords")
     }
     if ( !is.matrix(knots.coords) ) {
          stop("Error: knots.coords must be a (n x 2) matrix of xy-coordinate locations")
+    }
+    if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
+         stop("\n Error: knots.coords columns should be numeric \n")
     }
    #
    # check time.data
@@ -494,17 +500,26 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
         if (!is.matrix(knots.coords)) {
            stop("Error: knots coords must be a (knots x 2) matrix of xy-coordinate locations.")
         }
+        if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
+           stop("\n Error: knots.coords columns should be numeric \n")
+        }
         if (missing(coords)) {
             stop("Error: need to specify the coords")
         }
         if ( !is.matrix(coords) ) {
             stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
         }
+        if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+            stop("\n Error: coords columns should be numeric \n")
+        }
         if (missing(pred.coords)) {
            stop("Error: need to specify the prediction coords.")
         }
         if (!is.matrix(pred.coords)) {
            stop("Error: prediction coords must be a (n.pred.site x 2) matrix of xy-coordinate locations.")
+        }
+        if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
+           stop("\n Error: prediction coords columns should be numeric \n")
         }
       #
            coords.all <- rbind(knots.coords,pred.coords)
@@ -777,6 +792,9 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
        if ( !is.matrix(fore.coords) ) {
          stop("Error: fore.coords must be a matrix of xy-coordinate locations")
        }
+       if ( (!is.numeric(fore.coords[,1])) | (!is.numeric(fore.coords[,2]))) {
+         stop("\n Error: fore.coords columns should be numeric \n")
+       }
       #
            nsite <- dim(fore.coords)[[1]]
            n <- posteriors$n
@@ -1025,12 +1043,18 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
     if ( !is.matrix(coords) ) {
          stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
     }
+    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+         stop("\n Error: coords columns should be numeric \n")
+    }
    #
     if (missing(knots.coords)) {
          stop("Error: need to specify the knots.coords")
     }
     if ( !is.matrix(knots.coords) ) {
          stop("Error: knots.coords must be a (n x 2) matrix of xy-coordinate locations")
+    }
+    if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
+         stop("\n Error: knots.coords columns should be numeric \n")
     }
    #
    #
@@ -1039,6 +1063,9 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
     }
     if ( !is.matrix(pred.coords) ) {
          stop("Error: pred.coords must be a (pred.site x 2) matrix of xy-coordinate locations")
+    }
+    if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
+         stop("\n Error: prediction coords columns should be numeric \n")
     }
    #
    #
@@ -1073,7 +1100,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
    #
          all.coords <- rbind(coords,knots.coords)
    #
-      if(method=="geodetic:km"){
+     if(method=="geodetic:km"){
          coords.D.knots <- as.matrix(spT.geodist(Lon=knots.coords[,1],Lat=knots.coords[,2], KM=TRUE))
          coords.D.all <- as.matrix(spT.geodist(Lon=all.coords[,1],Lat=all.coords[,2], KM=TRUE))
      }
