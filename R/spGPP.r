@@ -153,18 +153,12 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     if ( !is.matrix(coords) ) {
          stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
     }
-    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
-         stop("\n Error: coords columns should be numeric \n")
-    }
    #
     if (missing(knots.coords)) {
          stop("Error: need to specify the knots.coords")
     }
     if ( !is.matrix(knots.coords) ) {
          stop("Error: knots.coords must be a (n x 2) matrix of xy-coordinate locations")
-    }
-    if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
-         stop("\n Error: knots.coords columns should be numeric \n")
     }
    #
    # check time.data
@@ -500,26 +494,17 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
         if (!is.matrix(knots.coords)) {
            stop("Error: knots coords must be a (knots x 2) matrix of xy-coordinate locations.")
         }
-        if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
-           stop("\n Error: knots.coords columns should be numeric \n")
-        }
         if (missing(coords)) {
             stop("Error: need to specify the coords")
         }
         if ( !is.matrix(coords) ) {
             stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
         }
-        if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
-            stop("\n Error: coords columns should be numeric \n")
-        }
         if (missing(pred.coords)) {
            stop("Error: need to specify the prediction coords.")
         }
         if (!is.matrix(pred.coords)) {
            stop("Error: prediction coords must be a (n.pred.site x 2) matrix of xy-coordinate locations.")
-        }
-        if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
-           stop("\n Error: prediction coords columns should be numeric \n")
         }
       #
            coords.all <- rbind(knots.coords,pred.coords)
@@ -792,9 +777,6 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
        if ( !is.matrix(fore.coords) ) {
          stop("Error: fore.coords must be a matrix of xy-coordinate locations")
        }
-       if ( (!is.numeric(fore.coords[,1])) | (!is.numeric(fore.coords[,2]))) {
-         stop("\n Error: fore.coords columns should be numeric \n")
-       }
       #
            nsite <- dim(fore.coords)[[1]]
            n <- posteriors$n
@@ -841,38 +823,6 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       fore.x<-Formula.matrix(call.f,data=fore.data)[[2]]
     #
     #
-#      #
-#        if (is.null(fore.X)){
-#           if(dimnames(posteriors$X)[[2]][1]=="(Intercept)"){
-#           fore.x <- matrix(rep(1,nsite*r*K))
-#           }
-#           else{ 
-#           stop("\n Error: need to specify the forecast covariates \n ...")
-#           }
-#        }
-#      #
-#        if (!is.null(fore.X)){
-#        if (!is.matrix(fore.X)) {
-#           stop("Error: fore.X must be a MATRIX.")
-#        }
-#      #
-#        if(dimnames(posteriors$X)[[2]][1]=="(Intercept)"){
-#           Intercept <- rep(1,dim(fore.X)[1])
-#           fore.x <- cbind(Intercept,fore.X)
-#        } 
-#      #
-#        if(dimnames(posteriors$X)[[2]][1] != "(Intercept)"){
-#           fore.x <- fore.X
-#        } 
-#      #
-#        }
-#        fore.X <- NULL
-#      #
-#      if(length(c(fore.x)) != (nsite*r*K*p)){
-#           stop("Error: number of observations in fore.X mismatches with the fore.coords.")
-#      }  	
-#      #
-      ###
       #
            dm <- posteriors$Distance.matrix.knots
       #
@@ -938,11 +888,18 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
           }
           # 
       #output$n.fore.sites <- nsite
+      #output$foreStep <- K
       output$knots.coords <- knots.coords
       output$fore.coords <- fore.coords
       output$distance.method<-posteriors$distance.method  
       output$cov.fnc<-posteriors$cov.fnc  
       output$scale.transform <- posteriors$scale.transform
+      output$obsData<-matrix(posteriors$Y,r*T,n)  
+      output$fittedData<-matrix(posteriors$fitted[,1],r*T,n) 
+      if(posteriors$scale.transform=="SQRT"){output$fittedData<-output$fittedData^2}
+      else if(posteriors$scale.transform=="LOG"){output$fittedData<-exp(output$fittedData)}
+      else {output$fittedData<-output$fittedData}
+      output$residuals<-matrix(c(output$obsData)-c(output$fittedData),r*T,n)
       #
       if(Summary == TRUE){
          if(itt < 40){
@@ -1043,18 +1000,12 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
     if ( !is.matrix(coords) ) {
          stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
     }
-    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
-         stop("\n Error: coords columns should be numeric \n")
-    }
    #
     if (missing(knots.coords)) {
          stop("Error: need to specify the knots.coords")
     }
     if ( !is.matrix(knots.coords) ) {
          stop("Error: knots.coords must be a (n x 2) matrix of xy-coordinate locations")
-    }
-    if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
-         stop("\n Error: knots.coords columns should be numeric \n")
     }
    #
    #
@@ -1063,9 +1014,6 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
     }
     if ( !is.matrix(pred.coords) ) {
          stop("Error: pred.coords must be a (pred.site x 2) matrix of xy-coordinate locations")
-    }
-    if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
-         stop("\n Error: prediction coords columns should be numeric \n")
     }
    #
    #
@@ -1100,7 +1048,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
    #
          all.coords <- rbind(coords,knots.coords)
    #
-     if(method=="geodetic:km"){
+      if(method=="geodetic:km"){
          coords.D.knots <- as.matrix(spT.geodist(Lon=knots.coords[,1],Lat=knots.coords[,2], KM=TRUE))
          coords.D.all <- as.matrix(spT.geodist(Lon=all.coords[,1],Lat=all.coords[,2], KM=TRUE))
      }
