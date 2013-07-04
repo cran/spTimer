@@ -298,7 +298,7 @@ spT.MCMC.plot<-function(x, nBurn=0, ACF="FALSE", PARTIAL.acf="FALSE")
   }
   #
   ##
-   x11()
+   dev.new()
    for(i in 1:dim(para)[[1]]){
     MCMC.plot.obj(para[i,],name=c(dimnames(para)[[1]][i]),ACF=ACF,PARTIAL.acf=PARTIAL.acf)
     par(ask=TRUE)
@@ -1015,16 +1015,16 @@ spT.validation <- function(z, zhat)
     round(sum(u^2)/sum(v^2), 4)
  }
  ##
- #cat("##\n Mean Squared Error (MSE) \n Root Mean Squared Error (RMSE) \n Mean Absolute Error (MAE) \n Mean Absolute Percentage Error (MAPE) \n Bias (BIAS) \n Relative Bias (rBIAS) \n Relative Mean Separation (rMSEP)\n##\n") 
+ cat("##\n Mean Squared Error (MSE) \n Root Mean Squared Error (RMSE) \n Mean Absolute Error (MAE) \n Mean Absolute Percentage Error (MAPE) \n Bias (BIAS) \n Relative Bias (rBIAS) \n Relative Mean Separation (rMSEP)\n##\n") 
  ##
    out<-NULL
-   out$VMSE<-VMSE(z, zhat)
-   out$RMSE<-RMSE(z, zhat)
-   out$MAE<-MAE(z, zhat)
-   #out$MAPE<-MAPE(z, zhat)
-   #out$BIAS<-BIAS(z, zhat)
-   out$rBIAS<-rBIAS(z, zhat)
-   out$rMSEP<-rMSEP(z, zhat)
+   out$MSE<-VMSE(c(z), c(zhat))
+   out$RMSE<-RMSE(c(z), c(zhat))
+   out$MAE<-MAE(c(z), c(zhat))
+   out$MAPE<-MAPE(c(z), c(zhat))
+   out$BIAS<-BIAS(c(z), c(zhat))
+   out$rBIAS<-rBIAS(c(z), c(zhat))
+   out$rMSEP<-rMSEP(c(z), c(zhat))
    unlist(out)
 }
 ##
@@ -1045,7 +1045,7 @@ MCMC.plot.obj<-function(post_val, nItr, nBurn=0,
       }
       if(ACF==FALSE & PARTIAL.acf==FALSE){
         #windows()
-        #x11()
+        #dev.new()
         par(mfrow=c(1,2))
         #plot(nBurn:nItr, x[nBurn:nItr], xlab = "Iterations", 
         #   ylab = paste("Values of  (", name, ")", sep=''), type = "l",
@@ -1060,7 +1060,7 @@ MCMC.plot.obj<-function(post_val, nItr, nBurn=0,
      }	
      else if(ACF==TRUE & PARTIAL.acf==TRUE){
       #windows()
-      #x11() 
+      #dev.new() 
       par(mfrow=c(1,4))
       plot(nBurn:nItr, x[nBurn:nItr], xlab = "Iterations", 
         ylab = paste("Values of  (", name, ")", sep=''), type = "l", 
@@ -1072,7 +1072,7 @@ MCMC.plot.obj<-function(post_val, nItr, nBurn=0,
       pacf(x[nBurn:nItr],main='Partial ACF plot',col="red")
      }
      else if(ACF=="TRUE" & PARTIAL.acf=="FALSE"){
-      #x11() 
+      #dev.new() 
       par(mfrow=c(1,3))
       plot(nBurn:nItr, x[nBurn:nItr], xlab = "Iterations", 
         ylab = paste("Values of  (", name, ")", sep=''), type = "l", 

@@ -107,8 +107,6 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
      //exit(9);
    }   
 
-//   o0_ar(n, r, T, rT, p, sig_eta, sig_l0, rho, mu_l, Sinv, XB, o, 
-//   constant, O_l0);
    theta_ar(n, r, T, rT, p, prior_sig, Qeta, O_l0, X, o, constant, 
    thetap); 
    rhop[0] = thetap[0];
@@ -813,7 +811,7 @@ void o0_ar(int *n, int *r, int *T, int *rT, int *p, double *sig_eta,
        m[i]=(rho[0]*(o1[i]-XB1[i])*(1.0/sig_eta[0]) + 
            mu_l[l]/sig_l0[l])/(rho[0]*rho[0]/sig_eta[0]+1.0/sig_l0[l]);
        }
-       mvrnormal(constant, m, del, n, out);
+//       mvrnormal(constant, m, del, n, out);
 
        for(i=0; i<n1; i++){
          o0post[i+l*n1]=m[i]; //out[i];

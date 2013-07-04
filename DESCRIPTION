@@ -1,12 +1,11 @@
 Package: spTimer
 Type: Package
 Title: Spatio-Temporal Bayesian Modelling Using R
-Version: 0.7
-Date: 2013-05-23
+Version: 0.8
+Date: 2013-07-04
 Author: K. Shuvo Bakar & Sujit K. Sahu
-Maintainer: Khandoker Shuvo Bakar <Shuvo.Bakar@csiro.au>
-URL: http://www.southampton.ac.uk/~sks/research
-        http://www.southampton.ac.uk/~sks/research/papers/spTimeRpaper.pdf
+Maintainer: Shuvo Bakar <Shuvo.Bakar@csiro.au>
+URL: http://www.southampton.ac.uk/~sks/research/papers/spTimeRpaper.pdf
 Depends: R (>= 2.14.0), coda, lattice, forecast
 Description: The package is able to fit, spatially predict and
         temporally forecast large amounts of space-time data using [1]
@@ -15,7 +14,7 @@ Description: The package is able to fit, spatially predict and
         Predictive Processes (GPP) based AR Models.
 License: GPL (>= 2)
 LazyData: yes
-Packaged: 2013-05-22 23:58:57 UTC; bak18b
+Packaged: 2013-07-03 23:10:56 UTC; bak18b
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2013-05-23 07:31:13
+Date/Publication: 2013-07-04 07:52:37

@@ -197,6 +197,11 @@ names(fore.ar)
 # Forecast validations 
 spT.validation(DataValFore$o8hrmax,c(fore.ar$Mean)) 
 
+# Use of "forecast" class
+tmp<-as.forecast.object(fore.ar, site=1) # default for site 1
+plot(tmp)
+
+
 ##
 ## Temporal  prediction/forecast 
 ## 2. In the observed/fitted locations
@@ -218,6 +223,10 @@ names(fore.ar)
 
 # Forecast validations 
 spT.validation(DataFitFore$o8hrmax,c(fore.ar$Mean)) # 
+
+# Use of "forecast" class
+tmp<-as.forecast.object(fore.ar, site=1) # default for site 1
+plot(tmp)
 
 ##
 ## Fit and spatially prediction simultaneously
@@ -291,6 +300,10 @@ names(fore.gpp)
 # Forecast validations 
 spT.validation(DataValFore$o8hrmax,c(fore.gpp$Mean)) 
 
+# Use of "forecast" class
+tmp<-as.forecast.object(fore.gpp, site=1) # default for site 1
+plot(tmp)
+
 ##
 ## Temporal  prediction/forecast 
 ## 2. In the observed/fitted locations
@@ -312,6 +325,10 @@ names(fore.gpp)
 
 # Forecast validations 
 spT.validation(DataFitFore$o8hrmax,c(fore.gpp$Mean)) # 
+
+# Use of "forecast" class
+tmp<-as.forecast.object(fore.gpp, site=1) # default for site 1
+plot(tmp)
 
 ##
 ## Fit and spatially prediction simultaneously
