@@ -13,7 +13,7 @@ spT.keep.morethan.dist(coords, tol.dist=100)
 \item{tol.dist}{The tolerance limit for the distance.}
 }
 \seealso{
-\code{\link{spT.geodist}, \link{dist}, \link{spT.data.selection}}.
+\code{\link{spT.geodist}, \link{dist}}.
 }
 \examples{
 \dontrun{

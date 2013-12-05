@@ -10,10 +10,11 @@ This function is used to obtain spatial predictions in the unknown locations and
         nBurn, tol.dist, predAR=NULL, ...)
 
 }
+
 \arguments{
 \item{object}{Object of class inheriting from "spT".}
 \item{newdata}{The data set for the covariate values for spatial prediction or temporal forecasts. This data should have the same space-time structure as the original data frame.}
-\item{newcoords}{The coordinates for the prediction or forecast sites. The locations are in similar format to coords.}
+\item{newcoords}{The coordinates for the prediction or forecast sites. The locations are in similar format to \code{coords}, see \code{\link{spT.Gibbs}}.}
 \item{foreStep}{Number of K-step (time points) ahead forecast, K=1,2, ...; Only applicable if type="temporal".}
 \item{type}{If "spatial" the do spatial prediction and if "temporal" the do temporal prediction or forecast. Default value is "spatial".}
 \item{nBurn}{Number of burn-in. Initial MCMC samples to discard before making inference.}
@@ -58,7 +59,8 @@ This function is used to obtain spatial predictions in the unknown locations and
 ##
 
 # Read data
-data(DataValPred)
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define prediction coordinates
 pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
@@ -78,7 +80,8 @@ spT.validation(DataValPred$o8hrmax,c(pred.gp$Mean))
 ##
 
 # Read data
-data(DataValFore);
+DataValFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValFore<-subset(DataValFore, with(DataValFore, (Day \%in\% c(30, 31) & Month == 8)))
 
 # define forecast coordinates
 fore.coords<-as.matrix(unique(cbind(DataValFore[,2:3])))
@@ -104,7 +107,9 @@ plot(tmp)
 ##
 
 # Read data
-data(DataFitFore)
+DataFitFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataFitFore<-subset(DataFitFore, with(DataFitFore, (Day \%in\% c(30, 31) & Month == 8)))
 
 # Define forecast coordinates
 fore.coords<-as.matrix(unique(cbind(DataFitFore[,2:3])))
@@ -129,8 +134,11 @@ plot(tmp)
 ##
 
 # Read data 
-data(DataFit); 
-data(DataValPred)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))
@@ -161,7 +169,8 @@ spT.validation(DataValPred$o8hrmax,c(post.gp.fitpred$prediction[,1]))
 ##
 
 # Read data
-data(DataValPred)
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define prediction coordinates
 pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
@@ -181,7 +190,8 @@ spT.validation(DataValPred$o8hrmax,c(pred.ar$Mean))
 ##
 
 # Read data
-data(DataValFore);
+DataValFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValFore<-subset(DataValFore, with(DataValFore, (Day \%in\% c(30, 31) & Month == 8)))
 
 # define forecast coordinates
 fore.coords<-as.matrix(unique(cbind(DataValFore[,2:3])))
@@ -208,7 +218,9 @@ plot(tmp)
 ##
 
 # Read data
-data(DataFitFore)
+DataFitFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataFitFore<-subset(DataFitFore, with(DataFitFore, (Day \%in\% c(30, 31) & Month == 8)))
 
 # Define forecast coordinates
 fore.coords<-as.matrix(unique(cbind(DataFitFore[,2:3])))
@@ -233,8 +245,10 @@ plot(tmp)
 ##
 
 # Read data 
-data(DataFit); 
-data(DataValPred)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))
@@ -264,7 +278,8 @@ spT.validation(DataValPred$o8hrmax,c(post.ar.fitpred$prediction[,1]))
 ##
 
 # Read data
-data(DataValPred)
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define prediction coordinates
 pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
@@ -284,7 +299,8 @@ spT.validation(DataValPred$o8hrmax,c(pred.gpp$Mean))
 ##
 
 # Read data
-data(DataValFore);
+DataValFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValFore<-subset(DataValFore, with(DataValFore, (Day %in% c(30, 31) & Month == 8)))
 
 # define forecast coordinates
 fore.coords<-as.matrix(unique(cbind(DataValFore[,2:3])))
@@ -310,7 +326,9 @@ plot(tmp)
 ##
 
 # Read data
-data(DataFitFore)
+DataFitFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataFitFore<-subset(DataFitFore, with(DataFitFore, (Day \%in\% c(30, 31) & Month == 8)))
 
 # Define forecast coordinates
 fore.coords<-as.matrix(unique(cbind(DataFitFore[,2:3])))
@@ -335,8 +353,10 @@ plot(tmp)
 ##
 
 # Read data 
-data(DataFit); 
-data(DataValPred)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))

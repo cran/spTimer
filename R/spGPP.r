@@ -62,6 +62,13 @@
 ## initials checking for the GPP
 ##
  initials.checking.gpp<-function(x,z,X,n,r,T,d){
+     # checking unequal T
+     if(length(T)>1){
+       rT <- sum(T)
+     }
+     else{
+       rT <- r*T
+     } 
      #
      # x = initial values
      #
@@ -72,9 +79,8 @@
       x$sig2eps <- 0.01; x$sig2eta <- 0.1; x$rho<-0.5
       x$sig2l <- rep(0.1, r);
       x$mu_l<-rep(NA,r); 
-      zm <- matrix(z,r*T,n)
+      zm <- matrix(z,rT,n)
       for(i in 1:r){
-        #x$mu_l[i] <- Mean(zm[1+T*(i-1),],na.rm=TRUE)
         x$mu_l[i] <- 0
       }
       lm.coef<-lm(c(z) ~ X-1)$coef
@@ -99,9 +105,8 @@
       x$sig2l <- rep(0.1, r);
       }
       if(is.null(x$mu_l)){
-      x$mu_l<-rep(NA,r); zm <- matrix(z,r*T,n)
+      x$mu_l<-rep(NA,r); zm <- matrix(z,rT,n)
       for(i in 1:r){
-       #x$mu_l[i] <- Mean(zm[1+T*(i-1),],na.rm=TRUE)
        x$mu_l[i] <- 0
       }
       }
@@ -144,6 +149,16 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
          Y <- XY[[1]]
          X <- as.matrix(XY[[2]])
          x.names <- XY[[3]]
+         Xsp <- XY[[4]]
+         x.names.sp <- XY[[5]]
+         Xtp <- XY[[6]]
+         x.names.tp <- XY[[7]]
+         #if((!is.null(x.names.sp)) | (!is.null(x.names.tp))){
+         #  stop("\n## \n# Error: spatially and/or temporally varying approach is not available for the GPP model\n ##\n")
+         #}
+         if((!is.null(x.names.tp))){
+           stop("\n## \n# Error: dynamic temporally varying approach is not available for the GPP model\n ##\n")
+         }
     }
    #
    #
@@ -153,6 +168,9 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     if ( !is.matrix(coords) ) {
          stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
     }
+    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+         stop("\n Error: coords columns should be numeric \n")
+    }
    #
     if (missing(knots.coords)) {
          stop("Error: need to specify the knots.coords")
@@ -160,10 +178,13 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     if ( !is.matrix(knots.coords) ) {
          stop("Error: knots.coords must be a (n x 2) matrix of xy-coordinate locations")
     }
+    if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
+         stop("\n Error: knots.coords columns should be numeric \n")
+    }
    #
    # check time.data
    if(is.null(time.data)){
-     time.data<-c(1,0,length(Y)/length(coords[,1]))
+     time.data<-list(1,length(Y)/length(coords[,1]))
    }
    else{
      time.data<-time.data
@@ -171,9 +192,17 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
    #
    #
          n <- length(coords[,1])            # number of sites
-         r <- time.data[1]                  # number of years
-         T <- time.data[3]                  # number of days
-         N <- n*r*T
+         r <- time.data[[1]]                  # number of years
+         T <- time.data[[2]]                  # number of days
+         #
+         # checking unequal T
+         if(length(T) > 1){
+           rT <- sum(T)
+         }
+         else{
+           rT <- r*T
+         }
+         N <- n*rT
          p <- length(x.names)
          knots <- length(knots.coords[,1]) 
    #
@@ -222,19 +251,19 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
           priors<-priors.checking.gpp(priors,r,p)
     #
          shape_e <- N/2+priors$prior_a
-         shape_eta <- (knots*r*T)/2+priors$prior_a
+         shape_eta <- (knots*rT)/2+priors$prior_a
          shape_l <- (knots*r)/2+priors$prior_a
     #
-         zm <- matrix(Y,r*T,n)
+         zm <- matrix(Y,rT,n)
          zm <- apply(zm,1,median,na.rm=TRUE)
          zm <- rep(zm,n)
          zm <- cbind(Y,zm)
          zm[is.na(zm[,1]),1] <- zm[is.na(zm[,1]),2]
-         zm[is.na(zm[,1]),1] <- median(zm[,2],na.rm=T)
+         zm[is.na(zm[,1]),1] <- median(zm[,2],na.rm=TRUE)
     #
          zm <- zm[,1] 
     #
-         flag <- matrix(NA,n*r*T,2)
+         flag <- matrix(NA,n*rT,2)
          flag[,1] <- c(Y)
          flag[!is.na(flag[,1]),2] <- 0
          flag[is.na(flag[,1]),2] <- 1
@@ -324,23 +353,28 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     }
     #
      tmp <- zm-median(zm)
-     tmp<-matrix(tmp,r*T,n)
+     tmp<-matrix(tmp,rT,n)
      tmp<-apply(tmp,1,mean)
      w<-rep(tmp,knots)
-     w<-matrix(w,r*T,knots)
+     rm(tmp)
+     w<-matrix(w,rT,knots)
      w<-t(w); w<-c(w);
-     #tmp<-matrix(tmp,T,r)
-     #tmp<-apply(tmp,2,mean)
-     #w0 <- rep(tmp,knots*r)
      w0 <- rep(0,knots*r)
-     #w <- rep(0,knots*r*T)
     # 
-    #
+    if((length(x.names.sp) == 0) & (length(x.names.tp) == 0)){
+      # non-spatial and non-temporal beta
+      # check for T
+        if(r > 1){ 
+         if(length(T) != r){         
+           T<-rep(T,r) 
+         }
+        }
+        #  
         out <- NULL
         out <- .C("GIBBS_zfitsum_onephi_gpp", as.integer(cov),
             as.integer(spdecay), as.double(flag), as.integer(nItr), 
             as.integer(nBurn), as.integer(n), as.integer(knots),
-            as.integer(T), as.integer(r), as.integer(r*T), 
+            as.integer(T), as.integer(r), as.integer(rT), 
             as.integer(p), as.integer(N), as.integer(report), 
             as.double(shape_e), as.double(shape_eta),
             as.double(shape_l), as.double(priors$prior_a), 
@@ -362,17 +396,86 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
             mu_lp = matrix(double(r*nItr), r, nItr), 
             sig2lp = matrix(double(r*nItr),r, nItr), 
             w0p = matrix(double(knots * r * nItr),knots * r, nItr), 
-            wp = matrix(double(knots*r*T*nItr), knots * r * T, nItr), 
+            wp = matrix(double(knots*rT*nItr), knots * rT, nItr), 
             gof = as.double(1), penalty = as.double(1),
-            fitted = matrix(double(2*n*r*T),n*r*T,2))[43:56]
-     #     
+            fitted = matrix(double(2*n*rT),n*rT,2))[43:56]
+
+    } # end for fixed beta
+    #  
+    else if((length(x.names.sp) > 0) & (length(x.names.tp) == 0)){
+      # for spatial beta
+      if(length(T)> 1){ stop("\n ## Error: Unequal T is currently not possible for spatially varying model. ##\n")}
+      q <- length(x.names.sp)          # number of spatial covariates
+      shape_beta<-(knots*q)/2+priors$prior_a
+      sig2beta<-0.1
+      betas<-rep(0,knots)
+      if("(Intercept)" %in% x.names){
+         if(sum(c(X[,1])) == 0){
+         intercept <- 0
+         }     
+         else{ intercept <- 1 }
+      }
+      else{ 
+         intercept <- 1 
+      }
+      #
+        out <- .C("GIBBSsp_zfitsum_onephi_gpp", as.integer(intercept),
+            as.integer(cov),
+            as.integer(spdecay), as.double(flag), as.integer(nItr), 
+            as.integer(nBurn), as.integer(n), as.integer(knots),
+            as.integer(T), as.integer(r), as.integer(rT), 
+            as.integer(p), as.integer(q), as.integer(N), as.integer(report), 
+            as.double(shape_e), as.double(shape_eta), as.double(shape_beta),
+            as.double(shape_l), as.double(priors$prior_a), 
+            as.double(priors$prior_b), as.double(priors$mu_beta),
+            as.double(priors$delta2_beta), as.double(priors$mu_rho), 
+            as.double(priors$delta2_rho), as.double(priors$alpha_l), 
+            as.double(priors$delta2_l), as.double(init.phi),
+            as.double(tuning), as.double(phis), as.integer(phik),
+            as.double(coords.D.knots), as.double(coords.D.obs.knots), 
+            as.integer(1), 
+            as.double(initials$sig2eps), as.double(initials$sig2eta),
+            as.double(sig2beta),
+            as.double(initials$sig2l), as.double(initials$beta), as.double(betas),
+            as.double(initials$rho), as.double(initials$mu_l),
+            as.double(X), as.double(Xsp), as.double(zm), as.double(w0), as.double(w),
+            as.integer(trans),
+            phip = double(nItr), accept = double(1), nup = double(nItr),
+            sig2eps = double(nItr), sig2etap = double(nItr), sig2betap = double(nItr),
+            betap = matrix(double(p*nItr), p, nItr), betasp = matrix(double(knots*q*nItr), knots*q, nItr), 
+            rhop = double(nItr),
+            mu_lp = matrix(double(r*nItr), r, nItr), 
+            sig2lp = matrix(double(r*nItr),r, nItr), 
+            w0p = matrix(double(knots * r * nItr),knots * r, nItr), 
+            wp = matrix(double(knots*rT*nItr), knots * r * T, nItr), 
+            gof = as.double(1), penalty = as.double(1),
+            fitted = matrix(double(2*n*rT),n*rT,2))[49:64]
+    } # end for spatial beta
+    else{
+         stop("\n#\n## Error: Dynamic temporally varying models are not available for the GPP based models. \n#")
+    } # end
+    #
+    ###
+    #
      if(X.out==TRUE){
-      out$X <- X
+        if((length(x.names.sp) == 0) & (length(x.names.tp) == 0)){
+        # non-spatial and temporal beta
+          out$X <- X
+        }
+        else if((length(x.names.sp) > 0) & (length(x.names.tp) == 0)){
+        # for spatial beta
+          out$X <- X
+          out$Xsp <- Xsp
+          dimnames(out$X)[[2]] <- as.list(x.names)
+        }  
+        else{
+          stop("\n#\n## Error: \n#")
+        }
      }
      if(Y.out==TRUE){
-      out$Y <- Y
+        out$Y <- Y
      }
-     #
+    #
       out$accept <- round(out$accept/nItr*100,2)
       out$call<-formula
      #
@@ -387,18 +490,28 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
            }
            out$sig2eps <- as.matrix(out$sig2eps[(nBurn+1):nItr])
            out$sig2etap <- as.matrix(out$sig2etap[(nBurn+1):nItr])
+           if((length(x.names.sp) > 0)){
+           out$sig2betap <- as.matrix(out$sig2betap[(nBurn+1):nItr])
+           } 
            out$sig2lp <- matrix(out$sig2lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
            out$rhop <- as.matrix(out$rhop[(nBurn+1):nItr])
            out$betap <- matrix(out$betap[1:p,(nBurn+1):nItr],p,length((nBurn+1):nItr))
+           if(length(x.names.sp) != 0){          
+           out$betasp <- matrix(out$betasp[1:(knots*q),(nBurn+1):nItr],knots*q,length((nBurn+1):nItr))
+           }
            out$mu_lp <- matrix(out$mu_lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))	
            out$w0p <- out$w0p[1:(knots*r),(nBurn+1):nItr]	
-           out$wp <- out$wp[1:(knots*r*T),(nBurn+1):nItr]
+           out$wp <- out$wp[1:(knots*rT),(nBurn+1):nItr]
            dimnames(out$fitted)[[2]] <- c("Mean","SD")
            out$tol.dist<-tol.dist
            out$distance.method<-method
            out$cov.fnc<-cov.fnc
            out$scale.transform<-scale.transform
            out$sampling.sp.decay<-spatial.decay
+           out$covariate.names<-c(x.names)
+           if(length(x.names.sp) != 0){          
+           out$sp.covariate.names<-c(x.names.sp)
+           }
            out$Distance.matrix.knots<-coords.D.knots
            out$knots.coords<-knots.coords
            out$coords<-coords
@@ -412,6 +525,9 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
            out$r <- r
            out$T <- T
            out$p <- p
+           if(length(x.names.sp) != 0){          
+           out$q<-q
+           }
            out$knots <- knots
            out$initials <- initials	
            out$priors <- priors	
@@ -451,39 +567,10 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            stop("Error: need to provide the posterior MCMC samples.")
         }
      #
-     #   if(is.null(fitted.X)==FALSE){
-     #     if(!is.matrix(fitted.X)) {
-     #      stop("Error: fitted.X must be a MATRIX of order (N x p),\n  p = number of parameters, N = n*r*T.")
-     #     }
-     #   }
-     #   else{
           if (is.null(posteriors$X)) {
            stop("Error: need to provide the fitted covariate values.")
           }
         fitted.X <- posteriors$X
-      #  }
-      #
-      #  if (is.null(pred.X)){
-      #     if(dimnames(fitted.X)[[2]][1]=="(Intercept)"){
-      #     pred.X <- matrix(rep(1,posteriors$T*posteriors$r*dim(pred.coords)[[1]]))
-      #     }
-      #     else{ 
-      #     stop("\n Error: need to specify the prediction covariates \n ...")
-      #     }
-      #  }
-      #
-      #  if (!is.matrix(pred.X)) {
-      #     stop("Error: pred.X must be a MATRIX of order (M x p),\n  p = number of parameters, M = pred.n*r*T.")
-      #  }
-      #
-      #  if (length(pred.X[1,]) != length(fitted.X[1,])) {
-      #     if(dimnames(fitted.X)[[2]][1]=="(Intercept)"){
-      #       pred.X <- cbind(rep(1,posteriors$T*posteriors$r*dim(pred.coords)[[1]]),pred.X)
-      #     }
-      #     else{
-      #     stop("Error: fitted.X and pred.X must have same number of variables.")
-      #     }
-      #  }
       # 
         knots.coords<-posteriors$knots.coords 	
         coords<-posteriors$coords 	
@@ -494,17 +581,26 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
         if (!is.matrix(knots.coords)) {
            stop("Error: knots coords must be a (knots x 2) matrix of xy-coordinate locations.")
         }
+        if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
+           stop("\n Error: knots coords columns should be numeric \n")
+        }
         if (missing(coords)) {
             stop("Error: need to specify the coords")
         }
         if ( !is.matrix(coords) ) {
             stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
         }
+        if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+            stop("\n Error: coords columns should be numeric \n")
+        }
         if (missing(pred.coords)) {
            stop("Error: need to specify the prediction coords.")
         }
         if (!is.matrix(pred.coords)) {
            stop("Error: prediction coords must be a (n.pred.site x 2) matrix of xy-coordinate locations.")
+        }
+        if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
+           stop("\n Error: prediction coords columns should be numeric \n")
         }
       #
            coords.all <- rbind(knots.coords,pred.coords)
@@ -591,6 +687,13 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            m <- tn.knotsites
            r <- posteriors$r
            T <- posteriors$T
+         # checking unequal T
+         if(length(T) > 1){
+           rT <- sum(T)
+         }
+         else{
+           rT <- r*T
+         }
            p <- length(c(posteriors$betap))/nItr
            n <- posteriors$n
       #
@@ -602,18 +705,19 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       call.f<-posteriors$call  
       call.f<-as.formula(paste("tmp~",paste(call.f,sep="")[[3]]))
       if(is.data.frame(pred.data)){
-      if((nsite*r*T)!=dim(pred.data)[[1]]){
+      if((nsite*rT)!=dim(pred.data)[[1]]){
         print("#\n # Check the pred.data \n#\n")
       }
-      pred.data$tmp<-rep(1,nsite*r*T)
+      pred.data$tmp<-rep(1,nsite*rT)
       }
       if(is.null(pred.data)){
-        pred.data<-data.frame(tmp=rep(1,nsite*r*T))
+        pred.data<-data.frame(tmp=rep(1,nsite*rT))
       }
       pred.x<-Formula.matrix(call.f,data=pred.data)[[2]]
+      pred.xsp<-Formula.matrix(call.f,data=pred.data)[[4]]
+      pred.xtp<-Formula.matrix(call.f,data=pred.data)[[6]]
     #
     #
-      #
            phip<-posteriors$phip[(nBurn+1):nItr,]
            if(cov==4){
            nup<-posteriors$nup[(nBurn+1):nItr,]
@@ -632,7 +736,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            betap<-betap[,(nBurn+1):nItr]
            w0p<-matrix(posteriors$w0p,m*r,nItr)
            w0p<-w0p[,(nBurn+1):nItr]	
-           wp<-matrix(posteriors$wp,m*r*T,nItr)
+           wp<-matrix(posteriors$wp,m*rT,nItr)
            wp<-wp[,(nBurn+1):nItr]	
       #
           #
@@ -648,41 +752,56 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       else {
          stop("scale.transform is not correctly defined.")
       }
-      # 
-      #out<-matrix(.C('z_pr_its_gpp_wtilde',as.integer(cov),
-      #     as.integer(scale.transform), as.integer(itt),as.integer(nsite),
-      #     as.integer(n),as.integer(m),as.integer(r),as.integer(T),
-      #     as.integer(r*T),as.integer(p),as.integer(nsite*r*T),
-      #     as.double(phip),as.double(dm),as.double(dnsm),
-      #     as.double(w0p),as.double(wp),as.double(sig2ep),
-      #     as.double(sig2etap),as.double(sig2lp),
-      #     as.double(rhop),as.double(betap),as.double(pred.X),
-      #     as.integer(1),zpred=double(nsite*r*T*itt))$zpred,
-      #     nsite*r*T,itt) 
       #
-      #out<-matrix(.C('z_pr_its_gpp', as.integer(cov),
-      #     as.integer(scale.transform), as.integer(itt),as.integer(nsite),
-      #     as.integer(n),as.integer(m),as.integer(r),as.integer(T),
-      #     as.integer(r*T),as.integer(p),as.integer(nsite*r*T),
-      #     as.double(phip),as.double(phip),as.double(dm),
-      #     as.double(dnsm),as.double(w0p),as.double(wp),as.double(sig2ep),
-      #     as.double(sig2etap),as.double(sig2lp),as.double(mu_lp),
-      #     as.double(rhop),as.double(betap),as.double(pred.X),
-      #     as.integer(1),zpred=double(nsite*r*T*itt))$zpred,
-      #     nsite*r*T,itt) 
-      #
+      if((is.null(pred.xsp)) & (is.null(pred.xtp))){
+      # fixed beta
       out<-matrix(.C('z_pr_its_gpp1', as.integer(cov), 
            as.integer(scale.transform), as.integer(itt),
            as.integer(nsite),as.integer(n),as.integer(m),
-           as.integer(r),as.integer(T),as.integer(r*T),as.integer(p), 
-           as.integer(nsite*r*T),as.double(phip),as.double(nup),as.double(dm),
+           as.integer(r),as.integer(T),as.integer(rT),as.integer(p), 
+           as.integer(nsite*rT),as.double(phip),as.double(nup),as.double(dm),
            as.double(dnsm),as.double(wp),as.double(sig2ep),
            as.double(betap),as.double(pred.x),as.integer(1),
-           zpred=double(itt*nsite*r*T))$zpred,nsite*r*T,itt)
+           zpred=double(itt*nsite*rT))$zpred,rT*nsite,itt)
       #
+      }
+      else if((!is.null(pred.xsp)) & (is.null(pred.xtp))){
+      # spatial beta
+        sig2betap<-posteriors$sig2betap[(nBurn+1):nItr,]
+        betasp<-posteriors$betasp[,(nBurn+1):nItr]
+        q<-posteriors$q 
+        out<-.C("z_pr_its_gpp1_sp",as.integer(cov),as.integer(scale.transform),
+             as.integer(itt),as.integer(nsite),as.integer(n),as.integer(m),
+             as.integer(r),as.integer(T),as.integer(rT),as.integer(p),as.integer(q),
+             as.integer(nsite*rT),as.double(phip),as.double(nup),as.double(dm),
+             as.double(dnsm),as.double(wp),as.double(sig2ep),as.double(sig2betap),
+             as.double(betap),as.double(betasp),as.double(pred.x),as.double(pred.xsp),
+             as.integer(1),betapred=double(q*nsite*itt),#matrix(double(q*nsite*itt),q*nsite,itt), #array(double(q*nsite*itt),dim=c(q,nsite,itt)),
+             zpred=matrix(double(rT*nsite*itt),rT*nsite,itt))[25:26]
+      }
+      #
+      else if((is.null(pred.xsp)) & (!is.null(pred.xtp))){
+      # temporal beta
+         stop("Error: dynamic modellings is not currently available for the GPP based models")
+      }
+      else if((!is.null(pred.xsp)) & (!is.null(pred.xtp))){
+      # both spatial and temporal beta
+         stop("Error: spatio-dynamic modellings is not currently available for the GPP based models")
+      }
+      else{
+         stop("Error: correctly define X variables")
+      } 
       #
       output<-NULL
-      output$pred.samples<-out
+      if((!is.null(pred.xsp)) & (is.null(pred.xtp))){
+      # spatial beta
+        output$pred.samples<-out$zpred
+        output$pred.spbeta.samples<-array(c(out$betapred),dim=c(q,nsite,itt))
+      }
+      else{
+        output$pred.samples<-out
+      }
+      #
       out<-NULL
       output$knots.coords <- posteriors$knots.coords
       output$pred.coords <- pred.coords
@@ -715,11 +834,11 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
           #
           szp<-spT.Summary.Stat(output$pred.samples[,])
           # 
-          output$Mean <- matrix(szp$Mean,r*T, nsite)
-          output$Median <- matrix(szp$Median,r*T, nsite)
-          output$SD <- matrix(szp$SD,r*T, nsite)
-          output$Low <- matrix(szp[,4],r*T, nsite)
-          output$Up <- matrix(szp[,5],r*T, nsite)
+          output$Mean <- matrix(szp$Mean,rT, nsite)
+          output$Median <- matrix(szp$Median,rT, nsite)
+          output$SD <- matrix(szp$SD,rT, nsite)
+          output$Low <- matrix(szp[,4],rT, nsite)
+          output$Up <- matrix(szp[,5],rT, nsite)
           szp <- NULL
     #
    end.time <- proc.time()[3]
@@ -777,13 +896,22 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
        if ( !is.matrix(fore.coords) ) {
          stop("Error: fore.coords must be a matrix of xy-coordinate locations")
        }
+       if ( (!is.numeric(fore.coords[,1])) | (!is.numeric(fore.coords[,2]))) {
+         stop("\n Error: fore.coords columns should be numeric \n")
+       }
       #
            nsite <- dim(fore.coords)[[1]]
            n <- posteriors$n
            r <- posteriors$r
            T <- posteriors$T
            m <- posteriors$knots  
-           N <- n*r*T
+           if(length(T)>1){
+             rT <- sum(T)
+           } 
+           else{
+             rT <- r*T
+           }
+           N <- n*rT
            p <- posteriors$p
       #
       #
@@ -868,7 +996,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       out<-NULL
       out<-matrix(.C("zlt_fore_gpp_its",as.integer(cov),
        as.integer(itt),as.integer(K),as.integer(nsite),
-       as.integer(m),as.integer(r),as.integer(p),as.integer(r*T),
+       as.integer(m),as.integer(r),as.integer(p),as.integer(rT),
        as.integer(T),as.integer(r*K),as.integer(nsite*r*K),
        as.double(dnsitem),as.double(dm),as.double(phip),as.double(nup),
        as.double(sig_ep),as.double(sig_etap),as.double(betap),
@@ -887,19 +1015,19 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       output$fore.samples <- exp(out)
           }
           # 
-      #output$n.fore.sites <- nsite
-      #output$foreStep <- K
       output$knots.coords <- knots.coords
       output$fore.coords <- fore.coords
       output$distance.method<-posteriors$distance.method  
       output$cov.fnc<-posteriors$cov.fnc  
-      output$scale.transform <- posteriors$scale.transform
-      output$obsData<-matrix(posteriors$Y,r*T,n)  
-      output$fittedData<-matrix(posteriors$fitted[,1],r*T,n) 
+      #output$scale.transform <- posteriors$scale.transform
+
+      output$obsData<-matrix(posteriors$Y,rT,n)  
+      output$fittedData<-matrix(posteriors$fitted[,1],rT,n) 
       if(posteriors$scale.transform=="SQRT"){output$fittedData<-output$fittedData^2}
       else if(posteriors$scale.transform=="LOG"){output$fittedData<-exp(output$fittedData)}
       else {output$fittedData<-output$fittedData}
-      output$residuals<-matrix(c(output$obsData)-c(output$fittedData),r*T,n)
+      output$residuals<-matrix(c(output$obsData)-c(output$fittedData),rT,n)
+
       #
       if(Summary == TRUE){
          if(itt < 40){
@@ -986,19 +1114,26 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          stop("\n Error: equation must be in formula-class \n ...")
     }
    #
-    if (class(formula) == "formula") {
          XY <- Formula.matrix(formula, data)
          Y <- XY[[1]]
          X <- as.matrix(XY[[2]])
          x.names <- XY[[3]]
-    }
+         Xsp <- XY[[4]]
+         x.names.sp <- XY[[5]]
+         Xtp <- XY[[6]]
+         x.names.tp <- XY[[7]]
    #
+   if(length(x.names.sp)>0){ stop("\n Error: currently not available for spatially varying model. \n")} 
+   if(length(x.names.tp)>0){ stop("\n Error: currently not available for temporally varying model. \n")} 
    #
     if (missing(coords)) {
          stop("Error: need to specify the coords")
     }
     if ( !is.matrix(coords) ) {
          stop("Error: coords must be a (n x 2) matrix of xy-coordinate locations")
+    }
+    if ( (!is.numeric(coords[,1])) | (!is.numeric(coords[,2]))) {
+         stop("\n Error: coords columns should be numeric \n")
     }
    #
     if (missing(knots.coords)) {
@@ -1007,6 +1142,9 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
     if ( !is.matrix(knots.coords) ) {
          stop("Error: knots.coords must be a (n x 2) matrix of xy-coordinate locations")
     }
+    if ( (!is.numeric(knots.coords[,1])) | (!is.numeric(knots.coords[,2]))) {
+         stop("\n Error: knots.coords columns should be numeric \n")
+    }
    #
    #
     if (missing(pred.coords)) {
@@ -1014,6 +1152,9 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
     }
     if ( !is.matrix(pred.coords) ) {
          stop("Error: pred.coords must be a (pred.site x 2) matrix of xy-coordinate locations")
+    }
+    if ( (!is.numeric(pred.coords[,1])) | (!is.numeric(pred.coords[,2]))) {
+         stop("\n Error: pred.coords columns should be numeric \n")
     }
    #
    #
@@ -1026,16 +1167,31 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
    #
    # check time.data
    if(is.null(time.data)){
-     time.data<-c(1,0,length(Y)/length(coords[,1]))
+     #time.data<-c(1,0,length(Y)/length(coords[,1]))
+     time.data<-list(1,length(Y)/length(coords[,1]))
    }
    else{
      time.data<-time.data
    }
    #
          n <- length(coords[,1])            # number of sites
-         r <- time.data[1]                  # number of years
-         T <- time.data[3]                  # number of days
-         N <- n*r*T
+         r <- time.data[[1]]                  # number of years
+         T <- time.data[[2]]                  # number of days
+         # check for T
+         if(r > 1){ 
+            if(length(T) != r){         
+              T<-rep(T,r) 
+            }
+         }
+         #  
+         # checking unequal T
+         if(length(T) > 1){
+           rT <- sum(T)
+         }
+         else{
+           rT <- r*T
+         }
+         N <- n*rT
          knots <- length(knots.coords[,1]) 
    #
     if(n <= knots){
@@ -1077,16 +1233,16 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          priors <- priors.checking.gpp(priors,r,p)
     #
          shape_e <- N/2+priors$prior_a
-         shape_eta <- (knots*r*T)/2+priors$prior_a
+         shape_eta <- (knots*rT)/2+priors$prior_a
          shape_l <- (knots*r)/2+priors$prior_a
     #
-         zm <- matrix(Y,r*T,n)
+         zm <- matrix(Y,rT,n)
          zm <- apply(zm,1,median,na.rm=TRUE)
          zm <- rep(zm,n)
          zm <- cbind(Y,zm)
          zm[is.na(zm[,1]),1]=zm[is.na(zm[,1]),2]
     #
-         flag <- matrix(NA,n*r*T,2)
+         flag <- matrix(NA,n*rT,2)
          flag[,1] <- c(Y)
          flag[!is.na(flag[,1]),2] <- 0
          flag[is.na(flag[,1]),2] <- 1
@@ -1182,38 +1338,11 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          stop("Error: nBurn must be specified")
     }
     #
-     w <- rep(0,r*T*knots)
+     w <- rep(0,rT*knots)
      w0 <- rep(0,knots*r)
     #
     # prediction part
     #
-      #
-      #  if (is.null(pred.X)){
-      #     if(dimnames(X)[[2]][1]=="(Intercept)"){
-      #     pred.x <- matrix(rep(1,T*r*dim(pred.coords)[[1]]))
-      #     }
-      #     else{ 
-      #     stop("\n Error: need to specify the prediction covariates \n ...")
-      #     }
-      #  }
-      #
-      #  if (!is.null(pred.X)){
-      #  if (!is.matrix(pred.X)) {
-      #     stop("Error: pred.X must be a MATRIX of order (M x p),\n  p = number of parameters, M = pred.n*r*T.")
-      #  }
-      #
-      #  if(dimnames(X)[[2]][1]=="(Intercept)"){
-      #     Intercept <- rep(1,dim(pred.X)[1])
-      #     pred.x <- cbind(Intercept,pred.X)
-      #  } 
-      #
-      #  if(dimnames(X)[[2]][1] != "(Intercept)"){
-      #     pred.x <- pred.X
-      #  } 
-      #
-      #  }
-      #  pred.X <- NULL
-      #
     #  	
          coords.all <- rbind(knots.coords,pred.coords)
          tn.knotsites <- length(knots.coords[, 1])
@@ -1244,13 +1373,13 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
       call.f<-formula  
       call.f<-as.formula(paste("tmp~",paste(call.f,sep="")[[3]]))
       if(is.data.frame(pred.data)){
-        if((nsite*r*T)!=dim(pred.data)[[1]]){
+        if((nsite*rT)!=dim(pred.data)[[1]]){
           print("#\n # Check the pred.data \n#\n")
         }
-        pred.data$tmp<-rep(1,nsite*r*T)
+        pred.data$tmp<-rep(1,nsite*rT)
       }
       if(is.null(pred.data)){
-        pred.data<-data.frame(tmp=rep(1,nsite*r*T))
+        pred.data<-data.frame(tmp=rep(1,nsite*rT))
       }
       pred.x<-Formula.matrix(call.f,data=pred.data)[[2]]
     #
@@ -1278,7 +1407,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
         out <- .C("GIBBS_sumpred_gpp",as.integer(aggtype),as.integer(cov), as.integer(spdecay), 
             as.double(flag), as.integer(nItr),
             as.integer(nBurn), as.integer(n), as.integer(m), as.integer(T),
-            as.integer(r), as.integer(r*T), as.integer(p), as.integer(N), as.integer(report),
+            as.integer(r), as.integer(rT), as.integer(p), as.integer(N), as.integer(report),
             as.double(shape_e), as.double(shape_eta), as.double(shape_l),  
             as.double(priors$prior_a), as.double(priors$prior_b), as.double(priors$mu_beta),
             as.double(priors$delta2_beta), as.double(priors$mu_rho), as.double(priors$delta2_rho),
@@ -1288,7 +1417,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
             as.integer(1), as.double(initials$sig2eps), as.double(initials$sig2eta),
             as.double(initials$sig2l), as.double(initials$beta), as.double(initials$rho), 
             as.double(initials$mu_l), as.double(X), as.double(zm), as.double(w0),
-            as.double(w), as.integer(nsite), as.integer(nsite*r*T), as.double(dnsm), 
+            as.double(w), as.integer(nsite), as.integer(nsite*rT), as.double(dnsm), 
             as.double(pred.x), as.integer(trans), accept=double(1), 
             gof=double(1),penalty=double(1))[48:50]    
      #

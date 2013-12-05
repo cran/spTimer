@@ -5,25 +5,25 @@
 This function is used to draw MCMC samples using the Gibbs sampler. 
 }
 \usage{
-spT.Gibbs(formula, data=parent.frame(), model, time.data, 
-coords, knots.coords, newcoords, newdata, priors, initials, 
-nItr, nBurn, report, tol.dist, distance.method, cov.fnc, 
-scale.transform, spatial.decay, annual.aggrn)
-%X.out=TRUE, Y.out=TRUE)
+spT.Gibbs(formula, data=parent.frame(), model="GP", time.data=NULL, 
+	coords, knots.coords, newcoords=NULL, newdata=NULL, priors=NULL, 
+	initials=NULL, nItr=5000, nBurn=2000, report=1, tol.dist=2, 
+	distance.method="geodetic:km", cov.fnc="exponential", scale.transform="NONE", 
+	spatial.decay=spT.decay(type="MH",tuning=0.1), annual.aggrn="NONE")
 }
 \arguments{
-\item{formula}{The symnbolic description of the model equation of the regression part of the space-time model.}
-\item{data}{An optional data frame containing the variables in the model. If omitted, the variables are taken from environment(formula), typically the environment from which spT.Gibbs is called. The data should be ordered first by the time and then by the sites specified by the \code{coords} below. One can also supply coordinates through this argument, where coordinate names should be "Latitude"/"Longitude" or "xcoords"/"ycoords".}
+\item{formula}{The symnbolic description of the model equation of the regression part of the space-time model.} 
+\item{data}{An optional data frame containing the variables in the model. If omitted, the variables are taken from environment(formula), typically the environment from which spT.Gibbs is called. The data should be ordered first by the time and then by the sites specified by the \code{coords} below. One can also supply coordinates through this argument, where coordinate names should be "Latitude" and "Longitude".}
 \item{model}{The spatio-temporal models to be fitted, current input: "GP", "AR", and "GPP".}
 \item{time.data}{Defining the segments of the time-series set up using the function \code{\link{spT.time}}.}
-\item{coords}{The n by 2 matrix defining the locations (e.g., longitude/easting, latitude/northing) of the fitting sites, where n is the number of fitting sites. One can also supply coordinates through the argument data, where coordinate names should be "Latitude"/"Longitude" or "xcoords"/"ycoords".}
+\item{coords}{The n by 2 matrix or data frame defining the locations (e.g., longitude/easting, latitude/northing) of the fitting sites, where n is the number of fitting sites. One can also supply coordinates through a formula argument as ~Longitude+Latitude.}
 \item{knots.coords}{The locations of the knots in similar format to coords above, only required if \code{model="GPP"}.}
 \item{newcoords}{The locations of the prediction sites in similar format to coords above, only required if fit and predictions are done simultaneously.}
 \item{newdata}{The covariate values at the prediction sites specified by \code{pred.coords}. This should have same space-time structure as the original data frame.}
 \item{priors}{The prior distributions for the parameters. Default distributions are specified if these are not specified. If priors=NULL a flat prior distribution will be used with large variance. See details in \code{\link{spT.priors}}.}
 \item{initials}{The preferred initial values for the parameters. If omitted, default values are provided automatically. Further  details are provided in  \code{\link{spT.initials}}.}
-\item{nItr}{Number of MCMC iterations. Default value is 13000.}
-\item{nBurn}{Number of burn-in samples. This number of samples will be discarded before making any inference. Default value is 3000.}
+\item{nItr}{Number of MCMC iterations. Default value is 5000.}
+\item{nBurn}{Number of burn-in samples. This number of samples will be discarded before making any inference. Default value is 2000.}
 \item{report}{Number of reports to display while running the Gibbs sampler. Defaults to number of iterations. }
 \item{distance.method}{The preferred method to calculate the distance between any two locations. The available options are "geodetic:km", "geodetic:mile", "euclidean", "maximum", "manhattan", and "canberra". See details in \code{\link{dist}}.}
 \item{tol.dist}{Minimum separation distance between any two locations out of those  specified by coords, knots.coords and pred.coords. The default is 0.005. The programme will exit if the minimum distance is less than the non-zero specified value. This will ensure non-singularity of the covariance matrices.}
@@ -42,10 +42,13 @@ scale.transform, spatial.decay, annual.aggrn)
 \item{nup}{MCMC samples for the parameter \eqn{\nu}. Only available if "matern" covariance function is used.}
 \item{sig2eps}{MCMC samples for the parameter \eqn{\sigma^2_\epsilon}.}
 \item{sig2etap}{MCMC samples for the parameter \eqn{\sigma^2_\eta}.}
+%\item{sig2betap}{MCMC samples for the parameter \eqn{\sigma^2_\beta}, only applicable for spatially varying model.}
+%\item{sig2deltap}{MCMC samples for the parameter \eqn{\sigma^2_\delta}, only applicable for temporally varying dynamic model.}
+%\item{sig2op}{MCMC samples for the parameter \eqn{\sigma^2_o}, only applicable for temporally varying dynamic model.}
 \item{betap}{MCMC samples for the parameter \eqn{\beta}.}
+\item{rhop}{MCMC samples for \eqn{\rho} for the AR or GPP model.}
 \item{op}{MCMC samples for the true observations.}
 \item{fitted}{MCMC summary (mean and sd) for the fitted values.}
-%\item{sig2eps}{MCMC samples for the parameter \eqn{\sigma^2_\epsilon}.}
 \item{tol.dist}{Minimum tolerance distance limit between the locations.}
 \item{distance.method}{Name of the distance calculation method.}
 \item{cov.fnc}{Name of the covariance function used in model fitting.}
@@ -105,17 +108,19 @@ OutGPP_Annual_4th_Highest_Prediction.txt: (nItr x (predsites*r)) matrix. \cr
 }
 \references{
 
- Bakar, K. S. and Sahu, S. K. (2013) spTimer: Spatio-Temporal Bayesian Modelling Using R. Technical Report, University of Southampton, UK. \cr
- Sahu, S. K. and Bakar, K. S. (2012) A comparison of Bayesian Models for Daily Ozone Concentration Levels Statistical Methodology , 9, 144-157. \cr
- Sahu, S. K. and Bakar, K. S. (2012) Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, 28, 395-415. \cr
+ Bakar, K. S. and Sahu, S. K. (2013) spTimer: Spatio-Temporal Bayesian Modelling Using R. Technical Report, University of Southampton, UK. 
+
+ Sahu, S. K. and Bakar, K. S. (2012) A comparison of Bayesian Models for Daily Ozone Concentration Levels Statistical Methodology , 9, 144-157.
+
+ Sahu, S. K. and Bakar, K. S. (2012) Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, 28, 395-415. 
+
  Sahu, S. K., Bakar, K. S. and Awang, N. (2013) Bayesian Forecasting Using Hierarchical Spatio-temporal Models with Applications to Ozone Levels in the Eastern United States. Technical Report, University of Southampton. 
 
 }
-
 %\note{
 %}
 \seealso{
-\code{\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{summary.spT}, \link{plot.spT}, \link{predict.spT}}.
+\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{summary.spT}, \link{plot.spT}, \link{predict.spT}
 }
 \examples{
 \dontrun{
@@ -136,16 +141,13 @@ library(spTimer)
 ##
 
 # Read data 
-data(DataFit); 
-
-# Define the coordinates
-coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+data(NYdata)
 
 # MCMC via Gibbs using default choices
 set.seed(11)
 post.gp <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
-         data=DataFit, model="GP", coords=coords, 
-         scale.transform="SQRT")
+        data=NYdata, model="GP", coords=~Longitude+Latitude, 
+        scale.transform="SQRT")
 print(post.gp)
 
 # MCMC via Gibbs not using default choices
@@ -186,6 +188,7 @@ plot(post.gp)
 plot(post.gp,residuals=TRUE)
 
 coef(post.gp)
+confint(post.gp)
 terms(post.gp)
 formula(post.gp)
 model.frame(post.gp)
@@ -199,8 +202,11 @@ post.gp$PMCC
 ##
 
 # Read data 
-data(DataFit); 
-data(DataValPred)
+s<-c(8,11,12,14,18,21,24,28)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))
@@ -231,15 +237,15 @@ spT.validation(DataValPred$o8hrmax,c(post.gp.fitpred$prediction[,1]))
 ##
 
 # Read data 
-data(DataFit); 
+data(NYdata)
 
 # Define the coordinates
-coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+coords<-as.matrix(unique(cbind(NYdata[,2:3])))
 
 # MCMC via Gibbs using default choices
 set.seed(11)
 post.ar <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
-         data=DataFit, model="AR", coords=coords, 
+         data=NYdata, model="AR", coords=coords, 
          scale.transform="SQRT")
 print(post.ar)
 
@@ -266,7 +272,7 @@ nItr<-5000
 # MCMC via Gibbs
 set.seed(11)
 post.ar <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=DataFit, model="AR", time.data=time.data, 
+         data=NYdata, model="AR", time.data=time.data, 
          coords=coords, priors=priors, initials=initials, 
          nItr=nItr, nBurn=0, report=nItr, 
          tol.dist=2, distance.method="geodetic:km", 
@@ -286,8 +292,11 @@ post.ar$PMCC
 ##
 
 # Read data 
-data(DataFit); 
-data(DataValPred)
+s<-c(8,11,12,14,18,21,24,28)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day %in% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day %in% c(30, 31) & Month == 8)))
 
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))
@@ -316,10 +325,10 @@ spT.validation(DataValPred$o8hrmax,c(post.ar.fitpred$prediction[,1]))
 ##
 
 # Read data 
-data(DataFit); 
+data(NYdata); 
 
 # Define the coordinates
-coords<-as.matrix(unique(cbind(DataFit[,2:3])))
+coords<-as.matrix(unique(cbind(NYdata[,2:3])))
 # Define knots
 knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
               min(coords[,1])),Latitude=c(max(coords[,2]),
@@ -328,7 +337,7 @@ knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
 # MCMC via Gibbs using default choices
 set.seed(11)
 post.gpp <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
-         data=DataFit, model="GPP", coords=coords, 
+         data=NYdata, model="GPP", coords=coords, 
          knots.coords=knots, scale.transform="SQRT")
 print(post.gpp)
 
@@ -355,7 +364,7 @@ nItr<-5000
 # MCMC via Gibbs
 set.seed(11)
 post.gpp <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH, 
-         data=DataFit, model="GPP", time.data=time.data, 
+         data=NYdata, model="GPP", time.data=time.data, 
          coords=coords, knots.coords=knots,
          priors=priors, initials=initials, 
          nItr=nItr, nBurn=0, report=nItr, 
@@ -376,8 +385,11 @@ post.gpp$PMCC
 ##
 
 # Read data 
-data(DataFit); 
-data(DataValPred)
+s<-c(8,11,12,14,18,21,24,28)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))

@@ -30,7 +30,7 @@ This function is used to obtain MCMC summary statistics.
 ##
 
 summary(out) # where out is the output from spT class
-summary(out, digits=2) # where out is the output from spT class
+summary(out, digit=2) # where out is the output from spT class
 summary(out, pack="coda") # where out is the output from spT class
 
 ##

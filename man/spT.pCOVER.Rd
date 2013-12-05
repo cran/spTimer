@@ -38,8 +38,8 @@ y <- matrix(rnorm(1000*5000,5,1),1000,5000)
 
 # The pCOVER is:
 
-spT.pCOVER(z=x, zsamples=y)
-spT.pCOVER(z=x, zsamples=y, level=50)
+spT.pCOVER(z=x, zsample=y)
+spT.pCOVER(z=x, zsample=y, level=50)
 
 ##  
 }

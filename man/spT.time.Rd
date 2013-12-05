@@ -5,11 +5,11 @@
 This function defines the time series in the spatio-temporal data.
 }
 \usage{
-spT.time(t.series, segment=1)
+spT.time(t.series, segments=1)
 }
 \arguments{
-\item{t.series}{Number of times within each segment in each series. This should be a constant. Currently it is not possible to make it a variable? Like its 30 for April, and 31 for May etc.}
-\item{segment}{Number of segments in each time series. This should  be a constant. }
+\item{t.series}{Number of times within each segment in each series. Can take both regular and irregular time-series. }
+\item{segments}{Number of segments in each time series. This should  be a constant. }
 }
 \seealso{
 \code{\link{spT.Gibbs}}.
@@ -18,7 +18,11 @@ spT.time(t.series, segment=1)
 \dontrun{
 ## 
 
-time.data<-spT.time(t.series=31,segment=2)
+# regular time-series in each year
+time.data<-spT.time(t.series=30,segments=2)
+
+# irregular time-series in each year
+time.data<-spT.time(t.series=c(35,25),segments=2)
 
 ##
 }

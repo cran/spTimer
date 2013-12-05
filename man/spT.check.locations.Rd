@@ -9,7 +9,7 @@ This function is used to check the minimum distance between two locations.
 spT.check.locations(fit.locations, pred.locations, 
    method="geodetic:km", tol = 5) 
 
-spT.check.sites.inside(coords, method)
+spT.check.sites.inside(coords, method, tol=0.1)
 }
 \arguments{
 \item{fit.locations}{The locations for the fitted observations.}
@@ -24,7 +24,7 @@ spT.check.sites.inside(coords, method)
 These functions are used to avoid of occuring non-positive definite correlation matrix.
 }
 \seealso{
-\code{\link{spT.geodist}, \link{dist}, \link{spT.data.selection}}.
+\code{\link{spT.geodist}, \link{dist}, \link{spT.subset}}.
 }
 \examples{
 \dontrun{
@@ -40,7 +40,7 @@ r4<-spT.data.selection(data=NYsite, random=TRUE, num.rs=4)
 
 # Choose purposively sites numbered as 2, 8, and 12, 15.
 
-p4<-spT.data.selection(data=NYsite, random=FALSE, s=c(2,8,12,15))
+p4<-spT.subset(data=NYsite, s=c(2,8,12,15))
    
 # Check locations of datasets r4 and p4
 

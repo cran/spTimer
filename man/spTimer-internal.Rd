@@ -3,7 +3,9 @@
 \alias{.First.lib}
 \alias{.onLoad}
 \alias{.onAttach}
+\alias{stat.sum}
 \alias{Formula.matrix}
+\alias{Formula.coords}
 \alias{Gam}
 \alias{Nor}
 \alias{PMCC}
@@ -45,6 +47,14 @@
 \alias{formula.spT}
 \alias{terms.spT}
 \alias{model.matrix.spT}
+\alias{sp.dimname.fnc}
+\alias{tp.dimname.fnc}
+\alias{tp}
+\alias{sp}
+\alias{spT.ObsGridLoc}
+\alias{spT.ObsGridData}
+\alias{spT.gridTodata}
+%\alias{NYgrid}
 %\alias{imputation.z}
 %\alias{spT.keep.morethan.dist}
 %\alias{summary.spT}
