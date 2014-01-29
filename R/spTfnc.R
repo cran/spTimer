@@ -618,7 +618,7 @@ spT.prediction<-function(nBurn=0, pred.data=NULL, pred.coords,
    else if(model=="GPP"){
       cat("\n Prediction: GPP models \n")
       out<-spGPP.prediction(nBurn=nBurn, pred.data=pred.data, pred.coords=pred.coords, 
-           posteriors=posteriors, Summary=Summary)
+           posteriors=posteriors, tol.dist=tol.dist, Summary=Summary)
       out$model<-model
       #class(out)<-"spTprd"
       out
@@ -640,7 +640,7 @@ print.spTfore<-function(x, ...) {
 }
 ##
 spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords, 
-            posteriors, pred.samples.ar=NULL, Summary=TRUE)
+            posteriors, pred.samples.ar=NULL, tol.dist, Summary=TRUE)
 {
   #
    if (missing(posteriors)) {
@@ -657,7 +657,7 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
       cat("\n Forecast: GP models \n")
       out<-spGP.forecast(nBurn=nBurn, K=K, fore.data=fore.data,
            fore.coords=fore.coords, posteriors=posteriors, 
-           Summary=Summary)
+           tol.dist=tol.dist, Summary=Summary)
       out$model<-model
       class(out)<-"spTfore"
       out
@@ -669,7 +669,8 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
       }
       cat("\n Forecast: AR models \n")
       out<-spAR.forecast(nBurn=nBurn, K=K, fore.data=fore.data, fore.coords=fore.coords, 
-           posteriors=posteriors, pred.samples.ar=pred.samples.ar, Summary=Summary)
+           posteriors=posteriors, pred.samples.ar=pred.samples.ar, tol.dist=tol.dist,
+		   Summary=Summary)
       out$model<-model
       class(out)<-"spTfore"
       out
@@ -678,7 +679,7 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
    else if(model=="GPP"){
       cat("\n Forecast: GPP models \n")
       out<-spGPP.forecast(nBurn=nBurn, K=K, fore.data=fore.data, fore.coords=fore.coords, 
-           posteriors=posteriors, Summary=Summary)
+           posteriors=posteriors, tol.dist=tol.dist, Summary=Summary)
       out$model<-model
       class(out)<-"spTfore"
       out
@@ -692,7 +693,7 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
 ## use of predict function
 ##
 predict.spT<-function(object, newdata=NULL, newcoords, foreStep=NULL, type="spatial", nBurn=0, 
-          tol.dist=2, predAR=NULL, ...)
+          tol.dist=2, predAR=NULL, Summary=TRUE, ...)
 {
    ## check for spacetime class
    if(class(newdata) %in% c("STFDF","STSDF","STIDF","SpatialPointsDataFrame")){
@@ -741,7 +742,7 @@ predict.spT<-function(object, newdata=NULL, newcoords, foreStep=NULL, type="spat
           stop("Error: define newcoords.")
         }
 	 out<-spT.prediction(nBurn=nBurn, pred.data=newdata, pred.coords=newcoords,
-          posteriors=object, tol.dist=tol.dist, Summary=TRUE)
+          posteriors=object, tol.dist=tol.dist, Summary=Summary)
      out$type<-"spatial"
      class(out)<-"spTpred" 
      out
@@ -754,7 +755,7 @@ predict.spT<-function(object, newdata=NULL, newcoords, foreStep=NULL, type="spat
           stop("Error: define foreStep.")
         }
      out<-spT.forecast(nBurn=nBurn, K=foreStep, fore.data=newdata, fore.coords=newcoords, 
-            posteriors=object, pred.samples.ar=predAR, Summary=TRUE)
+            posteriors=object, pred.samples.ar=predAR, tol.dist=tol.dist, Summary=Summary)
      out$type<-"temporal"
      class(out)<-"spTpred"
      out

@@ -304,7 +304,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     }
    #
      method <- distance.method
-     spT.check.sites.inside(coords, method)
+     spT.check.sites.inside(coords, method, tol=tol.dist)
    #
    if(method=="geodetic:km"){
      coords.D <- as.matrix(spT.geodist(Lon=coords[,1],Lat=coords[,2], KM=TRUE))
@@ -995,7 +995,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
 ## K-step forecasts for the GP models 
 ##
  spGP.forecast <- function(nBurn, K, fore.data=NULL,
-               fore.coords=NULL, posteriors, Summary=TRUE)
+               fore.coords=NULL, posteriors, tol.dist, Summary=TRUE)
 {
       start.time<-proc.time()[3]
       #
@@ -1085,7 +1085,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
       #
            method <- posteriors$distance.method
            coords <- posteriors$coords             
-           spT.check.sites.inside(fore.coords, method)
+           spT.check.sites.inside(fore.coords, method, tol=tol.dist)
       #                                                           
         if(method == "geodetic:km"){
            #coords.D <- as.matrix(spT.geodist(Lon=fore.coords[,1],Lat=fore.coords[,2],KM=TRUE))
@@ -1325,7 +1325,7 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     }
     #
       method <- distance.method
-      spT.check.sites.inside(coords, method)
+      spT.check.sites.inside(coords, method,tol=tol.dist)
    #
     if(method=="geodetic:km"){
       coords.D <- as.matrix(spT.geodist(Lon=coords[,1],Lat=coords[,2], KM=TRUE))

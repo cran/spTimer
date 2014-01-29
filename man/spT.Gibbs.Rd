@@ -151,6 +151,13 @@ post.gp <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,
 print(post.gp)
 
 # MCMC via Gibbs not using default choices
+# Read data 
+s<-c(8,11,12,14,18,21,24,28)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
+
 # define the time-series 
 time.data<-spT.time(t.series=60,segment=1)
 

@@ -211,7 +211,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     }
    #
       method <- distance.method
-      spT.check.sites.inside(knots.coords,method)  
+      spT.check.sites.inside(knots.coords,method,tol=tol.dist)  
    #
     if(method=="geodetic:km"){
       coords.D.knots <- as.matrix(spT.geodist(Lon=knots.coords[,1],Lat=knots.coords[,2], KM=TRUE))
@@ -228,7 +228,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     }
     #
       all.coords <- rbind(coords,knots.coords)
-      spT.check.sites.inside(all.coords, method)  
+      spT.check.sites.inside(all.coords, method,tol=tol.dist)  
     #
     if(method=="geodetic:km"){
        coords.D.all <- as.matrix(spT.geodist(Lon=all.coords[,1],Lat=all.coords[,2], KM=TRUE))
@@ -559,7 +559,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
 ## Prediction of Z_lt for the GPP models using MCMC samples
 ##
 spGPP.prediction<-function(nBurn, pred.data, pred.coords, 
-               posteriors, Summary=TRUE, fitted.X=NULL)
+               posteriors, tol.dist, Summary=TRUE, fitted.X=NULL)
 {
     start.time<-proc.time()[3]
      #
@@ -610,7 +610,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            npred.sites <- (tn.knotsites + 1):(length(coords.all[, 1]))
       #    
            method <- posteriors$distance.method   
-           spT.check.sites.inside(coords.all, method)
+           spT.check.sites.inside(coords.all, method, tol=tol.dist)
       #                                                           
         if(method == "geodetic:km"){
            coords.D <- as.matrix(spT.geodist(Lon=coords.all[,1],Lat=coords.all[,2], KM=TRUE))
@@ -628,7 +628,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            dm <- coords.D[1:tn.knotsites, 1:tn.knotsites] # m x m
       #
            all.coords <- rbind(coords,knots.coords)
-           spT.check.sites.inside(all.coords, method)
+           spT.check.sites.inside(all.coords, method,tol=tol.dist)
       #
         if(method == "geodetic:km"){
            coords.D.all <- as.matrix(spT.geodist(Lon=all.coords[,1],Lat=all.coords[,2], KM=TRUE))
@@ -643,7 +643,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            dnm <- coords.D.all[1:length(coords[,1]),(length(coords[,1])+1):length(all.coords[,1])]
       #
            al.coords <- rbind(pred.coords,coords)
-           spT.check.sites.inside(al.coords, method)
+           spT.check.sites.inside(al.coords, method, tol=tol.dist)
         if(method == "geodetic:km"){
            coords.D.al <- as.matrix(spT.geodist(Lon=al.coords[,1],Lat=al.coords[,2], KM=TRUE))
            dnsn <- coords.D.al[1:length(pred.coords[,1]),(length(pred.coords[,1])+1):length(al.coords[,1])]
@@ -868,7 +868,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
 ## K-step forecasts for the GPP models 
 ##
  spGPP.forecast<-function(nBurn, K, fore.data=NULL, 
-       fore.coords=NULL, posteriors, Summary=TRUE)
+       fore.coords=NULL, posteriors, tol.dist, Summary=TRUE)
 {
       start.time<-proc.time()[3]
       #
@@ -961,7 +961,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            npred.sites <- (tn.knotsites + 1):(length(coords.all[, 1]))
       #    
            method <- posteriors$distance.method   
-           spT.check.sites.inside(coords.all, method)
+           spT.check.sites.inside(coords.all, method, tol=tol.dist)
       #                                                           
         if(method == "geodetic:km"){
            coords.D <- as.matrix(spT.geodist(Lon=coords.all[,1],Lat=coords.all[,2], KM=TRUE))
@@ -1200,7 +1200,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
    #
     #
       method <- distance.method
-      spT.check.sites.inside(knots.coords, method)
+      spT.check.sites.inside(knots.coords, method, tol=tol.dist)
    #
          all.coords <- rbind(coords,knots.coords)
    #

@@ -7,7 +7,7 @@ This function is used to obtain spatial predictions in the unknown locations and
 \usage{
 ## S3 method for class 'spT'
 \method{predict}{spT}(object, newdata, newcoords, foreStep=NULL, type="spatial", 
-        nBurn, tol.dist, predAR=NULL, ...)
+        nBurn, tol.dist, predAR=NULL, Summary=TRUE, ...)
 
 }
 
@@ -20,16 +20,17 @@ This function is used to obtain spatial predictions in the unknown locations and
 \item{nBurn}{Number of burn-in. Initial MCMC samples to discard before making inference.}
 \item{tol.dist}{Minimum tolerance distance limit between fitted and predicted locations.}
 \item{predAR}{The prediction output, if forecasts are in the prediction locations. Only applicable if type="forecast" and data fitted with the "AR" model.}
+\item{Summary}{Logical argument to obtain summary of the predicted MCMC samples. Default is TRUE.}
 \item{...}{Other arguments.}
 }
 \value{
 \item{pred.samples or fore.samples}{Prediction or forecast MCMC samples.}
 \item{pred.coords or fore.coords}{prediction or forecast coordinates.}
-\item{Mean}{Average of the MCMC predictions}
-\item{Median}{Median of the MCMC predictions}
-\item{SD}{Standard deviation of the MCMC predictions}
-\item{Low}{Lower limit for the 95 percent CI of the MCMC predictions}
-\item{Up}{Upper limit for the 95 percent CI of the MCMC predictions}
+\item{Mean}{Average of the MCMC predictions, if Summary=TRUE}
+\item{Median}{Median of the MCMC predictions, if Summary=TRUE}
+\item{SD}{Standard deviation of the MCMC predictions, if Summary=TRUE}
+\item{Low}{Lower limit for the 95 percent CI of the MCMC predictions, if Summary=TRUE}
+\item{Up}{Upper limit for the 95 percent CI of the MCMC predictions, if Summary=TRUE}
 \item{computation.time}{The computation time.}
 \item{model}{The model method used for prediction.}
 \item{type}{"spatial" or "temporal".}

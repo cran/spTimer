@@ -46,7 +46,7 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     }
    #
      method <- distance.method
-     spT.check.sites.inside(coords, method)
+     spT.check.sites.inside(coords, method, tol=tol.dist)
    #
    if(method=="geodetic:km"){
      coords.D <- as.matrix(spT.geodist(Lon=coords[,1],Lat=coords[,2], KM=TRUE))
@@ -534,7 +534,7 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
 ##
  spAR.forecast <- function(nBurn, K, fore.data, 
         fore.coords, posteriors, pred.samples.ar=NULL,
-        Summary=TRUE)
+        tol.dist, Summary=TRUE)
 {
       start.time<-proc.time()[3]
       #
@@ -813,7 +813,7 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     }
     #
       method <- distance.method
-      spT.check.sites.inside(coords, method)
+      spT.check.sites.inside(coords, method, tol=tol.dist)
    #
     if(method=="geodetic:km"){
       coords.D <- as.matrix(spT.geodist(Lon=coords[,1],Lat=coords[,2], KM=TRUE))

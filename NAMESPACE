@@ -1,19 +1,10 @@
 
 useDynLib(spTimer)
 exportPattern("^[^\\.]")
-#export(spAR.Gibbs)
-#export(spAR.prediction)
-#export(spAR.forecast)
-#exportClasses(spAR.Gibbs,spAR.prediction,spAR.forecast)
 
-#export(spT.Gibbs)
-#export(spT.prediction)
-#export(spT.forecast)
-#export(spT.priors)
-#export(spT.initials)
-#export(spT.geodist)
-#export(spT.decay)
-
+import(coda)
+import(spacetime)
+import(forecast)
 
 S3method(print,spT)
 S3method(print,spTpred)
@@ -29,5 +20,3 @@ S3method(model.matrix,spT)
 S3method(residuals,spT)
 S3method(terms,spT)
 
-
-#import(coda)
