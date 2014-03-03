@@ -8,8 +8,8 @@ This function defines the time series in the spatio-temporal data.
 spT.time(t.series, segments=1)
 }
 \arguments{
-\item{t.series}{Number of times within each segment in each series. Can take both regular and irregular time-series. }
-\item{segments}{Number of segments in each time series. This should  be a constant. }
+\item{t.series}{Number of times within each segment in each series. It could be either a scalar or a vector. It should be a scalar if the segments are of equal length and should be a vector of length \code{segments} whose entries give the length of the segments.}  
+\item{segments}{Number of segments in each time series. This should  be a scalar. }
 }
 \seealso{
 \code{\link{spT.Gibbs}}.
@@ -18,11 +18,11 @@ spT.time(t.series, segments=1)
 \dontrun{
 ## 
 
-# regular time-series in each year
-time.data<-spT.time(t.series=30,segments=2)
+# Equal length time-series in each of 3 years
+time.data<-spT.time(t.series=365,segments=3)
 
-# irregular time-series in each year
-time.data<-spT.time(t.series=c(35,25),segments=2)
+# Un-equal length time-series in 5 years
+time.data<-spT.time(t.series=c(366, 365, 365, 365, 366),segments=5)
 
 ##
 }

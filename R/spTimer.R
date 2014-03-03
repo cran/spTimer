@@ -1,8 +1,9 @@
 ####################################################################################
 
-library(spacetime)
-library(forecast)
+
 library(coda)
+library(forecast)
+library(spacetime)
 
 .onLoad <-
     function(libname, pkgname)
@@ -21,5 +22,6 @@ library(coda)
         version <- um[nchar(um)>0][2]
         packageStartupMessage("\n## spTimer version: ", version," \n")
 }
+
 
 ####################################################################################

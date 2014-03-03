@@ -7,29 +7,29 @@ This function is used to draw MCMC samples using the Gibbs sampler.
 \usage{
 spT.Gibbs(formula, data=parent.frame(), model="GP", time.data=NULL, 
 	coords, knots.coords, newcoords=NULL, newdata=NULL, priors=NULL, 
-	initials=NULL, nItr=5000, nBurn=2000, report=1, tol.dist=2, 
+	initials=NULL, nItr=5000, nBurn=1000, report=1, tol.dist=0.05, 
 	distance.method="geodetic:km", cov.fnc="exponential", scale.transform="NONE", 
-	spatial.decay=spT.decay(type="MH",tuning=0.1), annual.aggrn="NONE")
+	spatial.decay=spT.decay(distribution="FIXED"), annual.aggrn="NONE")
 }
 \arguments{
 \item{formula}{The symnbolic description of the model equation of the regression part of the space-time model.} 
 \item{data}{An optional data frame containing the variables in the model. If omitted, the variables are taken from environment(formula), typically the environment from which spT.Gibbs is called. The data should be ordered first by the time and then by the sites specified by the \code{coords} below. One can also supply coordinates through this argument, where coordinate names should be "Latitude" and "Longitude".}
-\item{model}{The spatio-temporal models to be fitted, current input: "GP", "AR", and "GPP".}
+\item{model}{The spatio-temporal models to be fitted, current choices are: "GP", "AR", and "GPP" with the first one as the default.}
 \item{time.data}{Defining the segments of the time-series set up using the function \code{\link{spT.time}}.}
-\item{coords}{The n by 2 matrix or data frame defining the locations (e.g., longitude/easting, latitude/northing) of the fitting sites, where n is the number of fitting sites. One can also supply coordinates through a formula argument as ~Longitude+Latitude.}
+\item{coords}{The n by 2 matrix or data frame defining the locations (e.g., longitude/easting, latitude/northing) of the fitting sites, where n is the number of fitting sites. One can also supply coordinates through a formula argument such as ~Longitude+Latitude.}
 \item{knots.coords}{The locations of the knots in similar format to coords above, only required if \code{model="GPP"}.}
-\item{newcoords}{The locations of the prediction sites in similar format to coords above, only required if fit and predictions are done simultaneously.}
-\item{newdata}{The covariate values at the prediction sites specified by \code{pred.coords}. This should have same space-time structure as the original data frame.}
-\item{priors}{The prior distributions for the parameters. Default distributions are specified if these are not specified. If priors=NULL a flat prior distribution will be used with large variance. See details in \code{\link{spT.priors}}.}
+\item{newcoords}{The locations of the prediction sites in similar format to coords above, only required if fit and predictions are to be performed simultaneously. If omitted, no predictions will be performed.}
+\item{newdata}{The covariate values at the prediction sites specified by \code{newcoords}. This should have same space-time structure as the original data frame.}
+\item{priors}{The prior distributions for the parameters. Default distributions are specified if these are not provided. If priors=NULL a flat prior distribution will be used with large variance. See details in \code{\link{spT.priors}}.}
 \item{initials}{The preferred initial values for the parameters. If omitted, default values are provided automatically. Further  details are provided in  \code{\link{spT.initials}}.}
 \item{nItr}{Number of MCMC iterations. Default value is 5000.}
-\item{nBurn}{Number of burn-in samples. This number of samples will be discarded before making any inference. Default value is 2000.}
+\item{nBurn}{Number of burn-in samples. This number of samples will be discarded before making any inference. Default value is 1000.}
 \item{report}{Number of reports to display while running the Gibbs sampler. Defaults to number of iterations. }
-\item{distance.method}{The preferred method to calculate the distance between any two locations. The available options are "geodetic:km", "geodetic:mile", "euclidean", "maximum", "manhattan", and "canberra". See details in \code{\link{dist}}.}
+\item{distance.method}{The preferred method to calculate the distance between any two locations. The available options are "geodetic:km", "geodetic:mile", "euclidean", "maximum", "manhattan", and "canberra". See details in \code{\link{dist}}. The default is "geodetic:km".}
 \item{tol.dist}{Minimum separation distance between any two locations out of those  specified by coords, knots.coords and pred.coords. The default is 0.005. The programme will exit if the minimum distance is less than the non-zero specified value. This will ensure non-singularity of the covariance matrices.}
 \item{cov.fnc}{Covariance function for the spatial effects. The available options  are "exponential", "gaussian", "spherical" and "matern". If "matern" is used then by default the smooth parameter (\eqn{\nu}) is estimated from (0,1) uniform distribution using discrete samples.}
 \item{scale.transform}{The transformation method for the response variable. Currently implemented options are: "NONE", "SQRT", and "LOG" with  "NONE" as the deault.}
-\item{spatial.decay}{Provides the options for sampling the spatial decay parameter \eqn{\phi}. Currently implemented options  are "DISCRETE", "MH" or "FIXED" and further options for each of these are specified by \code{\link{spT.decay}}. The default is "MH".}
+\item{spatial.decay}{Provides the prior distribution for the spatial decay parameter \eqn{\phi}. Currently implemented options  are  "FIXED", "Unif", or "Gamm".  Further details for each of these are specified by \code{\link{spT.decay}}.}
 \item{annual.aggrn}{This provides the options for calculating annual summary statistics by aggregating different time segments (e.g., annual mean). Currently implemented options are: "NONE", "ave" and "an4th", where "ave" = annual average, "an4th"= annual 4th highest. Only applicable if \code{\link{spT.time}} inputs more than one segment and when fit and predict are done simultaneously.}
 %\item{X.out}{Logical value, if TRUE then the covariates are present in the output.}
 %\item{Y.out}{Logical value, if TRUE then the dependent variable is present in the output.}
@@ -114,13 +114,11 @@ OutGPP_Annual_4th_Highest_Prediction.txt: (nItr x (predsites*r)) matrix. \cr
 
  Sahu, S. K. and Bakar, K. S. (2012) Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, 28, 395-415. 
 
- Sahu, S. K., Bakar, K. S. and Awang, N. (2013) Bayesian Forecasting Using Hierarchical Spatio-temporal Models with Applications to Ozone Levels in the Eastern United States. Technical Report, University of Southampton. 
-
 }
 %\note{
 %}
 \seealso{
-\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{summary.spT}, \link{plot.spT}, \link{predict.spT}
+\code{\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{summary.spT}, \link{plot.spT}, \link{predict.spT}}.
 }
 \examples{
 \dontrun{
@@ -162,17 +160,17 @@ DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Mont
 time.data<-spT.time(t.series=60,segment=1)
 
 # hyper-parameters for the prior distributions
-priors<-spT.priors(model="GP",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
+priors<-spT.priors(model="GP",inv.var.prior=Gamm(2,1),
+        beta.prior=Norm(0,10^4))
 
 # initial values for the model parameters
 initials<-spT.initials(model="GP", sig2eps=0.01, 
             sig2eta=0.5, beta=NULL, phi=0.001)
 
 # input for spatial decay, any one approach from below
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.08)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
+#spatial.decay<-spT.decay(distribution="FIXED", value=0.01)
+spatial.decay<-spT.decay(distribution=Gamm(2,1), tuning=0.08)
+#spatial.decay<-spT.decay(distribution=Unif(0.01,0.02),npoints=5)
 
 # Iterations for the MCMC algorithms
 nItr<-5000
@@ -235,6 +233,36 @@ names(post.gp.fitpred)
 # validation criteria
 spT.validation(DataValPred$o8hrmax,c(post.gp.fitpred$prediction[,1]))  
 
+
+######################################
+## The GP model for sp class data
+######################################
+
+# Creating sp class data
+library(sp)
+data(meuse)
+summary(meuse)
+coordinates(meuse) <- ~x+y
+class(meuse)
+out<-spT.Gibbs(formula=zinc~sqrt(dist),data=meuse,
+               model="GP", scale.transform="LOG")
+summary(out)
+
+# Create a dataset with spacetime class
+library(spTimer)
+site<-unique(NYdata[,c("Longitude","Latitude")])
+library(spacetime)
+row.names(site)<-paste("point",1:nrow(site),sep="")
+site <- SpatialPoints(site)
+ymd<-as.POSIXct(seq(as.Date("2006-07-01"),as.Date("2006-08-31"),by=1))
+# introduce class STFDF
+newNYdata<-STFDF(sp=site, time=ymd, data=NYdata) # full lattice
+class(newNYdata)
+out <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+      data=newNYdata, model="GP", scale.transform="SQRT")
+summary(out)
+
+
 ###########################
 ## The AR models:
 ###########################
@@ -261,17 +289,17 @@ print(post.ar)
 time.data<-spT.time(t.series=60,segment=1)
 
 # hyper-parameters for the prior distributions
-priors<-spT.priors(model="AR",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
+priors<-spT.priors(model="AR",inv.var.prior=Gamm(2,1),
+        beta.prior=Norm(0,10^4))
 
 # initial values for the model parameters
 initials<-spT.initials(model="AR", sig2eps=0.01, 
             sig2eta=0.5, beta=NULL, phi=0.001)
 
 # Input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.01)
-spatial.decay<-spT.decay(type="MH", tuning=0.08)
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.01,0.02),segments=5)
+#spatial.decay<-spT.decay(distribution="FIXED", value=0.01)
+spatial.decay<-spT.decay(distribution=Gamm(2,1), tuning=0.08)
+#spatial.decay<-spT.decay(distribution=Unif(0.01,0.02),npoints=5)
 
 # Iterations for the MCMC algorithms
 nItr<-5000
@@ -353,17 +381,17 @@ print(post.gpp)
 time.data<-spT.time(t.series=60,segment=1)
 
 # hyper-parameters for the prior distributions
-priors<-spT.priors(model="GPP",var.prior=Gam(2,1),
-        beta.prior=Nor(0,10^4))
+priors<-spT.priors(model="GPP",inv.var.prior=Gamm(2,1),
+        beta.prior=Norm(0,10^4))
 
 # initial values for the model parameters
 initials<-spT.initials(model="GPP", sig2eps=0.01, 
             sig2eta=0.5, beta=NULL, phi=0.001)
 
 # input for spatial decay
-#spatial.decay<-spT.decay(type="FIXED", value=0.001)
-spatial.decay<-spT.decay(type="MH", tuning=0.05) # 
-#spatial.decay<-spT.decay(type="DISCRETE",limit=c(0.001,0.009),segments=10)
+#spatial.decay<-spT.decay(distribution="FIXED", value=0.001)
+spatial.decay<-spT.decay(distribution=Gamm(2,1), tuning=0.05)
+#spatial.decay<-spT.decay(distribution=Unif(0.001,0.009),npoints=10)
 
 # Iterations for the MCMC algorithms
 nItr<-5000 

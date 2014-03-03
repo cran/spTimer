@@ -11,6 +11,7 @@
 void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N, 
      int *cov, int *spdecay,
      double *shape_e, double *shape_eta, double *shape_0,  
+     double *phi_a, double *phi_b,
      double *prior_a, double *prior_b, double *prior_sig, double *phi, 
      double *tau, double *phis, int *phik, double *nu, double *d, int *constant, 
      double *sig_e, double *sig_eta, 
@@ -69,7 +70,7 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
    else if(spdecay[0] == 2){
 
      phi_ar_DIS(cov, Qeta, det, phi, phis, phik, nup,  n, r, T, rT, N, 
-     prior_a, prior_b, d, sig_eta, rho, mu_l, O_l0, XB, o, constant, 
+     phi_a, phi_b, d, sig_eta, rho, mu_l, O_l0, XB, o, constant, 
      accept, phip);
      covFormat(cov, n, phip, nup, d, sig_eta, S, det, Sinv, Qeta);   
 //     if(accept[0] == 1.0){    
@@ -96,7 +97,7 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
 //     Rprintf("det2 %f phi2 %f\n", det2[0], phi2[0]);
 
     phi_ar_MH(Qeta, Qeta2, det, det2, phi, phi2, n, r, T, rT, p, N, 
-    prior_a, prior_b, rho, mu_l, O_l0, XB, o, constant, accept, phip);
+    phi_a, phi_b, rho, mu_l, O_l0, XB, o, constant, accept, phip);
     if(accept[0] == 1.0){
     covFormat(cov, n, phip, nup, d, sig_eta, S, det, Sinv, Qeta);   
     }

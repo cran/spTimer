@@ -17,6 +17,7 @@
 void GIBBS_sumpred_txt_gp(int *aggtype, double *flag, int *its, int *burnin,
      int *n, int *T, int *r, int *rT, int *p, int *N, int *report,
      int *cov, int *spdecay, double *shape_e, double *shape_eta,  
+     double *phi_a, double *phi_b,     
      double *prior_a, double *prior_b, double *prior_mubeta, 
      double *prior_sigbeta, double *prior_omu, double *prior_osig,
      double *phi, double *tau, double *phis, int *phik,
@@ -141,7 +142,7 @@ void GIBBS_sumpred_txt_gp(int *aggtype, double *flag, int *its, int *burnin,
      GetRNGstate();                 
      for(i=0; i < its1; i++) {
 
-     JOINT_gp(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta,
+     JOINT_gp(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta, phi_a, phi_b,
      prior_a, prior_b, prior_mubeta, prior_sigbeta, prior_omu, prior_osig,
      phi1, tau, phis, phik, nu, d, sig_e1, sig_eta1, beta1, X, z, o1, constant,
      phip, acc, nup, sig_ep, sig_etap, betap, op);
@@ -312,6 +313,7 @@ void GIBBS_sumpred_txt_gp(int *aggtype, double *flag, int *its, int *burnin,
 void GIBBS_gp(double *flag, int *its, int *burnin,
      int *n, int *T, int *r, int *rT, int *p, int *N, int *report,
      int *cov, int *spdecay, double *shape_e, double *shape_eta,   
+     double *phi_a, double *phi_b,
      double *prior_a, double *prior_b, double *prior_mubeta, 
      double *prior_sigbeta, double *prior_omu, double *prior_osig,
      double *phi, double *tau, double *phis, int *phik,
@@ -393,7 +395,7 @@ void GIBBS_gp(double *flag, int *its, int *burnin,
      GetRNGstate();       
      for(i=0; i < its1; i++) {
 
-     JOINT_gp(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta,
+     JOINT_gp(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta, phi_a, phi_b,
      prior_a, prior_b, prior_mubeta, prior_sigbeta, prior_omu, prior_osig,
      phi1, tau, phis, phik, nu, d, sig_e1, sig_eta1, beta1, X, z1, o1, constant,
      phip, acc, nup, sig_ep, sig_etap, betap, op);

@@ -261,8 +261,7 @@
 spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords, 
            priors=NULL, initials=NULL, nItr, nBurn=0, report=1, 
            tol.dist=2, distance.method="geodetic:km", cov.fnc="exponential",
-           scale.transform="NONE", spatial.decay=spT.decay(type="MH",tuning=0.01),
-           X.out=TRUE, Y.out=TRUE)
+           scale.transform="NONE", spatial.decay, X.out=TRUE, Y.out=TRUE)
 {
     start.time<-proc.time()[3]
   #
@@ -393,8 +392,12 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     #
     if(spatial.decay$type=="FIXED"){
          spdecay <- 1
+		 if(is.null(spatial.decay$value)){
+		 spatial.decay$value <- (3/max(c(coords.D))) 
+		 }
          init.phi <- spatial.decay$value 
          tuning <- 0; phis<-0; phik<-0; 
+		 phi_a <- 0; phi_b <- 0; 
     }
     else if(spatial.decay$type=="DISCRETE"){
          spdecay <- 2
@@ -402,12 +405,15 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          tuning <-0; 
          phis<-spatial.decay$value; 
          phik<-spatial.decay$segments;
+		 phi_a<-0; phi_b<-0
     }
     else if(spatial.decay$type=="MH"){
          spdecay <- 3
          init.phi <- initials$phi 
          tuning <- spatial.decay$tuning
          phis<-0; phik<-0; 
+		 phi_a<-spatial.decay$val[1]
+		 phi_b<-spatial.decay$val[2]
     }
     else{
          stop("\n Error: spatial.decay is not correctly specified \n")
@@ -433,7 +439,9 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          as.integer(r),as.integer(rT),as.integer(p),
          as.integer(N),as.integer(report),as.integer(cov),
          as.integer(spdecay),as.double(shape_e),
-         as.double(shape_eta),as.double(priors$prior_a),
+         as.double(shape_eta),
+		 as.double(phi_a), as.double(phi_b),
+		 as.double(priors$prior_a),
          as.double(priors$prior_b),as.double(priors$prior_mubeta),    
          as.double(priors$prior_sigbeta),as.double(priors$prior_omu), 
          as.double(priors$prior_osig),as.double(init.phi),
@@ -445,7 +453,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          accept=double(1),nup=double(nItr),sig2ep=double(nItr),
          sig2etap=double(nItr),betap=matrix(double(p*nItr),p,nItr), 
          op=matrix(double(N*nItr),N,nItr),fit=matrix(double(N*2),N,2), 
-         gof=double(1),penalty=double(1))[33:42]
+         gof=double(1),penalty=double(1))[35:44]
     }
     else if((length(x.names.sp) > 0) & (length(x.names.tp) == 0)){
     # for spatial beta
@@ -1281,12 +1289,9 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
 ## MCMC fit and predictions for the GP models
 ##
 spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data, 
-            coords, pred.coords, priors, initials,
-            pred.data, nItr, nBurn=0, report=1, tol.dist=2,
-            distance.method="geodetic:km", cov.fnc="exponential",
-            scale.transform="NONE", 
-            spatial.decay=spT.decay(type="MH",tuning=0.01),
-            annual.aggregation="NONE")
+            coords, pred.coords, priors, initials, pred.data, nItr, nBurn, 
+			report=1, tol.dist=2, distance.method="geodetic:km", cov.fnc="exponential",
+            scale.transform="NONE", spatial.decay, annual.aggregation="NONE")
 {
     start.time<-proc.time()[3]
   #
@@ -1325,7 +1330,7 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     }
     #
       method <- distance.method
-      spT.check.sites.inside(coords, method,tol=tol.dist)
+      spT.check.sites.inside(coords, method, tol=tol.dist)
    #
     if(method=="geodetic:km"){
       coords.D <- as.matrix(spT.geodist(Lon=coords[,1],Lat=coords[,2], KM=TRUE))
@@ -1432,8 +1437,12 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     #
     if(spatial.decay$type=="FIXED"){
          spdecay <- 1
+		 if(is.null(spatial.decay$value)){
+		 spatial.decay$value <- (3/max(c(coords.D))) 
+		 }
          init.phi <- spatial.decay$value 
          tuning <- 0; phis<-0; phik<-0; 
+		 phi_a<-0; phi_b<-0
     }
     else if(spatial.decay$type=="DISCRETE"){
          spdecay <- 2
@@ -1441,12 +1450,15 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
          tuning <-0; 
          phis<-spatial.decay$value; 
          phik<-spatial.decay$segments;
+		 phi_a<-0; phi_b<-0
     }
     else if(spatial.decay$type=="MH"){
          spdecay <- 3
          init.phi <- initials$phi 
          tuning <- spatial.decay$tuning
          phis<-0; phik<-0; 
+ 		 phi_a<-spatial.decay$val[1]
+		 phi_b<-spatial.decay$val[2]
     }
     else{
          stop("\n Error: spatial.decay is not correctly specified \n")
@@ -1537,7 +1549,8 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
         out <- .C("GIBBS_sumpred_txt_gp", as.integer(aggtype),as.double(flag), as.integer(nItr),
             as.integer(nBurn), as.integer(n), as.integer(T), as.integer(r), 
             as.integer(rT), as.integer(p), as.integer(N), as.integer(report),
-            as.integer(cov), as.integer(spdecay), as.double(shape_e), as.double(shape_eta), 
+            as.integer(cov), as.integer(spdecay), as.double(shape_e), as.double(shape_eta),
+            as.double(phi_a), as.double(phi_b),			
             as.double(priors$prior_a), as.double(priors$prior_b), 
             as.double(priors$prior_mubeta), as.double(priors$prior_sigbeta),
             as.double(priors$prior_omu), as.double(priors$prior_osig),
@@ -1547,7 +1560,7 @@ spGP.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
             as.double(initials$beta), as.double(X), as.double(zm), as.double(o),
             as.integer(1), 
             as.integer(nsite), as.integer(predN), as.double(d12), as.double(pred.x), 
-            as.integer(trans), accept=double(1), gof=double(1),penalty=double(1))[39:41] 
+            as.integer(trans), accept=double(1), gof=double(1),penalty=double(1))[41:43] 
      #
       out$accept <- round(out$accept/nItr*100,2)
       out$call<-formula

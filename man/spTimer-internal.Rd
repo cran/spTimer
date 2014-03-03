@@ -6,8 +6,9 @@
 \alias{stat.sum}
 \alias{Formula.matrix}
 \alias{Formula.coords}
-\alias{Gam}
-\alias{Nor}
+\alias{Gamm}
+\alias{Norm}
+\alias{Unif}
 \alias{PMCC}
 \alias{fnc.time}
 \alias{initials.checking.ar}

@@ -797,7 +797,8 @@ spT.geo_dist <- function(points)
            }
            else{
             cat("#\n# Tolerance Limit (unit):", paste(tol))
-            cat("\n# Fitted and Predicted location distances are alright \n#\n")  
+            #cat("\n# Fitted and Predicted location distances are alright \n#\n")  
+            cat("\n# Location distances are alright \n#\n")  
            }
       }
       else{
@@ -816,7 +817,8 @@ spT.geo_dist <- function(points)
            }
            else{
             cat("#\n# Tolerance Limit (unit):", paste(tol))
-            cat("\n# Fitted and Predicted location distances are alright \n#\n")  
+            #cat("\n# Fitted and Predicted location distances are alright \n#\n")  
+            cat("\n# Location distances are alright \n#\n")  
            }
        }
 }
@@ -1660,5 +1662,29 @@ confint.spT<-function(object, parm, level=0.95, ...){
    }
 }
 ##
-## 
+## Gamma prior
+##
+Gamm<-function(a=NA,b=NA){
+   out<-matrix(c(a,b),1,2)
+   class(out)<-"Gamma"
+   out
+}
+##
+## Normal prior
+##
+Norm<-function(mu=NA,sig=NA){
+   out<-matrix(c(mu,sig),1,2)
+   class(out)<-"Normal"
+   out
+}
+##
+## Uniform prior
+##
+Unif<-function(low=NA,up=NA){
+   out<-matrix(c(low,up),1,2)
+   class(out)<-"Uniform"
+   out
+}
+##
+##
 ##

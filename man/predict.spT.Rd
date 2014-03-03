@@ -13,24 +13,24 @@ This function is used to obtain spatial predictions in the unknown locations and
 
 \arguments{
 \item{object}{Object of class inheriting from "spT".}
-\item{newdata}{The data set for the covariate values for spatial prediction or temporal forecasts. This data should have the same space-time structure as the original data frame.}
+\item{newdata}{The data set providing the covariate values for spatial prediction or temporal forecasts. This data should have the same space-time structure as the original data frame.}
 \item{newcoords}{The coordinates for the prediction or forecast sites. The locations are in similar format to \code{coords}, see \code{\link{spT.Gibbs}}.}
 \item{foreStep}{Number of K-step (time points) ahead forecast, K=1,2, ...; Only applicable if type="temporal".}
-\item{type}{If "spatial" the do spatial prediction and if "temporal" the do temporal prediction or forecast. Default value is "spatial".}
+\item{type}{If the value is "spatial" then only spatial prediction will be performed at the \code{newcoords} which must be different from the fitted sites provided by \code{coords}.  When the "temporal" option is specified then forecasting will be performed  and in this case the \code{newcoords} may also contain elements of the fitted sites in which case only temporal forecasting beyond the last fitted time point will be performed. } 
 \item{nBurn}{Number of burn-in. Initial MCMC samples to discard before making inference.}
 \item{tol.dist}{Minimum tolerance distance limit between fitted and predicted locations.}
 \item{predAR}{The prediction output, if forecasts are in the prediction locations. Only applicable if type="forecast" and data fitted with the "AR" model.}
-\item{Summary}{Logical argument to obtain summary of the predicted MCMC samples. Default is TRUE.}
+\item{Summary}{To obtain summary statistics for the posterior predicted MCMC samples. Default is TRUE.}
 \item{...}{Other arguments.}
 }
 \value{
 \item{pred.samples or fore.samples}{Prediction or forecast MCMC samples.}
 \item{pred.coords or fore.coords}{prediction or forecast coordinates.}
-\item{Mean}{Average of the MCMC predictions, if Summary=TRUE}
-\item{Median}{Median of the MCMC predictions, if Summary=TRUE}
-\item{SD}{Standard deviation of the MCMC predictions, if Summary=TRUE}
-\item{Low}{Lower limit for the 95 percent CI of the MCMC predictions, if Summary=TRUE}
-\item{Up}{Upper limit for the 95 percent CI of the MCMC predictions, if Summary=TRUE}
+\item{Mean}{Average of the MCMC predictions}
+\item{Median}{Median of the MCMC predictions}
+\item{SD}{Standard deviation of the MCMC predictions}
+\item{Low}{Lower limit for the 95 percent CI of the MCMC predictions}
+\item{Up}{Upper limit for the 95 percent CI of the MCMC predictions}
 \item{computation.time}{The computation time.}
 \item{model}{The model method used for prediction.}
 \item{type}{"spatial" or "temporal".}
@@ -38,11 +38,9 @@ This function is used to obtain spatial predictions in the unknown locations and
 }
 \references{
 
- Bakar, K. S. and Sahu, S. K. (2013) spTimer: Spatio-Temporal Bayesian Modelling Using R. Technical Report, University of Southampton, UK. \cr
+ Bakar, K. S. and Sahu, S. K. (2014) spTimer: Spatio-Temporal Bayesian Modelling Using R. Technical Report, University of Southampton, UK. To appear in the Journal of Statistical Software. \cr
  Sahu, S. K. and Bakar, K. S. (2012) A comparison of Bayesian Models for Daily Ozone Concentration Levels Statistical Methodology , 9, 144-157. \cr
  Sahu, S. K. and Bakar, K. S. (2012) Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, 28, 395-415. \cr
- Sahu, S. K., Bakar, K. S. and Awang, N. (2013) Bayesian Forecasting Using Hierarchical Spatio-temporal Models with Applications to Ozone Levels in the Eastern United States. Technical Report, University of Southampton. 
-
 }
 \seealso{
 \code{\link{spT.Gibbs}, \link{as.forecast.object}}.

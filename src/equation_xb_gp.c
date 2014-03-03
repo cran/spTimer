@@ -11,6 +11,7 @@
 // Joint posterior distribution
 void JOINT_gp(int *n, int *T, int *r, int *rT, int *p, int *N, 
      int *cov, int *spdecay, double *shape_e, double *shape_eta,
+     double *phi_a, double *phi_b,
      double *prior_a, double *prior_b, double *prior_mubeta, 
      double *prior_sigbeta, double *prior_omu, double *prior_osig,
      double *phi, double *tau, double *phis, int *phik, double *nu,
@@ -57,7 +58,7 @@ void JOINT_gp(int *n, int *T, int *r, int *rT, int *p, int *N,
 // discrete sampling for phi 
    else if(spdecay[0] == 2){
      phi_gp_DIS(cov, Qeta, det, phi, phis, phik, nup, n, r, T, rT, N, 
-     prior_a, prior_b, d, sig_eta, XB, o, constant, accept, phip);
+     phi_a, phi_b, d, sig_eta, XB, o, constant, accept, phip);
      covFormat(cov, n, phip, nup, d, sig_eta, S, det, Sinv, Qeta);   
 //       if(accept[0] == 1.0){    
 //        covFormat(cov, n, phip, nu, d, sig_eta, S, det, Sinv, Qeta);   
@@ -83,7 +84,7 @@ void JOINT_gp(int *n, int *T, int *r, int *rT, int *p, int *N,
 // Rprintf("   phi: %4.4f, phi2: %4.4f, cov: %i\n", phi[0], phi2[0], cov[0]);
 //     randow-walk M  
      phi_gp_MH(Qeta, Qeta2, det, det2, phi, phi2, n, r, T, rT, N, 
-     prior_a, prior_b, XB, o, constant, accept, phip);
+     phi_a, phi_b, XB, o, constant, accept, phip);
 // Rprintf("   phi: %4.4f, phi2: %4.4f, cov: %i\n", phi[0], phi2[0], cov[0]);
      if(accept[0] == 1.0){    
          covFormat(cov, n, phip, nup, d, sig_eta, S, det, Sinv, Qeta);   

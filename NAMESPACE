@@ -19,4 +19,3 @@ S3method(model.frame,spT)
 S3method(model.matrix,spT)
 S3method(residuals,spT)
 S3method(terms,spT)
-

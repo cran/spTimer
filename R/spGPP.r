@@ -125,8 +125,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
          knots.coords, coords, priors=NULL, initials=NULL, 
          nItr, nBurn=0, report=1, tol.dist=2, distance.method="geodetic:km", 
          cov.fnc="exponential", scale.transform="NONE", 
-         spatial.decay=spT.decay(type="MH",tuning=0.01), 
-         X.out=TRUE, Y.out=FALSE)
+         spatial.decay, X.out=TRUE, Y.out=FALSE)
 {
     start.time<-proc.time()[3]
   #
@@ -211,7 +210,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     }
    #
       method <- distance.method
-      spT.check.sites.inside(knots.coords,method,tol=tol.dist)  
+      spT.check.sites.inside(knots.coords, method, tol=tol.dist)
    #
     if(method=="geodetic:km"){
       coords.D.knots <- as.matrix(spT.geodist(Lon=knots.coords[,1],Lat=knots.coords[,2], KM=TRUE))
@@ -228,7 +227,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     }
     #
       all.coords <- rbind(coords,knots.coords)
-      spT.check.sites.inside(all.coords, method,tol=tol.dist)  
+      spT.check.sites.inside(all.coords, method, tol=tol.dist)
     #
     if(method=="geodetic:km"){
        coords.D.all <- as.matrix(spT.geodist(Lon=all.coords[,1],Lat=all.coords[,2], KM=TRUE))
@@ -308,8 +307,12 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
     #
     if(spatial.decay$type=="FIXED"){
          spdecay <- 1
+		 if(is.null(spatial.decay$value)){
+		 spatial.decay$value <- (3/max(c(coords.D.all))) 
+		 }
          init.phi <- spatial.decay$value 
          tuning <- 0; phis<-0; phik<-0; 
+		 phi_a <- 0; phi_b <- 0; 
     }
     else if(spatial.decay$type=="DISCRETE"){
          spdecay <- 2
@@ -317,17 +320,20 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
          tuning <-0; 
          phis<-spatial.decay$value; 
          phik<-spatial.decay$segments;
+		 phi_a<-0; phi_b<-0
     }
     else if(spatial.decay$type=="MH"){
          spdecay <- 3
          init.phi <- initials$phi 
          tuning <- spatial.decay$tuning
          phis<-0; phik<-0; 
+		 phi_a<-spatial.decay$val[1]
+		 phi_b<-spatial.decay$val[2]
     }
     else{
          stop("\n Error: spatial.decay is not correctly specified \n")
     }
-    #
+    # 
     #
     if (length(initials$mu_l) != r){
          stop("Error: need to specify correct number of years (r) for mu_l initials.")
@@ -376,9 +382,9 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
             as.integer(nBurn), as.integer(n), as.integer(knots),
             as.integer(T), as.integer(r), as.integer(rT), 
             as.integer(p), as.integer(N), as.integer(report), 
-            as.double(shape_e), as.double(shape_eta),
-            as.double(shape_l), as.double(priors$prior_a), 
-            as.double(priors$prior_b), as.double(priors$mu_beta),
+            as.double(shape_e), as.double(shape_eta),as.double(shape_l), 
+			as.double(phi_a), as.double(phi_b),
+			as.double(priors$prior_a),as.double(priors$prior_b), as.double(priors$mu_beta),
             as.double(priors$delta2_beta), as.double(priors$mu_rho), 
             as.double(priors$delta2_rho), as.double(priors$alpha_l), 
             as.double(priors$delta2_l), as.double(init.phi),
@@ -398,7 +404,7 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
             w0p = matrix(double(knots * r * nItr),knots * r, nItr), 
             wp = matrix(double(knots*rT*nItr), knots * rT, nItr), 
             gof = as.double(1), penalty = as.double(1),
-            fitted = matrix(double(2*n*rT),n*rT,2))[43:56]
+            fitted = matrix(double(2*n*rT),n*rT,2))[45:58]
 
     } # end for fixed beta
     #  
@@ -628,7 +634,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
            dm <- coords.D[1:tn.knotsites, 1:tn.knotsites] # m x m
       #
            all.coords <- rbind(coords,knots.coords)
-           spT.check.sites.inside(all.coords, method,tol=tol.dist)
+           spT.check.sites.inside(all.coords, method, tol=tol.dist)
       #
         if(method == "geodetic:km"){
            coords.D.all <- as.matrix(spT.geodist(Lon=all.coords[,1],Lat=all.coords[,2], KM=TRUE))
@@ -1095,9 +1101,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
              time.data, knots.coords, coords, pred.coords, priors, 
              initials, nItr, nBurn=0, report=1, tol.dist=2,
              distance.method="geodetic:km", cov.fnc="exponential", 
-             scale.transform="NONE", 
-             spatial.decay=spT.decay(type="MH",tuning=0.01),
-             annual.aggregation="NONE")
+             scale.transform="NONE", spatial.decay, annual.aggregation="NONE")
 {
    #
     start.time<-proc.time()[3]
@@ -1290,8 +1294,12 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
     #
     if(spatial.decay$type=="FIXED"){
          spdecay <- 1
+		 if(is.null(spatial.decay$value)){
+		 spatial.decay$value <- (3/max(c(coords.D.knots))) 
+		 }
          init.phi <- spatial.decay$value 
          tuning <- 0; phis<-0; phik<-0; 
+		 phi_a <- 0; phi_b <- 0; 
     }
     else if(spatial.decay$type=="DISCRETE"){
          spdecay <- 2
@@ -1299,16 +1307,20 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          tuning <-0; 
          phis<-spatial.decay$value; 
          phik<-spatial.decay$segments;
+		 phi_a<-0; phi_b<-0
     }
     else if(spatial.decay$type=="MH"){
          spdecay <- 3
          init.phi <- initials$phi 
          tuning <- spatial.decay$tuning
          phis<-0; phik<-0; 
+		 phi_a<-spatial.decay$val[1]
+		 phi_b<-spatial.decay$val[2]
     }
     else{
          stop("\n Error: spatial.decay is not correctly specified \n")
     }
+    # 
     #
     if (length(initials$mu_l) != r){
          stop("Error: need to specify correct number of years (r) for mu_l initials.")
@@ -1408,7 +1420,8 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
             as.double(flag), as.integer(nItr),
             as.integer(nBurn), as.integer(n), as.integer(m), as.integer(T),
             as.integer(r), as.integer(rT), as.integer(p), as.integer(N), as.integer(report),
-            as.double(shape_e), as.double(shape_eta), as.double(shape_l),  
+            as.double(shape_e), as.double(shape_eta), as.double(shape_l),
+            as.double(phi_a), as.double(phi_b),			
             as.double(priors$prior_a), as.double(priors$prior_b), as.double(priors$mu_beta),
             as.double(priors$delta2_beta), as.double(priors$mu_rho), as.double(priors$delta2_rho),
             as.double(priors$alpha_l), as.double(priors$delta2_l), as.double(init.phi),
@@ -1419,7 +1432,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
             as.double(initials$mu_l), as.double(X), as.double(zm), as.double(w0),
             as.double(w), as.integer(nsite), as.integer(nsite*rT), as.double(dnsm), 
             as.double(pred.x), as.integer(trans), accept=double(1), 
-            gof=double(1),penalty=double(1))[48:50]    
+            gof=double(1),penalty=double(1))[50:52]    
      #
       out$accept <- round(out$accept/nItr*100,2)
       out$call<-formula

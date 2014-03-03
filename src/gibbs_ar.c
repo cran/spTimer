@@ -14,7 +14,8 @@
 // output into the txt files
 void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      int *n, int *T, int *r, int *rT, int *p, int *N, int *report,
-     int *cov, int *spdecay, double *shape_e, double *shape_eta, double *shape_0,  
+     int *cov, int *spdecay, double *shape_e, double *shape_eta, double *shape_0,
+     double *phi_a, double *phi_b,  
      double *prior_a, double *prior_b, double *prior_sig, double *phi, 
      double *tau, double *phis, int *phik, double *d, int *constant, 
      double *sig_e, double *sig_eta, double *sig_0, double *mu_l,  
@@ -149,7 +150,8 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      GetRNGstate();            
      for(i=0; i < its1; i++) {
 
-     JOINT_ar(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta, shape_0,  
+     JOINT_ar(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta, shape_0,
+     phi_a, phi_b,  
      prior_a, prior_b, prior_sig, phi1, tau, phis, phik, nu, d, constant, 
      sig_e1, sig_eta1, sig_01, mu_l1, rho1, beta1, X, z, o1, 
      phip, acc, nup, sig_ep, sig_etap, rhop, betap, mu_lp, sig_0p, op, w);
@@ -337,6 +339,7 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
 void GIBBS_ar(double *flag, int *its, int *burnin,
      int *n, int *T, int *r, int *rT, int *p, int *N, int *report,
      int *cov, int *spdecay, double *shape_e, double *shape_eta, double *shape_0,  
+     double *phi_a, double *phi_b,
      double *prior_a, double *prior_b, double *prior_sig, double *phi, 
      double *tau, double *phis, int *phik, double *d, int *constant, 
      double *sig_e, double *sig_eta, double *sig_0, double *mu_l,  
@@ -430,6 +433,7 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      for(i=0; i < its1; i++) {
 
      JOINT_ar(n, T, r, rT, p, N, cov, spdecay, shape_e, shape_eta, shape_0,  
+     phi_a, phi_b,
      prior_a, prior_b, prior_sig, phi1, tau, phis, phik, nu, d, constant, 
      sig_e1, sig_eta1, sig_01, mu_l1, rho1, beta1, X, z1, o1, 
      phip, acc, nup, sig_ep, sig_etap, rhop, betap, mu_lp, sig_0p, op, w);

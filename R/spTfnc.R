@@ -1,28 +1,23 @@
 ##
 ## prior function for spTimer
 ##
-spT.priors<-function(model="GP",var.prior=Gam(a = 2,b = 1), 
-           beta.prior=Nor(0,10^10), rho.prior=Nor(0,10^10),
-           phi.prior=Gam(a = 2, b = 1))
+spT.priors<-function(model="GP",inv.var.prior=Gamm(a = 2,b = 1), 
+           beta.prior=Norm(0,10^10), rho.prior=Norm(0,10^10))
 {
-   #
-   #if(!model %in% c("GP", "AR", "GPP")){
-   # stop("\n# Error: correctly define model \n")
-   #}
    #
    if(model=="GP"){
      #
-     if(is.na(var.prior[,1])){
+     if(is.na(inv.var.prior[,1])){
        prior_a<-NULL
      }
      else{
-       prior_a<-var.prior[,1]
+       prior_a<-inv.var.prior[,1]
      }
-     if(is.na(var.prior[,2])){
+     if(is.na(inv.var.prior[,2])){
        prior_b<-NULL
      }
      else{
-       prior_b<-var.prior[,2]
+       prior_b<-inv.var.prior[,2]
      }
      if(is.na(beta.prior[,1])){
        prior_mubeta<-NULL
@@ -72,17 +67,17 @@ spT.priors<-function(model="GP",var.prior=Gam(a = 2,b = 1),
    #
    else if(model=="AR"){
      #
-     if(is.na(var.prior[,1])){
+     if(is.na(inv.var.prior[,1])){
        prior_a<-NULL
      }
      else{
-       prior_a<-var.prior[,1]
+       prior_a<-inv.var.prior[,1]
      }
-     if(is.na(var.prior[,2])){
+     if(is.na(inv.var.prior[,2])){
        prior_b<-NULL
      }
      else{
-       prior_b<-var.prior[,2]
+       prior_b<-inv.var.prior[,2]
      }
      if(is.na(beta.prior[,1])){
        prior_mubeta<-NULL
@@ -127,17 +122,17 @@ spT.priors<-function(model="GP",var.prior=Gam(a = 2,b = 1),
    #
    else if(model=="GPP"){
      #
-     if(is.na(var.prior[,1])){
+     if(is.na(inv.var.prior[,1])){
        prior_a<-NULL
      }
      else{
-       prior_a<-var.prior[,1]
+       prior_a<-inv.var.prior[,1]
      }
-     if(is.na(var.prior[,2])){
+     if(is.na(inv.var.prior[,2])){
        prior_b<-NULL
      }
      else{
-       prior_b<-var.prior[,2]
+       prior_b<-inv.var.prior[,2]
      }
      if(is.na(beta.prior[,1])){
        prior_mubeta<-NULL
@@ -195,18 +190,6 @@ spT.priors<-function(model="GP",var.prior=Gam(a = 2,b = 1),
         stop("\n# Error: correctly define model  \n")
    }
    #
-}
-##
-## Gamma prior
-##
-Gam<-function(a=NA,b=NA){
-   matrix(c(a,b),1,2)
-}
-##
-## Normal prior
-##
-Nor<-function(mu=NA,sig=NA){
-   matrix(c(mu,sig),1,2)
 }
 ##
 ## initial function for spTimer
@@ -302,41 +285,37 @@ spT.time<-function(t.series,segments=1)
 ##
 ## Function for the spatial decay selection
 ##
- spT.decay<-function(type="MH", tuning=NULL, limit=NULL, segments=NULL, value=NULL)
+ spT.decay<-function(distribution=Gamm(a=2,b=1), tuning=NULL, npoints=NULL, value=NULL)
 {
    #
-   if(!type %in% c("FIXED", "DISCRETE", "MH")){
-    stop("\n# Error: correctly define spatial.decay \n")
-   }
-   #
    out<-NULL
-   if(type == "FIXED"){
-    if(is.null(value)){
-     stop("\n# Error: correctly define discrete limits \n")
+   if(class(distribution) == "character"){
+    if(distribution != "FIXED"){
+     stop("\n# Error: define distribution correctly \n")
     }
     out$type<-"FIXED"
     out$value<-value
     out
    }
-   else if(type == "DISCRETE"){
-    if(is.null(limit)){
-     stop("\n# Error: correctly define discrete limits \n")
-    }
-    if(is.null(segments)){
-     stop("\n# Error: correctly define discrete segments \n")
+   else if(class(distribution) == "Uniform"){
+	limit<-c(distribution)
+    if(is.null(npoints)){
+     #stop("\n# Error: correctly define discrete segments \n")
+	 npoints<-5
     }
     out$type<-"DISCRETE"
     out$values<-seq(from=limit[1],to=limit[2],
-        by=(limit[2]-limit[1])/(segments-1))
-    out$segments<-segments
+        by=(limit[2]-limit[1])/(npoints-1))
+    out$segments<-npoints
     out
    }
-   else if(type == "MH"){
+   else if(class(distribution) == "Gamma"){
     if(is.null(tuning)){
      stop("\n# Error: correctly define tuning parameter \n")
     }
     out$type<-"MH"
     out$tuning<-tuning
+	out$val<-c(distribution)
     out
    }
    else{
@@ -351,15 +330,17 @@ spT.time<-function(t.series,segments=1)
 spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
          time.data=NULL, coords, knots.coords, 
          newcoords=NULL, newdata=NULL, 
-         priors=NULL, initials=NULL, nItr=5000, nBurn=2000, report=1, 
-         tol.dist=2, distance.method="geodetic:km", 
+         priors=NULL, initials=NULL, nItr=5000, nBurn=1000, report=1, 
+         tol.dist=0.05, distance.method="geodetic:km", 
          cov.fnc="exponential", scale.transform="NONE", 
-         spatial.decay=spT.decay(type="MH",tuning=0.1),
+         spatial.decay=spT.decay(distribution="FIXED"),
          annual.aggrn="NONE")
 {
    ## check for spacetime class
    if(class(data) %in% c("STFDF","STSDF","STIDF","SpatialPointsDataFrame")){
-	coords <- as.matrix(unique((as.data.frame(data[,0]))))
+    dat <- as.data.frame(data)
+	coords <- as.matrix(unique(dat[,1:2]))
+	rm(dat)
 	dimnames(coords) <- NULL
    }
    if(class(data) %in% c("ST","STTDF")){
@@ -793,7 +774,7 @@ print.spTpred<-function(x, ...) {
             initials, pred.data=NULL, nItr, nBurn=0, report=1,
             tol.dist=2, distance.method="geodetic:km",  
             cov.fnc="exponential", scale.transform="NONE",
-            spatial.decay,annual.aggrn="NONE")
+            spatial.decay, annual.aggrn="NONE")
 {
    # 
    if (missing(formula)) {

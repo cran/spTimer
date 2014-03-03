@@ -151,8 +151,12 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     #
     if(spatial.decay$type=="FIXED"){
          spdecay <- 1
+		 if(is.null(spatial.decay$value)){
+		 spatial.decay$value <- (3/max(c(coords.D))) 
+		 }
          init.phi <- spatial.decay$value 
          tuning <- 0; phis<-0; phik<-0; 
+		 phi_a <- 0; phi_b <- 0; 
     }
     else if(spatial.decay$type=="DISCRETE"){
          spdecay <- 2
@@ -160,17 +164,20 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          tuning <-0; 
          phis<-spatial.decay$value; 
          phik<-spatial.decay$segments;
+		 phi_a<-0; phi_b<-0
     }
     else if(spatial.decay$type=="MH"){
          spdecay <- 3
          init.phi <- initials$phi 
          tuning <- spatial.decay$tuning
          phis<-0; phik<-0; 
+		 phi_a<-spatial.decay$val[1]
+		 phi_b<-spatial.decay$val[2]
     }
     else{
          stop("\n Error: spatial.decay is not correctly specified \n")
     }
-    #
+    # 
       if(length(initials$mu_l) != length(initials$sig_l0)){
          stop("Error: check the parameters with year labels")
       }  
@@ -196,8 +203,10 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            as.integer(nBurn), as.integer(n),as.integer(T),as.integer(r),
            as.integer(rT),as.integer(p),as.integer(N),as.integer(report),
            as.integer(cov),as.integer(spdecay),as.double(shape_e),
-           as.double(shape_eta),as.double(shape_0),as.double(priors$prior_a),
-           as.double(priors$prior_b),as.double(priors$prior_sig),as.double(init.phi), 
+           as.double(shape_eta),as.double(shape_0),
+		   as.double(phi_a),as.double(phi_b),
+		   as.double(priors$prior_a),as.double(priors$prior_b),
+		   as.double(priors$prior_sig),as.double(init.phi), 
            as.double(tuning),as.double(phis),as.integer(phik),
            as.double(coords.D),as.integer(1),as.double(initials$sig2eps),
            as.double(initials$sig2eta),as.double(initials$sig_l0),as.double(initials$mu_l),
@@ -206,27 +215,8 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            phip=double(nItr),accept=double(1),nup=double(nItr),sig_ep=double(nItr),sig_etap=double(nItr), 
            rhop=double(nItr),betap=matrix(double(nItr*p),p,nItr),mu_lp=matrix(double(r*nItr),r,nItr),
            sig_l0p=matrix(double(r*nItr),r,nItr),op=matrix(double(nItr*N),N,nItr),wp=matrix(double(nItr*N),N,nItr),
-           fit=matrix(double(2*N),N,2),gof=double(1),penalty=double(1))[34:47]
+           fit=matrix(double(2*N),N,2),gof=double(1),penalty=double(1))[36:49]
     }
-    else if(length(x.names.sp)>0){
-    # for spatial beta
-      q <- length(x.names.sp)          # number of spatial covariates
-      out<-.C('GIBBS_ar',as.double(flag[,2]),as.integer(nItr), 
-           as.integer(nBurn), as.integer(n),as.integer(T),as.integer(r),
-           as.integer(r*T),as.integer(p),as.integer(N),as.integer(report),
-           as.integer(cov),as.integer(spdecay),as.double(shape_e),
-           as.double(shape_eta),as.double(shape_0),as.double(priors$prior_a),
-           as.double(priors$prior_b),as.double(priors$prior_sig),as.double(init.phi), 
-           as.double(tuning),as.double(phis),as.integer(phik),
-           as.double(coords.D),as.integer(1),as.double(initials$sig2eps),
-           as.double(initials$sig2eta),as.double(initials$sig_l0),as.double(initials$mu_l),
-           as.double(initials$rho),as.double(initials$beta),
-           as.double(X),as.double(zm[,1]),as.double(o), 
-           phip=double(nItr),accept=double(1),nup=double(nItr),sig_ep=double(nItr),sig_etap=double(nItr), 
-           rhop=double(nItr),betap=matrix(double(nItr*p),p,nItr),mu_lp=matrix(double(r*nItr),r,nItr),
-           sig_l0p=matrix(double(r*nItr),r,nItr),op=matrix(double(nItr*N),N,nItr),wp=matrix(double(nItr*N),N,nItr),
-           fit=matrix(double(2*N),N,2),gof=double(1),penalty=double(1))[34:47]
-    } 
     else{
          stop("\n#\n## Error: \n#")
     }
@@ -776,9 +766,7 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
             coords, pred.coords, priors, initials,
             pred.data, nItr, nBurn=0, report=1, tol.dist=2,
             distance.method="geodetic:km", cov.fnc="exponential",
-            scale.transform="NONE", 
-            spatial.decay=spT.decay(type="MH",tuning=0.01),
-            annual.aggregation="NONE")
+            scale.transform="NONE", spatial.decay, annual.aggregation="NONE")
 {
     start.time<-proc.time()[3]
   #
@@ -916,13 +904,17 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
     #
       initials<-initials.checking.ar(initials,zm,X,Xsp,n,r,T,coords.D)
     #
-         #o <- zm - rnorm(N,0,sqrt(initials$sig2eps))
          o <- zm
+    #
     #
     if(spatial.decay$type=="FIXED"){
          spdecay <- 1
+		 if(is.null(spatial.decay$value)){
+		 spatial.decay$value <- (3/max(c(coords.D))) 
+		 }
          init.phi <- spatial.decay$value 
          tuning <- 0; phis<-0; phik<-0; 
+		 phi_a <- 0; phi_b <- 0; 
     }
     else if(spatial.decay$type=="DISCRETE"){
          spdecay <- 2
@@ -930,16 +922,20 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
          tuning <-0; 
          phis<-spatial.decay$value; 
          phik<-spatial.decay$segments;
+		 phi_a<-0; phi_b<-0
     }
     else if(spatial.decay$type=="MH"){
          spdecay <- 3
          init.phi <- initials$phi 
          tuning <- spatial.decay$tuning
          phis<-0; phik<-0; 
+		 phi_a<-spatial.decay$val[1]
+		 phi_b<-spatial.decay$val[2]
     }
     else{
          stop("\n Error: spatial.decay is not correctly specified \n")
     }
+    # 
     #
       if(length(initials$mu_l) != length(initials$sig_l0)){
          stop("Error: check the parameters with year labels")
@@ -1044,15 +1040,16 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
         out <- .C("GIBBS_sumpred_txt_ar", as.integer(aggtype),as.double(flag), as.integer(nItr),
             as.integer(nBurn), as.integer(n), as.integer(T), as.integer(r), 
             as.integer(rT), as.integer(p), as.integer(N), as.integer(report),
-            as.integer(cov), as.integer(spdecay), as.double(shape_e), as.double(shape_eta), 
-            as.double(shape_0), as.double(priors$prior_a), as.double(priors$prior_b), 
+            as.integer(cov), as.integer(spdecay), as.double(shape_e), as.double(shape_eta), as.double(shape_0), 
+			as.double(phi_a), as.double(phi_b),
+			as.double(priors$prior_a), as.double(priors$prior_b), 
             as.double(priors$prior_sig), as.double(init.phi), as.double(tuning),
             as.double(phis), as.integer(phik), as.double(coords.D), 
             as.integer(1), as.double(initials$sig2eps), as.double(initials$sig2eta),
             as.double(initials$sig_l0), as.double(initials$mu_l), as.double(initials$rho), 
             as.double(initials$beta), as.double(X), as.double(zm), as.double(o),
             as.integer(nsite), as.integer(predN), as.double(d12), as.double(pred.x), 
-            as.integer(trans), accept=double(1), gof=double(1),penalty=double(1))[40:42] 
+            as.integer(trans), accept=double(1), gof=double(1),penalty=double(1))[42:44] 
      #
       out$accept <- round(out$accept/nItr*100,2)
       out$call<-formula

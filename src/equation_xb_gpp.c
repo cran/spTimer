@@ -10,7 +10,9 @@
 // Joint posterior distribution with one phi parameter
 void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m, 
      int *T, int *r, int *rT, int *p, int *N, double *shape_e, double *shape_eta, 
-     double *shape_l, double *prior_a, double *prior_b, double *mu_beta, 
+     double *shape_l, 
+     double *phi_a, double *phi_b,
+     double *prior_a, double *prior_b, double *mu_beta, 
      double *delta2_beta, double *mu_rho,  double *delta2_rho, double *alpha_l, 
      double *delta2_l, double *phi, double *tau, double *phis, int *phik,
      double *nu, double *dm, double *dnm, int *constant, 
@@ -1183,7 +1185,7 @@ void wlt_gpp(int *n, int *m, int *r, int *T, int *rT, int *p, double *sig2e,
              }         
              MProd(tr, constant, n, tA, m, tr1);
              for(i=0; i<m1; i++){
-                 chi[i] = tr1[i]/sig2e[0]+tr2[i];
+                 chi[i] = tr1[i]/sig2e[0]+tr2[i]*rho[0]; // fixed
              }
              MProd(chi, constant, m, de_tT, m, mean1);                     
              mvrnormal(constant, mean1, de_tT, m, ww);     // random generator
@@ -1218,7 +1220,7 @@ void wlt_gpp(int *n, int *m, int *r, int *T, int *rT, int *p, double *sig2e,
                 }         
                 MProd(tr, constant, n, tA, m, tr1);
                 for(i=0; i<m1; i++){
-                    chi[i] = tr1[i]/sig2e[0]+tr2[i]+tr3[i];
+                    chi[i] = tr1[i]/sig2e[0]+tr2[i]*rho[0]+tr3[i]*rho[0];
                 }
                 MProd(chi, constant, m, de_tT, m, mean1);                     
                 mvrnormal(constant, mean1, de_tT, m, ww);     // random generator
@@ -1241,7 +1243,7 @@ void wlt_gpp(int *n, int *m, int *r, int *T, int *rT, int *p, double *sig2e,
              }         
              MProd(tr, constant, n, tA, m, tr1);
              for(i=0; i<m1; i++){
-                 chi[i] = tr1[i]/sig2e[0]+tr2[i];
+                 chi[i] = tr1[i]/sig2e[0]+tr2[i]*rho[0];
              }
              MProd(chi, constant, m, de_T, m, mean1);                     
              mvrnormal(constant, mean1, de_T, m, ww);     // random generator
