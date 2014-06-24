@@ -74,12 +74,14 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      ofit = (double *) malloc((size_t)((N1)*sizeof(double)));     
      acc = (double *) malloc((size_t)((col)*sizeof(double)));
 
-     double *phi1, *sig2e1, *sig2eta1, *rho1, *beta1;
+     double *phi1, *sig2e1, *sig2eta1, *rho1, *beta1, *w01, *w1;
      phi1 = (double *) malloc((size_t)((col)*sizeof(double)));
      sig2e1 = (double *) malloc((size_t)((col)*sizeof(double)));
      sig2eta1 = (double *) malloc((size_t)((col)*sizeof(double)));
      rho1 = (double *) malloc((size_t)((col)*sizeof(double)));
      beta1 = (double *) malloc((size_t)((p1*col)*sizeof(double)));     
+     w01 = (double *) malloc((size_t)((m1*r1)*sizeof(double))); 
+     w1 = (double *) malloc((size_t)((m1*rT1)*sizeof(double))); 
 
      double *zp, *anf; //, tmp[T1];
      zp = (double *) malloc((size_t)((nsite1*rT1)*sizeof(double)));      
@@ -95,7 +97,12 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
        ext_sigeta(sig2eta, sig2eta1);
        ext_rho(rho, rho1);
        ext_beta(p, beta, beta1);
-
+       for(j=0; j<m1*rT1; j++){
+         w1[j] = w[j];
+       }     
+       for(j=0; j<m1*r1; j++){
+         w01[j] = w0[j];
+       }     
 
      FILE *parafile;
      parafile = fopen("OutGPP_Values_Parameter.txt", "w");
@@ -135,7 +142,7 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      phi_a, phi_b,
      prior_a, prior_b, mu_beta, delta2_beta, 
      mu_rho, delta2_rho, alpha_l, delta2_l, phi1, tau, phis, phik, nu, dm, dnm, 
-     constant, sig2e1, sig2eta1, sig2l, beta1, rho1, mu_l, X, z, w0, w, 
+     constant, sig2e1, sig2eta1, sig2l, beta1, rho1, mu_l, X, z, w01, w1, 
      phip, acc, nup, sig2ep, sig2etap, betap, rhop, mu_lp, sig2lp, w0p, wp, zfit);
 
      z_pr_gpp1(cov, nsite, n, m, r, T, rT, p, nsiterT, phip, nup, dm, dnsm, 
@@ -197,6 +204,12 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
        ext_sigeta(sig2etap, sig2eta1); 
        ext_rho(rhop, rho1); 
        ext_beta(p, betap, beta1);              
+       for(j=0; j<m1*rT1; j++){
+         w1[j] = wp[j];
+       }     
+       for(j=0; j<m1*r1; j++){
+         w01[j] = w0p[j];
+       }     
 
      if(cov[0]==4){
      para_printRnu (i, its1, rep1, p1, accept1, phip, nup, rhop, sig2ep, sig2etap, betap); 
@@ -362,7 +375,7 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      double *phi_etap, *sig2ep, *sig2etap, *rhop, *betap;
      double *mu_lp, *sig2lp, *wp, *w0p, *zfit;
      double *phi_eta1, *sig2e1, *sig2eta1, *rho1, *beta1;
-     double *mu_l1, *sig2l1; //, *w01, *w1;
+     double *mu_l1, *sig2l1, *w01, *w1;
      double *acc_eta, *out; // *z1;
           
      phi_etap = (double *) malloc((size_t)((1)*sizeof(double)));          
@@ -383,8 +396,8 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      beta1 = (double *) malloc((size_t)((p1)*sizeof(double)));     
      mu_l1 = (double *) malloc((size_t)((r1)*sizeof(double)));    
      sig2l1 = (double *) malloc((size_t)((r1)*sizeof(double))); 
-//     w01 = (double *) malloc((size_t)((m1*r1)*sizeof(double))); 
-//     w1 = (double *) malloc((size_t)((m1*r1*T1)*sizeof(double))); 
+     w01 = (double *) malloc((size_t)((m1*r1)*sizeof(double))); 
+     w1 = (double *) malloc((size_t)((m1*r1*T1)*sizeof(double))); 
      
      acc_eta = (double *) malloc((size_t)((1)*sizeof(double)));
      out = (double *) malloc((size_t)((1)*sizeof(double)));     
@@ -403,6 +416,12 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
        ext_mul(r, mu_l, mu_l1);
        ext_sigl(r, sig2l, sig2l1);
 //       ext_o(N, z, z1);
+       for(j=0; j<m1*r1*T1; j++){
+         w1[j] = w[j];
+       }     
+       for(j=0; j<m1*r1; j++){
+         w01[j] = w0[j];
+       }     
             
 /*
 // for missing
@@ -427,7 +446,7 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      prior_a, prior_b, mu_beta, delta2_beta, 
      mu_rho, delta2_rho, alpha_l, delta2_l, phi_eta1, tau_eta, phis, phik, nu, 
      dm, dnm, constant, sig2e1, sig2eta1, sig2l1, beta1, rho1, mu_l1, X, z, 
-     w0, w, phi_etap, acc_eta, nup, sig2ep, sig2etap, betap, rhop, mu_lp, sig2lp, 
+     w01, w1, phi_etap, acc_eta, nup, sig2ep, sig2etap, betap, rhop, mu_lp, sig2lp, 
      w0p, wp, zfit);
 
      accept1 += acc_eta[0];
@@ -469,6 +488,12 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
        ext_sigeta(sig2etap, sig2eta1); 
        ext_rho(rhop, rho1); 
        ext_beta(p, betap, beta1);              
+       for(j=0; j<m1*r1*T1; j++){
+         w1[j] = wp[j];
+       }     
+       for(j=0; j<m1*r1; j++){
+         w01[j] = w0p[j];
+       }     
 
      if(cov[0]==4){
      para_printRnu (i, its1, rep1, p1, accept1, phi_etap, nup, rhop, sig2ep, sig2etap, betap); 
@@ -485,7 +510,8 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      free(rhop); free(betap); free(mu_lp); free(sig2lp); free(wp); free(w0p); 
      free(zfit); free(phi_eta1); free(sig2e1); free(sig2eta1); free(rho1); 
      free(beta1); free(mu_l1); free(sig2l1); free(acc_eta); free(out); 
-     //free(z1); // free(w01); free(w1); 
+     //free(z1);  
+     free(w01); free(w1); 
 
      accept_etaf[0] = accept1;
 

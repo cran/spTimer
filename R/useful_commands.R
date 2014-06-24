@@ -305,8 +305,10 @@ spT.segment.plot<-function(obs, est, up, low, limit=NULL){
    dimnames(mat)[[1]]<-c(paste("[Obs:<=",tol,"]"),paste("[Obs:> ",tol,"]")) 
    dimnames(mat)[[2]]<-c(paste("[Forecast:<=",tol,"]"),paste("[Forecast:>",tol,"]")) 
    POD<-round(mat[1,1]/sum(diag(mat)),4)
-   FAR<-round(mat[1,2]/sum(mat[1,]),4)
-   HAR<-round(sum(diag(mat))/sum(mat),4)
+   FAR<-round(mat[2,1]/sum(mat[,1]),4)
+   HAR<-round(mat[1,1]/sum(mat[1,]),4)
+   #FAR<-round(mat[1,2]/sum(mat[1,]),4)
+   #HAR<-round(sum(diag(mat))/sum(mat),4)
    top<-2*(mat[1,1]*mat[2,2]-mat[1,2]*mat[2,1])
    bot<-mat[1,2]^2+mat[2,1]^2+2*mat[1,1]*mat[2,2]+(mat[1,2]+mat[2,1])*sum(diag(mat))
    S<-round(top/bot,4)
@@ -317,26 +319,54 @@ spT.segment.plot<-function(obs, est, up, low, limit=NULL){
 ##
 ## For data split
 ##
- spT.subset<-function(data, var.name, s = NULL, reverse=FALSE) 
+spT.subset<-function (data, var.name, s = NULL, reverse = FALSE) 
 {
 #
 # This function is to select and deduct the sites used to
 # fit or valid the model
 # Input: 	data
 #		s = the site numbers to be selected/deselected, e.g., c(4,7,10)
-	if(missing(var.name)){
-		stop("Error: need to define the var.name")
-	}
-    s.index <- unique(data[,var.name[1]])
-    if(reverse==FALSE){
-		dat <- subset(data, s.index %in% s)
-		dat
-	}
-	else{
-		dat <- subset(data, !(s.index %in% s))
-		dat
-	}
+
+    if (missing(var.name)) {
+        stop("Error: need to define the var.name")
+    }
+    if(!is.data.frame(data)){
+        stop("Error: data should be in data.frame")
+    }
+    if(!var.name %in%names(data)){
+        stop("Error: var.name should be in data")
+    }
+    data<-data[,c(var.name,names(data)[!names(data)%in%var.name])]
+    s.index <- unique(data[, var.name[1]])
+    if (reverse == FALSE) {
+        data <- data[data[,1] %in% (s.index[s.index %in% s]),]
+        data
+    }
+    else {
+        data <- data[data[,1] %in% (s.index[!s.index %in% s]),]
+        data
+    }
 }
+# spT.subset<-function(data, var.name, s = NULL, reverse=FALSE) 
+#{
+#
+# This function is to select and deduct the sites used to
+# fit or valid the model
+# Input: 	data
+#		s = the site numbers to be selected/deselected, e.g., c(4,7,10)
+#	if(missing(var.name)){
+#		stop("Error: need to define the var.name")
+#	}
+#   s.index <- unique(data[,var.name[1]])
+#    if(reverse==FALSE){
+#		dat <- subset(data, s.index %in% s)
+#		dat
+#	}
+#	else{
+#		dat <- subset(data, !(s.index %in% s))
+#		dat
+#	}
+#}
 ##
 # spT.data.selection<-function(data, rs = NULL, s = NULL, reverse=FALSE) 
 #{

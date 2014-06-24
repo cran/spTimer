@@ -1134,7 +1134,8 @@ void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
      tr2 = (a-1.0)*log(phi2[0])-b*phi2[0]-0.5*rT1*log(det2[0])-v; 
 //     Rprintf("for u: %f for v: %f\n", u, v);
 //     Rprintf("for phi1: %f for phi2: %f\n", tr1, tr2);
-     ratio[0] = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
+//     ratio[0] = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
+     ratio[0] = exp(tr2 - tr1 + log(phi2[0]) - log(phi1[0]));
      ratio_fnc(ratio, constant, U);     
      if(U[0] < ratio[0]){
           phip[0] = phi2[0];

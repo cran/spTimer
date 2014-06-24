@@ -154,6 +154,19 @@ void rigamma_val(int *n, double *shape, double *rate, double *result)
      return;
 }
 
+/*
+// This defines the random gamma variate using GUI library
+double rgammaa2 (double shape, double rate)
+{
+  // set up GSL RNG //
+  gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937);
+  // end of GSL setup //
+  out=gsl_ran_gamma(r, shape , rate);
+  return out;
+}     	
+*/
+
+
 /*****************************************/
     
 /* Multivariate random normal */

@@ -286,7 +286,7 @@ print(post.ar)
 
 # MCMC via Gibbs not using default choices
 # define the time-series 
-time.data<-spT.time(t.series=60,segment=1)
+time.data<-spT.time(t.series=62,segment=1)
 
 # hyper-parameters for the prior distributions
 priors<-spT.priors(model="AR",inv.var.prior=Gamm(2,1),
@@ -378,7 +378,7 @@ print(post.gpp)
 
 # MCMC via Gibbs not using default choices
 # define the time-series 
-time.data<-spT.time(t.series=60,segment=1)
+time.data<-spT.time(t.series=62,segment=1)
 
 # hyper-parameters for the prior distributions
 priors<-spT.priors(model="GPP",inv.var.prior=Gamm(2,1),

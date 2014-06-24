@@ -5,7 +5,6 @@
 Extract average fitted values and corresponding standard deviations from model.
 }
 \usage{
-## S3 method for class 'spT'
 \method{fitted}{spT}(object, ...)
 
 ## 

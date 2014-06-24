@@ -34,12 +34,12 @@ Data descriptions: \cr
 }
 \author{
 K.S. Bakar & S.K. Sahu \cr
-Maintainer: K.S. Bakar <shuvo.bakar@csiro.au>
+Maintainer: K.S. Bakar <shuvo.bakar@gmail.com>
 }
 \references{
-1. Sahu, S.K. & Bakar, K.S. (2012). Hierarchical Bayesian Autoregressive Models for Large Space Time Data with Applications to Ozone Concentration Modelling. Applied Stochastic Models in Business and Industry, 28, 395-415.
-2. Sahu, S.K., Gelfand, A.E., & Holland, D.M. (2007). High-Resolution Space-Time Ozone Modelling for Assessing Trends. Journal of the American Statistical Association, 102, 1221-1234.\cr
-3. Bakar, K.S. & Sahu, S.K. (2012). spTimer: Spatio-Temporal Bayesian Modelling Using R. URL: http://www.southampton.ac.uk/~sks/research/papers/spTimeRpaper.pdf \cr
+1. Bakar, K.S. & Sahu, S.K. (2014). spTimer: Spatio-Temporal Bayesian Modelling Using R. Journal of Statistical Software. In Press.\cr
+2. Sahu, S.K. & Bakar, K.S. (2012). Hierarchical Bayesian Autoregressive Models for Large Space Time Data with Applications to Ozone Concentration Modelling. Applied Stochastic Models in Business and Industry, 28, 395-415.\cr
+3. Sahu, S.K., Gelfand, A.E., & Holland, D.M. (2007). High-Resolution Space-Time Ozone Modelling for Assessing Trends. Journal of the American Statistical Association, 102, 1221-1234.\cr
 4. Bakar, K.S. (2012). Bayesian Analysis of Daily Maximum Ozone Levels. PhD Thesis, University of Southampton, Southampton, United Kingdom.
 }
 \keyword{ package }

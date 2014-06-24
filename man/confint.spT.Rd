@@ -5,7 +5,6 @@
 This function is used to obtain credible intervals for model parameters from the MCMC samples.
 }
 \usage{
-## S3 method for class 'spT'
 \method{confint}{spT}(object, parm, level = 0.95, ...)
 
 ## 

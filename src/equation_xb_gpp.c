@@ -109,7 +109,11 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
    beta_gpp(n, p, rT, N, mu_beta, delta2_beta, sig2e, X, Aw, z, 
    constant, betap); 
    MProd(betap, constant, p, X, N, XB);
-   mu_l_gpp(m, r, sig2l, alpha_l, delta2_l, Sinv, w0p, constant, mu_lp);         
+   int j;
+   for(j=0; j < r1; j++) {
+         mu_lp[j] = mu_l[j];     
+   }
+//   mu_l_gpp(m, r, sig2l, alpha_l, delta2_l, Sinv, w0p, constant, mu_lp);         
    sig_l_gpp(m, r, shape_l, prior_b, mu_lp, Sinv, w0p, constant, sig2lp);          
    sig_eta_gpp(m, r, T, rT, shape_eta, prior_b, Sinv, rhop, wp, w0p, 
    constant, sig2etap);
@@ -1462,7 +1466,7 @@ void phi_gpp_MH2(double *Qeta1, double *Qeta2, double *det1, double *det2,
      else{
 
 // with Gamma prior    
-     double tr1, tr2;
+     double tr1, tr2; //, u1;
    
      tr1 = (a-1.0)*log(phi1[0])-b*phi1[0]-0.5*rT1*log(det1[0])- u; 
      tr2 = (a-1.0)*log(phi2[0])-b*phi2[0]-0.5*rT1*log(det2[0])- v; 
@@ -1470,7 +1474,11 @@ void phi_gpp_MH2(double *Qeta1, double *Qeta2, double *det1, double *det2,
 //     double tr;
 //     tr = tr2 + exp(tr2) - tr1 - exp(tr1);
 //     Rprintf("for phi1: %f for phi2: %f\n", tr1, tr2);
-     *ratio = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
+//     *ratio = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
+//       u1 = tr2 - tr1 ; /* log density ratio */
+//       u 1+= log(phi2[0]) - log(phi1[0]);
+//       *ratio = exp(u1); 
+     *ratio = exp(tr2 - tr1 + log(phi2[0]) - log(phi1[0]));
 //     *ratio = exp(tr);
      ratio_fnc(ratio, constant, U);
      if(U[0] < ratio[0]){

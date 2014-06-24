@@ -5,7 +5,6 @@
 This function is used to obtain MCMC summary statistics.
 }
 \usage{
-## S3 method for class 'spT'
 \method{summary}{spT}(object, digits=4, package="spTimer", ...)
 
 ## 

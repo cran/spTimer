@@ -5,7 +5,6 @@
 This function is used to obtain spatial predictions in the unknown locations and also to get the temporal forecasts using MCMC samples.
 }
 \usage{
-## S3 method for class 'spT'
 \method{predict}{spT}(object, newdata, newcoords, foreStep=NULL, type="spatial", 
         nBurn, tol.dist, predAR=NULL, Summary=TRUE, ...)
 

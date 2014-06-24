@@ -5,7 +5,6 @@
 This function is used to obtain MCMC summary, residual and fitted surface plots.
 }
 \usage{
-## S3 method for class 'spT'
 \method{plot}{spT}(x, residuals=FALSE, ...)
 
 ## 
