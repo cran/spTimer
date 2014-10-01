@@ -29,15 +29,15 @@ void GIBBS_sumpred_txt_gp(int *aggtype, double *flag, int *its, int *burnin,
 //     unsigned iseed = 44;
 //     srand(iseed); 
      
-     int its1, col, i, j, n1, r1, rT1, p1, N1, nr, rep1, nsite1, brin, trans1;
+     int its1, col, i, j, r1, rT1, p1, N1, rep1, nsite1, brin, trans1;
      its1 = *its;
      col = *constant;
-     n1 = *n;
+//     n1 = *n;
      r1 = *r;
      rT1 = *rT;
      p1 = *p;
      N1 = *N;
-     nr = n1 * r1;
+//     nr = n1 * r1;
      rep1 = *report;
      nsite1 = *nsite;
      brin = *burnin;
@@ -326,7 +326,7 @@ void GIBBS_gp(double *flag, int *its, int *burnin,
 //     unsigned iseed = 44;
 //     srand(iseed); 
      
-     int its1, brin, col, i, j, n1, r1, p1, N1, nr, rep1;
+     int its1, brin, col, i, j, p1, N1, rep1;
      double *phip, *sig_ep, *sig_etap, *betap, *op;
      double *phi1, *sig_e1, *sig_eta1, *beta1, *o1;
      double *z1, *oo, *ot, *acc;
@@ -334,11 +334,11 @@ void GIBBS_gp(double *flag, int *its, int *burnin,
      its1 = *its;
      brin = *burnin;
      col = *constant;
-     n1 = *n;
-     r1 = *r;
+//     n1 = *n;
+//     r1 = *r;
      p1 = *p;
      N1 = *N;
-     nr = n1 * r1;
+//     nr = n1 * r1;
      rep1 = *report;
           
      double accept1, mn_rep[N1], var_rep[N1];
@@ -496,7 +496,7 @@ void GIBBS_gp(double *flag, int *its, int *burnin,
 }
 
 
-
+/*
 // The programme for GIBBS SAMPLING with XB and missing values
 // spatially varying covariates
 void GIBBSsp_gp(int *intercept, double *flag, int *its, int *burnin,
@@ -513,7 +513,7 @@ void GIBBSsp_gp(int *intercept, double *flag, int *its, int *burnin,
      double *opf, double *zlt_mean_sd, double *gof, double *penalty)
 {
      
-     int its1, brin, col, i, j, n1, r1, T1, p1, q1, N1, nr, rep1;
+     int its1, brin, col, i, j, n1, r1, p1, q1, N1, rep1;
      double *phip, *sig_ep, *sig_etap, *sig_betap, *betap, *betasp, *op;
      double *phi1, *sig_e1, *sig_eta1, * sig_beta1, *beta1, *o1;
      double *z1, *oo, *ot, *acc;
@@ -523,11 +523,11 @@ void GIBBSsp_gp(int *intercept, double *flag, int *its, int *burnin,
      col = *constant;
      n1 = *n;
      r1 = *r;
-     T1 = *T;
+//     T1 = *T;
      p1 = *p;
      q1 = *q;
      N1 = *N;
-     nr = n1 * r1;
+//     nr = n1 * r1;
      rep1 = *report;
           
      double accept1, mn_rep[N1], var_rep[N1];
@@ -699,7 +699,9 @@ void GIBBSsp_gp(int *intercept, double *flag, int *its, int *burnin,
 
      return;
 }
+*/
 
+/*
 // The programme for GIBBS SAMPLING with XB and missing values
 // temporally varying covariates
 void GIBBStp_gp(int *intercept, double *flag, int *its, int *burnin,
@@ -718,7 +720,7 @@ void GIBBStp_gp(int *intercept, double *flag, int *its, int *burnin,
      double *opf, double *zlt_mean_sd, double *gof, double *penalty)
 {
      
-     int its1, brin, col, i, j, n1, r1, T1, p1, u1, N1, nr, rep1;
+     int its1, brin, col, i, j, n1, r1, T1, p1, u1, N1, rep1;
      double *phip, *sig_ep, *sig_etap, *sig_deltap, *sig_0p, *rhop, *betap, * betat0p, *betatp, *op;
      double *phi1, *sig_e1, *sig_eta1, *sig_delta1, *sig_01, *rho1, *beta1, *o1;
      double *z1, *oo, *ot, *acc;
@@ -732,7 +734,7 @@ void GIBBStp_gp(int *intercept, double *flag, int *its, int *burnin,
      p1 = *p;
      u1 = *u;
      N1 = *N;
-     nr = n1 * r1;
+//     nr = n1 * r1;
      rep1 = *report;
           
      double accept1, mn_rep[N1], var_rep[N1];
@@ -925,8 +927,10 @@ void GIBBStp_gp(int *intercept, double *flag, int *its, int *burnin,
 
      return;
 }
+*/
 
 
+/*
 // The programme for GIBBS SAMPLING with XB and missing values
 // temporally varying covariates
 void GIBBSsptp_gp(int *intercept, double *flag, int *its, int *burnin,
@@ -945,7 +949,7 @@ void GIBBSsptp_gp(int *intercept, double *flag, int *its, int *burnin,
      double *opf, double *zlt_mean_sd, double *gof, double *penalty)
 {
      
-     int its1, brin, col, i, j, n1, r1, T1, p1, q1, u1, N1, nr, rep1;
+     int its1, brin, col, i, j, n1, r1, T1, p1, q1, u1, N1, rep1;
      double *phip, *sig_ep, *sig_etap, *sig_betap, *sig_deltap, *sig_0p, *betap, *betasp, * betat0p, *betatp, *op, *rhop; 
      double *phi1, *sig_e1, *sig_eta1, *sig_beta1, *sig_delta1, *sig_01, *beta1, *o1, *rho1;
      double *z1, *oo, *ot, *acc;
@@ -960,7 +964,7 @@ void GIBBSsptp_gp(int *intercept, double *flag, int *its, int *burnin,
      q1 =*q;
      u1 = *u;
      N1 = *N;
-     nr = n1 * r1;
+//     nr = n1 * r1;
      rep1 = *report;
           
      double accept1, mn_rep[N1], var_rep[N1];
@@ -1165,5 +1169,6 @@ void GIBBSsptp_gp(int *intercept, double *flag, int *its, int *burnin,
 
      return;
 }
+*/
 
 /////////////////////////// THE END ///////////////////////////////////////////

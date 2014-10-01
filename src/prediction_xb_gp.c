@@ -14,11 +14,11 @@ void z_pr_its_gp(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      double *phip, double *nup, double *sig_ep, double *sig_etap, double *betap,   
      double *X, double *valX, double *op, int *constant, double *zpred)
 {
-     int its1, r1, rn, n1, rT1, N1, col, i, j, k, ns, p1;
+     int its1, rT1, N1, col, i, j, k, ns, p1;
      its1 = *its;
-     r1 = *r;
-     n1 = *n;
-     rn = r1*n1;
+//     r1 = *r;
+//     n1 = *n;
+//     rn = r1*n1;
      rT1 = *rT;
      N1 = *N;
      col = *constant;
@@ -86,18 +86,18 @@ void z_pr_gp(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
      double *sig_ep, double *sig_etap, double *betap, double *X, double *valX,
      double *op, int *constant, double *zpred)
 {
-	 int i, j, l, t, r1, col, rT1, n1, nn, ns, nns, p1, N1, valN1;
+	 int i, j, l, t, r1, col, rT1, n1, ns, p1, N1;
  
 	 col = *constant;
 	 r1 = *r;
      rT1 = *rT;
      n1 = *n;
-     nn = n1*n1;
+//     nn = n1*n1;
      ns = *nsite;
-     nns = n1*ns;
+//     nns = n1*ns;
      p1 = *p;
      N1 = *N;
-     valN1 = *valN;
+//     valN1 = *valN;
 
      int *T1, *T2; 
      T1 = (int *) malloc((size_t)((r1)*sizeof(int)));
@@ -195,12 +195,12 @@ void z_pr_its_gp_sp(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      double *betap, double *betasp, double *X, double *valX, double *Xsp, 
      double *valXsp, double *op, int *constant, double *betapred, double *zpred)
 {
-     int its1, r1, rn, n1, T1, rT1, N1, col, i, j, k, ns, p1, q1;
+     int its1, n1, rT1, N1, col, i, j, k, ns, p1, q1;
      its1 = *its;
-     r1 = *r;
+//     r1 = *r;
      n1 = *n;
-     T1 = *T;
-     rn = r1*n1;
+//     T1 = *T;
+//     rn = r1*n1;
      rT1 = *rT;
      N1 = *N;
      col = *constant;
@@ -279,20 +279,20 @@ void z_pr_gp_sp(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
      double *X, double *valX, double *Xsp, double *valXsp,
      double *op, int *constant, double *betapred, double *zpred)
 {
-	 int i, j, l, t, r1, T1, col, rT1, n1, nn, ns, nns, p1, q1, N1, valN1;
+	 int i, j, l, t, r1, T1, col, rT1, n1, ns, p1, q1, N1;
  
 	 col = *constant;
 	 r1 = *r;
 	 T1 = *T;
      rT1 = *rT;
      n1 = *n;
-     nn = n1*n1;
+//     nn = n1*n1;
      ns = *nsite;
-     nns = n1*ns;
+//     nns = n1*ns;
      p1 = *p;
      q1 = *q;
      N1 = *N;
-     valN1 = *valN;
+//     valN1 = *valN;
       
     double *S, *Si, *S_12, *S_12c, *det; 
     S = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -414,12 +414,12 @@ void z_pr_its_gp_tp(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      double *X, double *valX, double *Xtp, double *valXtp, double *op, 
      int *constant, double *zpred)
 {
-     int its1, r1, rn, n1, T1, rT1, N1, col, i, j, k, ns, p1, u1;
+     int its1, T1, rT1, N1, col, i, j, k, ns, p1, u1;
      its1 = *its;
-     r1 = *r;
-     n1 = *n;
+//     r1 = *r;
+//     n1 = *n;
      T1 = *T;
-     rn = r1*n1;
+//     rn = r1*n1;
      rT1 = *rT;
      N1 = *N;
      col = *constant;
@@ -503,20 +503,20 @@ void z_pr_gp_tp(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
      double *valX, double *Xtp, double *valXtp, double *op, int *constant, 
      double *zpred)
 {
-	 int i, j, l, t, r1, T1, col, rT1, n1, nn, ns, nns, p1, u1, N1, valN1;
+	 int i, j, l, t, r1, T1, col, rT1, n1, ns, p1, u1, N1;
  
 	 col = *constant;
 	 r1 = *r;
 	 T1 = *T;
      rT1 = *rT;
      n1 = *n;
-     nn = n1*n1;
+//     nn = n1*n1;
      ns = *nsite;
-     nns = n1*ns;
+//     nns = n1*ns;
      p1 = *p;
      u1 = *u;
      N1 = *N;
-     valN1 = *valN;
+//     valN1 = *valN;
       
     double *S_eta, *Si_eta, *S_eta12, *S_eta12c, *det; 
     S_eta = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -615,12 +615,12 @@ void z_pr_its_gp_sptp(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      double *Xsp, double *valXsp, double *Xtp, double *valXtp, double *op, 
      int *constant, double *betapred, double *zpred)
 {
-     int its1, r1, rn, n1, T1, rT1, N1, col, i, j, k, ns, p1, q1, u1;
+     int its1, n1, T1, rT1, N1, col, i, j, k, ns, p1, q1, u1;
      its1 = *its;
-     r1 = *r;
+//     r1 = *r;
      n1 = *n;
      T1 = *T;
-     rn = r1*n1;
+//     rn = r1*n1;
      rT1 = *rT;
      N1 = *N;
      col = *constant;
@@ -719,21 +719,21 @@ void z_pr_gp_sptp(int *cov, int *nsite, int *n, int *r, int *rT, int *T, int *p,
      double *Xsp, double *valXsp, double *Xtp, double *valXtp, double *op, 
      int *constant, double *betapred, double *zpred)
 {
-	 int i, j, l, t, r1, T1, col, rT1, n1, nn, ns, nns, p1, q1, u1, N1, valN1;
+	 int i, j, l, t, r1, T1, col, rT1, n1, ns, p1, q1, u1, N1;
  
 	 col = *constant;
 	 r1 = *r;
 	 T1 = *T;
      rT1 = *rT;
      n1 = *n;
-     nn = n1*n1;
+//     nn = n1*n1;
      ns = *nsite;
-     nns = n1*ns;
+//     nns = n1*ns;
      p1 = *p;
      q1 = *q;
      u1 = *u;
      N1 = *N;
-     valN1 = *valN;
+//     valN1 = *valN;
       
     double *S, *Si, *S_12, *S_12c, *det; 
     S = (double *) malloc((size_t)((n1*n1)*sizeof(double)));

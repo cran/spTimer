@@ -21,30 +21,28 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
      double *sig_ep, double *sig_etap, double *rhop, double *betap, 
      double *mu_lp, double *sig_l0p, double *op, double *w)
 {     
-     int n1, nn, r1, p1, rn, N1, col; 
+     int n1, r1, p1, N1; 
      n1 = *n;
-     nn = n1*n1;
+//     nn = n1*n1;
      r1 = *r;
      p1 = *p;
-     rn = r1 *n1;
+//     rn = r1 *n1;
      N1 = *N;
-     col = *constant;
+//     col = *constant;
      
     int i;
      
-   double *Qeta, *XB, *Sinv, *Qeta2, *det, *det2, *S, *O_l0, *thetap, *tmp, *phi2;
+   double *Qeta, *XB, *Sinv, *det, *S, *O_l0, *thetap;
    Qeta = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
    XB = (double *) malloc((size_t)((N1)*sizeof(double)));
    Sinv = (double *) malloc((size_t)((n1*n1)*sizeof(double)));   
-   Qeta2 = (double *) malloc((size_t)((n1*n1)*sizeof(double)));   
+//   Qeta2 = (double *) malloc((size_t)((n1*n1)*sizeof(double)));   
    det = (double *) malloc((size_t)((1)*sizeof(double)));   
-   det2 = (double *) malloc((size_t)((1)*sizeof(double)));   
+//   det2 = (double *) malloc((size_t)((1)*sizeof(double)));   
    S = (double *) malloc((size_t)((n1*n1)*sizeof(double)));   
    O_l0 = (double *) malloc((size_t)((r1*n1)*sizeof(double)));
    thetap = (double *) malloc((size_t)((p1+1)*sizeof(double)));
-   tmp = (double *) malloc((size_t)((1)*sizeof(double)));   
-   phi2 = (double *) malloc((size_t)((1)*sizeof(double)));   
-
+//   tmp = (double *) malloc((size_t)((1)*sizeof(double)));   
    
    covFormat(cov, n, phi, nu, d, sig_eta, S, det, Sinv, Qeta);   
    MProd(beta, constant, p, X, N, XB);
@@ -210,10 +208,10 @@ void sig2_ar(int *n, int *r,  int *T, int *rT, int *p,
      double *XB, double *o, double *z, int *constant, 
      double *sig2ep, double *sig2etap)
 {
-     int t, l, i, n1, r1, p1, col;
+     int t, l, i, n1, r1, col;
      n1 =*n;
      r1 =*r;
-     p1 =*p;
+//     p1 =*p;
      col =*constant;
      
     double *A, *SinvA, *det, *o2, *z1, *o1, *XB1, *ov, *oz, *out1, *out2, *out3, *tmp;
@@ -369,11 +367,11 @@ void sig_eta_ar(int *n, int *r,  int *T, int *rT, int *p, double *phi,
      double *sig2eta)     
 {
      double *ov, *o1, *o2, *out, u, b, sh, sig[1];
-     int row, col, l, i, j, r1, p1;
+     int row, col, l, i, j, r1;
      row = *n;
      col = *constant;
      r1 = *r;
-     p1= *p;
+//     p1= *p;
      
      o1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
      o2 = (double *) malloc((size_t)((row*col)*sizeof(double)));
@@ -624,12 +622,12 @@ void rho_ar(int *n, int *r, int *T, int *rT, int *p,
      double *XB, double *o, int *constant, double *rho)     
 {
      double *ot, *ot1, u, v;
-     int row, col, l, i, j, r1, nn, p1;
+     int row, col, l, i, j, r1;
      row = *n;
      col = *constant;
      r1 = *r;
-     nn = row*row;
-     p1= *p;
+//     nn = row*row;
+//     p1= *p;
 
      ot = (double *) malloc((size_t)((row*col)*sizeof(double)));
      ot1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
@@ -802,8 +800,8 @@ void mu_l_ar (int *n, int *r, double *sig_l0, double *Sinv, double *O_l0,
 void Z_fitfnc(int *its, int *N, double *sig_ep, double *o_p, 
                 int *constant, double *z_p)
 {
-     unsigned iseed = 44;
-     srand(iseed); 
+//     unsigned iseed = 44;
+//     srand(iseed); 
      
      int i, j, N1, its1, col;
      N1 = *N;
@@ -885,9 +883,9 @@ void o_ar(int *n, int *r, int *T, int *rT, int *p, double *sig_e,
      double *O_l0, double *XB, double *z, double *o, 
      int *constant, double *opost)     
 {
-     int i, l, t, r1, nn, row, col, p1; 
+     int i, l, t, r1, nn, row, col; 
      r1 = *r;     row = *n;    nn = row * row;  col = *constant;
-     p1 = *p;
+     //p1 = *p;
      
      double *term1, *term2, *o_1, *de_tT, *d_tT, *de_T, *delT; 
      double *det1, *det2, *mean1, *XB1, *XB2;
@@ -1026,14 +1024,14 @@ void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
      int *constant, double *accept, double *phip)
 {
      
-     double *ov, *o1, *o2, u, v, w, x, a, b;
-     int row, col, l, i, j, r1, p1, N1, rT1;
+     double *ov, *o1, *o2, u, v, a, b;
+     int row, col, l, i, j, r1, rT1;
      row = *n;
      col = *constant;
      r1 = *r;
-     p1= *p;
+//     p1= *p;
      rT1 = *rT;
-     N1 = row*rT1;
+//     N1 = row*rT1;
      
      o1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
      o2 = (double *) malloc((size_t)((row*col)*sizeof(double)));
@@ -1054,8 +1052,8 @@ void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
      
      u = 0.0;
      v = 0.0;
-     w = 0.0;
-     x = 0.0;     
+//     w = 0.0;
+//     x = 0.0;     
 
      for(l=0; l < r1; l++) {
          for(i=0; i < T1[l]; i++) {                                
@@ -1162,12 +1160,12 @@ void phi_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi1,
      double *rho, double *mu_l, double *O_l0, double *XB, double *o, 
      int *constant, double *accept, double *phip)
 {
-     int row, col, i, r1, N1, rT1, pk;
+     int row, col, i, pk;
      row = *n;
      col = *constant;
-     r1 = *r;
-     rT1 = *rT;
-     N1 = row*rT1;
+//     r1 = *r;
+//     rT1 = *rT;
+//     N1 = row*rT1;
      pk = *phik;
 
      double *phitmp, *pden, *Qeta, *det, *out;
@@ -1247,12 +1245,12 @@ void phidens_ar(double *phi, double *Qeta, double *det, int *n, int *r,
      double *rho, double *O_l0, double *o, int *constant, double *out)
 {
 
-     int row, col, l, i, j, r1, N1, rT1;
+     int row, col, l, i, j, r1, rT1;
      row = *n;
      col = *constant;
      r1 = *r;
      rT1 = *rT;
-     N1 = row*rT1;
+//     N1 = row*rT1;
           
      double *ov, *o1, *o2, *XB1;     
      o1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
@@ -1316,12 +1314,12 @@ void nu_ar_DIS(int *cov, double *Qeta1, double *det1, double *phi, double *nu1,
      double *rho, double *mu_l, double *O_l0, double *XB, double *o, 
      int *constant, double *nup)
 {
-     int row, col, i, r1, N1, rT1;
+     int row, col, i;
      row = *n;
      col = *constant;
-     r1 = *r;
-     rT1 = *rT;
-     N1 = row*rT1;
+//     r1 = *r;
+//     rT1 = *rT;
+//     N1 = row*rT1;
      
      int nuk;
 

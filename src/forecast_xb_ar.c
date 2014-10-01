@@ -89,12 +89,12 @@ void zlt_fore_ar(int *cov, int *K, int *nsite, int *n, int *r, int *p,
      double *foreX, double *beta, double *z, double *w, 
      int *constant, double *foreZ)
 { 
-     int l, k, t, i, K1, r1, n1, ns, nns, col;
+     int l, k, t, i, K1, r1, n1, ns, col;
      K1 =*K;
      r1 =*r;
      n1 =*n;
      ns =*nsite;
-     nns =n1*ns;
+//     nns =n1*ns;
      col =*constant;
 
 

@@ -28,10 +28,10 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
 //     unsigned iseed = 44;
 //     srand(iseed); 
      
-     int its1, col, i, j, n1, m1, r1, rT1, p1, N1, rep1, nsite1, brin, trans1;
+     int its1, col, i, j, m1, r1, rT1, p1, N1, rep1, nsite1, brin, trans1;
      its1 = *its;
      col = *constant;
-     n1 = *n;
+//     n1 = *n;
      m1 = *m;
      r1 = *r;
      rT1 = *rT;
@@ -348,10 +348,10 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
 //     unsigned iseed = 44;
 //     srand(iseed); 
      
-     int its1, col, i, j, n1, m1, r1, T1, p1, N1, rep1, brin, trans1;
+     int its1, col, i, j, m1, r1, T1, p1, N1, rep1, brin;
      its1 = *its;
      col = *constant;
-     n1 = *n;
+//     n1 = *n;
      m1 = *m;
      r1 = *r;
      T1 = *T;
@@ -359,7 +359,7 @@ void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, in
      N1 = *N;
      rep1 = *report;
      brin = *burnin;
-     trans1 = *transform;
+//     trans1 = *transform;
 
      double accept1; //, mn_rep[N1], var_rep[N1];
      accept1 = 0.0;
@@ -578,10 +578,10 @@ void GIBBSsp_zfitsum_onephi_gpp(int *intercept, int *cov, int *spdecay,
 //     unsigned iseed = 44;
 //     srand(iseed); 
      
-     int its1, col, i, j, n1, m1, r1, T1, p1, q1, N1, rep1, brin, trans1;
+     int its1, col, i, j, m1, r1, T1, p1, q1, N1, rep1, brin;
      its1 = *its;
      col = *constant;
-     n1 = *n;
+//     n1 = *n;
      m1 = *m;
      r1 = *r;
      T1 = *T;
@@ -590,7 +590,7 @@ void GIBBSsp_zfitsum_onephi_gpp(int *intercept, int *cov, int *spdecay,
      N1 = *N;
      rep1 = *report;
      brin = *burnin;
-     trans1 = *transform;
+//     trans1 = *transform;
 
 
      double accept1; 

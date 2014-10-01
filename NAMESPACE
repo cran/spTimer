@@ -3,8 +3,7 @@ useDynLib(spTimer)
 exportPattern("^[^\\.]")
 
 import(coda)
-import(spacetime)
-import(forecast)
+import(sp)
 
 S3method(print,spT)
 S3method(print,spTpred)

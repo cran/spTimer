@@ -96,8 +96,10 @@ names(fore.gp)
 spT.validation(DataValFore$o8hrmax,c(fore.gp$Mean)) 
 
 # Use of "forecast" class
+library(forecast)
 tmp<-as.forecast.object(fore.gp, site=1) # default for site 1
 plot(tmp)
+summary(tmp)
 
 ##
 ## Temporal  prediction/forecast 
@@ -124,6 +126,7 @@ names(fore.gp)
 spT.validation(DataFitFore$o8hrmax,c(fore.gp$Mean)) # 
 
 # Use of "forecast" class
+library(forecast)
 tmp<-as.forecast.object(fore.gp, site=5) # for site 5
 plot(tmp)
 

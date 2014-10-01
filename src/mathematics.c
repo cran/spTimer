@@ -510,8 +510,8 @@ void maximum(int *n, double *x, double *maxi)
 void minimum(int *n, double *x, double *mini)
 {
      double temp;
-     int i,j, n1;
-     n1 = *n;
+     int i,j;
+//   n1 = *n;
      for(i=0;i< *n;i++){
      for(j=i+1;j< *n;j++)
      {

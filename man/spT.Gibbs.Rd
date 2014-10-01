@@ -179,7 +179,7 @@ nItr<-5000
 set.seed(11)
 post.gp <- spT.Gibbs(formula=o8hrmax ~ cMAXTMP+WDSP+RH, 
          data=DataFit, model="GP", time.data=time.data, 
-         coords=coords, priors=priors, initials=initials, 
+         coords=~Longitude+Latitude, priors=priors, initials=initials, 
          nItr=nItr, nBurn=0, report=nItr, 
          tol.dist=2, distance.method="geodetic:km", 
          cov.fnc="exponential", scale.transform="SQRT", 

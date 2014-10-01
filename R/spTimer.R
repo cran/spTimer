@@ -2,8 +2,7 @@
 
 
 library(coda)
-library(forecast)
-library(spacetime)
+library(sp)
 
 .onLoad <-
     function(libname, pkgname)

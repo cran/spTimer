@@ -3,6 +3,7 @@
 \alias{.First.lib}
 \alias{.onLoad}
 \alias{.onAttach}
+\alias{as.forecast.object}
 \alias{stat.sum}
 \alias{Formula.matrix}
 \alias{Formula.coords}

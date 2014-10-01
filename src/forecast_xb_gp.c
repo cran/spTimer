@@ -80,12 +80,12 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
      double *phi, double *nu, double *sig_e, double *sig_eta, double *foreX, 
      double *beta, double *w, int *constant, double *foreZ)
 { 
-     int l, k, i, K1, r1, n1, ns, nns, col;
+     int l, k, i, K1, r1, n1, ns, col;
      K1 =*K;
      r1 =*r;
      n1 =*n;
      ns =*nsite;
-     nns =n1*ns;
+//     nns =n1*ns;
      col =*constant;
 
     double *S_eta, *Si_eta, *S_eta12, *S_eta12c, *det; 
@@ -163,7 +163,7 @@ void zlt_fore_gp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
      return;
 }
 
-
+/*
 // for spatially varying beta
 // d is the distance for actual locations n x n
 // d12 is the distance between pred and observaed locations nsite x n
@@ -174,12 +174,12 @@ void zlt_fore_gp_sp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r,
      double *foreX, double *foreXsp, double *betap, double *betasp, double *wp, 
      int *constant, double *foreZ)
 {
-     int i, j, its1, n1, ns, r1, T1, K1, p1, q1, col;
+     int i, j, its1, n1, ns, r1, K1, p1, q1, col;
      its1 = *its;
      n1 =*n;
      ns =*nsite;
      r1 =*r;
-     T1 =*T;
+//     T1 =*T;
      K1 =*K;
      p1 =*p;
      q1 =*q;
@@ -230,7 +230,9 @@ void zlt_fore_gp_sp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r,
      
      return;
 }
+*/
 
+/*
 // K-step Forecasts without its
 // for spatial beta
 // nrK = nsite*r*K
@@ -240,13 +242,13 @@ void zlt_fore_gp_sp(int *cov, int *K, int *nsite, int *n, int *r, int *p, int *q
      double *foreX, double *foreXsp, double *beta, double *betas, double *w, int *constant, 
      double *foreZ)
 { 
-     int l, k, t, i, j, T1, K1, r1, n1, ns, nns, col;
+     int l, k, i, t, j, T1, K1, r1, n1, ns, col;
      T1 =*T;
      K1 =*K;
      r1 =*r;
      n1 =*n;
      ns =*nsite;
-     nns =n1*ns;
+//     nns =n1*ns;
      col =*constant;
 
     double *S, *Si, *S_12, *S_12c, *det; 
@@ -354,8 +356,9 @@ void zlt_fore_gp_sp(int *cov, int *K, int *nsite, int *n, int *r, int *p, int *q
      
      return;
 }
+*/
 
-
+/*
 // for temporally varying beta
 // d is the distance for actual locations n x n
 // d12 is the distance between pred and observaed locations nsite x n
@@ -366,9 +369,9 @@ void zlt_fore_gp_tp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r,
      double *sig_op, double *foreX, double *foreXtp, double *betap, double *rhotp,
      double *betat0p, double *betatp, double *wp, int *constant, double *foreZ)
 {
-     int i, j, its1, n1, ns, r1, T1, K1, p1, u1, col;
+     int i, j, its1, ns, r1, T1, K1, p1, u1, col;
      its1 = *its;
-     n1 =*n;
+//     n1 =*n;
      ns =*nsite;
      r1 =*r;
      T1 =*T;
@@ -432,8 +435,9 @@ void zlt_fore_gp_tp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r,
      
      return;
 }
+*/
 
-
+/*
 // for temporally varying beta
 // K-step Forecasts without its
 void zlt_fore_gp_tp(int *cov, int *K, int *nsite, int *n, int *r, int *p, int *u,
@@ -442,14 +446,14 @@ void zlt_fore_gp_tp(int *cov, int *K, int *nsite, int *n, int *r, int *p, int *u
      double *foreX, double *foreXtp, double *beta, double *rhotp, double *betat0, 
      double *betat, double *w, int *constant, double *foreZ)
 { 
-     int l, k, t, i, T1, K1, r1, n1, u1, ns, nns, col;
+     int l, k, t, i, T1, K1, r1, n1, u1, ns, col;
      T1 =*T;
      K1 =*K;
      r1 =*r;
      n1 =*n;
      u1 = *u;
      ns =*nsite;
-     nns =n1*ns;
+//     nns =n1*ns;
      col =*constant;
 
     double *S_eta, *Si_eta, *S_eta12, *S_eta12c, *det; 
@@ -549,8 +553,9 @@ void zlt_fore_gp_tp(int *cov, int *K, int *nsite, int *n, int *r, int *p, int *u
      
      return;
 }
+*/
 
-
+/*
 // for spatially and temporally varying beta
 // d is the distance for actual locations n x n
 // d12 is the distance between pred and observaed locations nsite x n
@@ -637,9 +642,9 @@ void zlt_fore_gp_sptp_its(int *cov, int *its, int *K, int *nsite, int *n, int *r
      
      return;
 }
+*/
 
-
-
+/*
 // for spatially and temporally varying beta
 // K-step Forecasts without its
 void zlt_fore_gp_sptp(int *cov, int *K, int *nsite, int *n, int *r, int *p, 
@@ -649,15 +654,15 @@ void zlt_fore_gp_sptp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
      double *foreXtp, double *beta, double *betas, double *rhotp, double *betat0, 
      double *betat, double *w, int *constant, double *foreZ)
 { 
-     int l, k, t, i, j, T1, K1, r1, n1, q1, u1, ns, nns, col;
+     int l, k, t, i, j, T1, K1, r1, n1, u1, ns, col;
      T1 =*T;
      K1 =*K;
      r1 =*r;
      n1 =*n;
-     q1 =*q;
+//     q1 =*q;
      u1 =*u;
      ns =*nsite;
-     nns =n1*ns;
+//     nns =n1*ns;
      col =*constant;
 
     double *S, *Si, *S_12, *S_12c, *det; 
@@ -784,6 +789,6 @@ void zlt_fore_gp_sptp(int *cov, int *K, int *nsite, int *n, int *r, int *p,
 
      return;
 }
-
+*/
 
 /////////////////////// END ///////////////////////////////////////////////////

@@ -86,8 +86,8 @@ void zlt_fore_gpp(int *cov, int *K, int *n, int *m, int *r, int *p, int *rT, int
      double *sig_eta, double *beta, double *rho, double *wp, double *foreX, 
      int *constant, double *foreZ)
 { 
-     int l, k, t, i, rT1, K1, r1, n1, m1, col;
-     rT1 =*rT;
+     int l, k, t, i, K1, r1, n1, m1, col;
+//     rT1 =*rT;
      K1 =*K;
      r1 =*r;
      n1 =*n;

@@ -18,11 +18,11 @@ void z_pr_its_gpp1_sp(int *cov, int *scale, int *its, int *nsite, int *n,
      double *Xpred, double *Xspred, int *constant, double *betapred,
      double *zpred)
 {
-     int i, j, its1, nsite1, m1, r1, rT1, p1, q1, col;
+     int i, j, its1, nsite1, m1, rT1, p1, q1, col;
      its1 = *its;
      nsite1 = *nsite;
      m1 = *m;
-     r1 =*r;
+//     r1 =*r;
      rT1 =*rT;
      p1 =*p;
      q1 =*q;
@@ -300,11 +300,11 @@ void z_pr_its_gpp1(int *cov, int *scale, int *its, int *nsite, int *n, int *m, i
      double *dnsm, double *wp, double *sig2ep, double *betap, double *Xpred, 
      int *constant, double *zpred)
 {
-     int i, j, its1, nsite1, m1, r1, rT1, p1, col;
+     int i, j, its1, nsite1, m1, rT1, p1, col;
      its1 = *its;
      nsite1 = *nsite;
      m1 = *m;
-     r1 =*r;
+//     r1 =*r;
      rT1 =*rT;
      p1 =*p;
      col =*constant;
@@ -370,11 +370,11 @@ void z_pr_gpp1(int *cov, int *nsite, int *n, int *m, int *r, int *T,
      double *dnsm, double *wp, double *sig2ep, double *betap, 
      double *Xpred, int *constant, double *zpred)
 {
-     int i, m1, nsite1, r1, rT1, col;
+     int i, m1, nsite1, rT1, col;
 
      m1 =*m;
      nsite1 =*nsite;
-     r1 =*r;
+//     r1 =*r;
      rT1 =*rT;
      col = *constant;
 

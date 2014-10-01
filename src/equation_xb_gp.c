@@ -20,14 +20,14 @@ void JOINT_gp(int *n, int *T, int *r, int *rT, int *p, int *N,
      double *phip, double *accept, double *nup, double *sig_ep, double *sig_etap, 
      double *betap, double *op)
 {     
-     int n1, nn, r1, p1, rn, N1, col; 
+     int n1, N1; 
      n1 = *n;
-     nn = n1*n1;
-     r1 = *r;
-     p1 = *p;
-     rn = r1 *n1;
+//     nn = n1*n1;
+//     r1 = *r;
+//     p1 = *p;
+//     rn = r1 *n1;
      N1 = *N;
-     col = *constant;
+//     col = *constant;
      
    double *Qeta, *XB, *Sinv, *det, *S;
    Qeta = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -122,16 +122,16 @@ void JOINTsptp_gp(int *intercept, int *n, int *T, int *r, int *rT, int *p, int *
      double *sigbetap, double *sigdeltap, double *sig0p, double *rhop, 
      double *betap, double *betasp, double *betat0p, double *betatp, double *op)
 {     
-     int n1, nn, r1, p1, q1, u1, rn, N1, col; 
+     int n1, p1, u1, N1; 
      n1 = *n;
-     nn = n1*n1;
-     r1 = *r;
+//     nn = n1*n1;
+//     r1 = *r;
      p1 = *p;
-     q1 = *q;
+//     q1 = *q;
      u1 = *u;
-     rn = r1 *n1;
+//     rn = r1 *n1;
      N1 = *N;
-     col = *constant;
+//     col = *constant;
      
    double *Qeta, *XB, *XBtmp, *XBno, *XBsp, *XBtp, *Sinv, *det, *S, *G;
    Qeta = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -315,15 +315,15 @@ void JOINTtp_gp(int *intercept, int *n, int *T, int *r, int *rT, int *p, int *u,
      double *sigdeltap, double *sig0p, double *rhop, double *betap, 
      double *betat0p, double *betatp, double *op)
 {     
-     int n1, nn, r1, p1, u1, rn, N1, col; 
+     int n1, p1, u1, N1; 
      n1 = *n;
-     nn = n1*n1;
-     r1 = *r;
+//     nn = n1*n1;
+//     r1 = *r;
      p1 = *p;
      u1 = *u;
-     rn = r1 *n1;
+//     rn = r1 *n1;
      N1 = *N;
-     col = *constant;
+//     col = *constant;
      
    double *Qeta, *XB, *XBno, *XBtp, *Sinv, *det, *S, *G;
    Qeta = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -470,14 +470,14 @@ void JOINTsp_gp(int *intercept, int *n, int *T, int *r, int *rT, int *p, int *q,
      double *phip, double *accept, double *nup, double *sig_ep, double *sig_etap, 
      double *sig_betasp, double *betap, double *betasp, double *op)
 {     
-     int n1, nn, r1, p1, rn, N1, col; 
+     int n1, p1, N1; 
      n1 = *n;
-     nn = n1*n1;
-     r1 = *r;
+//     nn = n1*n1;
+//     r1 = *r;
      p1 = *p;
-     rn = r1 *n1;
+//     rn = r1 *n1;
      N1 = *N;
-     col = *constant;
+//     col = *constant;
      
    double *Qeta, *XB, *XBno, *XBsp, *Sinv, *det, *S;
    Qeta = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -811,10 +811,10 @@ void sig_eta_gp_sptp(int *n, int *r,  int *T, int *rT, double *shape,
 void sig_beta_gp_sp(int *n, int *q, double *shape, double *prior_b, double *betasp, 
      double *Sinv, int *constant, double *sig2beta)
 {
-     int i, j, n1, q1, col;
+     int i, j, n1, q1;
      n1 =*n;
      q1 =*q;
-     col =*constant;
+//     col =*constant;
      
      double *bt;
      bt = (double *) malloc((size_t)((n1)*sizeof(double)));
@@ -846,8 +846,8 @@ void sig_beta_gp_sp(int *n, int *q, double *shape, double *prior_b, double *beta
 void sig_0_gp_tp(int *u, double *shape, double *prior_b, double *gam_0, 
      int *constant, double *sig0)          
 {
-     int u1, col;
-     u1 = *u;
+     int col;
+//     u1 = *u;
      col = *constant;
 
      double sh, rt, *out, b, v;
@@ -1580,12 +1580,12 @@ void phi_gp_MH(double *Qeta1, double *Qeta2, double *det1, double *det2,
      double *accept, double *phip)
 {
      
-     int row, col, l, i, j, r1, N1, rT1;
+     int row, col, l, i, j, r1, rT1;
      row = *n;
      col = *constant;
      r1 = *r;
      rT1 = *rT;
-     N1 = row*rT1;
+//     N1 = row*rT1;
      
      double *ov, *o1, *XB1, *ratio, *U; 
      o1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
@@ -1679,13 +1679,13 @@ void phi_gp_MH_sptp(double *Qeta1, double *Qeta2, double *det1, double *det2,
      double *accept, double *phip)
 {
      
-     int row, col, l, i, j, r1, N1, rT1, T1;
+     int row, col, l, i, j, r1, rT1, T1;
      row = *n;
      col = *constant;
      r1 = *r;
      T1 =*T;
      rT1 = *rT;
-     N1 = row*rT1;
+//     N1 = row*rT1;
      
      double *ov, *o1, *XB1, *ratio, *U; 
      o1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
@@ -1770,11 +1770,11 @@ void phi_gp_DIS(int *cov, double *Qeta1, double *det1, double *phi1,
      double *phip)
 {
     
-     int row, col, i, r1, rT1, pk;
+     int row, col, i, pk;
      row = *n;
      col = *constant;
-     r1 = *r;
-     rT1 = *rT;
+//     r1 = *r;
+//     rT1 = *rT;
      pk = *phik;
 
      double *phitmp, *pden, *Qeta, *det, *out;
@@ -1847,11 +1847,11 @@ void phidens_gp(double *phi, double *Qeta, double *det, int *n, int *r,
      int *T, int *rT, int *N, double *prior_a, double *prior_b, double *XB, 
      double *o, int *constant, double *out)
 {
-     int row, col, l, i, j, r1, N1, rT1;
+     int row, col, l, i, j, r1, rT1;
      row = *n;
      col = *constant;
      r1 = *r;
-     N1 = *N;
+//     N1 = *N;
      rT1 = *rT;
 
      double *ov, *o1, *XB1; 
@@ -1909,11 +1909,11 @@ void phi_gp_DIS_sptp(int *cov, double *Qeta1, double *det1, double *phi1,
      double *phip)
 {
     
-     int row, col, i, r1, rT1, pk;
+     int row, col, i, pk;
      row = *n;
      col = *constant;
-     r1 = *r;
-     rT1 = *rT;
+//     r1 = *r;
+//     rT1 = *rT;
      pk = *phik;
 
      double *phitmp, *pden, *Qeta, *det, *out;
@@ -1986,11 +1986,11 @@ void phidens_gp_sptp(double *phi, double *Qeta, double *det, int *n, int *r,
      int *T, int *rT, int *N, double *prior_a, double *prior_b, double *XB, 
      double *o, int *constant, double *out)
 {
-     int row, col, l, i, j, r1, N1, T1, rT1;
+     int row, col, l, i, j, r1, T1, rT1;
      row = *n;
      col = *constant;
      r1 = *r;
-     N1 = *N;
+//     N1 = *N;
      T1 = *T;
      rT1 =*rT;
 
@@ -2039,11 +2039,11 @@ void nu_gp_DIS(int *cov, double *Qeta1, double *det1, double *phi,
      double *nup)
 {
     
-     int row, col, i, r1, rT1;
+     int row, col, i;
      row = *n;
      col = *constant;
-     r1 = *r;
-     rT1 = *rT;
+//     r1 = *r;
+//     rT1 = *rT;
      int nuk;
 
      nuk=30;
@@ -2196,11 +2196,11 @@ void nu_gp_DIS_sptp(int *cov, double *Qeta1, double *det1, double *phi,
      double *nup)
 {
     
-     int row, col, i, r1, T1;
+     int row, col, i;
      row = *n;
      col = *constant;
-     r1 = *r;
-     T1 = *T;
+//     r1 = *r;
+//     T1 = *T;
      int nuk;
 
      nuk=30;

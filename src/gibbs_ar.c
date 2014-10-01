@@ -26,15 +26,15 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
 //     unsigned iseed = 44;
 //     srand(iseed); 
      
-     int its1, col, i, j, n1, r1, rT1, p1, N1, nr, rep1, nsite1, brin, trans1;
+     int its1, col, i, j, r1, rT1, p1, N1, rep1, nsite1, brin, trans1;
      its1 = *its;
      col = *constant;
-     n1 = *n;
+//     n1 = *n;
      r1 = *r;
      rT1 =*rT;
      p1 = *p;
      N1 = *N;
-     nr = n1 * r1;
+//     nr = n1 * r1;
      rep1 = *report;
      nsite1 = *nsite;
      brin = *burnin;
@@ -351,7 +351,7 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
 //     unsigned iseed = 44;
 //     srand(iseed); 
      
-     int its1, brin, col, i, j, n1, r1, T1, p1, N1, nr, rep1;
+     int its1, brin, col, i, j, r1, p1, N1, rep1;
      double *phip, *sig_ep, *sig_etap, *rhop, *betap;
      double *mu_lp, *sig_0p, *op;
      double *phi1, *sig_e1, *sig_eta1, *rho1, *beta1;
@@ -362,12 +362,12 @@ void GIBBS_ar(double *flag, int *its, int *burnin,
      its1 = *its;
      brin = *burnin;
      col = *constant;
-     n1 = *n;
+//     n1 = *n;
      r1 = *r;
-     T1 = *T;
+//     T1 = *T;
      p1 = *p;
      N1 = *N;
-     nr = n1 * r1;
+//     nr = n1 * r1;
      rep1 = *report;
           
      double accept1, mn_rep[N1], var_rep[N1];

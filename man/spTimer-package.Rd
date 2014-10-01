@@ -44,7 +44,7 @@ Maintainer: K.S. Bakar <shuvo.bakar@gmail.com>
 }
 \keyword{ package }
 \seealso{
-Packages 'forecast'; 'spBayes'; 'maps'; 'MBA'; 'coda'; website: \code{http://www.r-project.org/}.
+Packages 'spacetime', 'forecast'; 'spBayes'; 'maps'; 'MBA'; 'coda'; website: \code{http://www.r-project.org/}.
 }
 %\examples{
 %~~ simple examples of the most important functions ~~

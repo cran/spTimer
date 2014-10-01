@@ -23,13 +23,13 @@ void JOINT_onephi_gpp(int *cov, int *spdecay, double *flag, int *n, int *m,
      double *mu_lp, double *sig2lp, double *w0p, double *wp, 
      double *zfit)
 {     
-     int n1, m1, r1, p1, N1, col; 
+     int n1, m1, r1, N1; 
      n1 = *n;
      m1 = *m;
      r1 = *r;
-     p1 = *p;
+//     p1 = *p;
      N1 = *N;
-     col = *constant;
+//     col = *constant;
      
    double *Qeta, *XB, *Sinv, *S, *det, *A, *C, *Aw;
 
@@ -142,14 +142,14 @@ void JOINT_onephi_sp_gpp(int *intercept, int *cov, int *spdecay, double *flag,
      double *mu_lp, double *sig2lp, double *w0p, double *wp, double *zfit)
 {     
 
-     int n1, m1, r1, p1, q1, N1, col; 
+     int n1, m1, p1, N1; 
      n1 = *n;
      m1 = *m;
-     r1 = *r;
+//     r1 = *r;
      p1 = *p;
-     q1 = *q;
+//     q1 = *q;
      N1 = *N;
-     col = *constant;
+//     col = *constant;
      
    double *Qeta, *XB, *XBno, *XBsp, *Sinv, *S, *det, *A, *C, *Aw;
 
@@ -285,8 +285,8 @@ void JOINT_onephi_sp_gpp(int *intercept, int *cov, int *spdecay, double *flag,
 void sig_e_gpp(int *n, int *rT, int *N, double *shape, double *prior_b, 
      double *XB, double *Aw, double *z, int *constant, double *sig2e)
 {
-     int i, n1, col, N1;
-     n1 =*n;
+     int i, col, N1;
+//     n1 =*n;
      col =*constant;
      N1 =*N;
      
@@ -323,11 +323,11 @@ void sig_eta_gpp(int *m, int *r, int *T, int *rT, double *shape,
      double *prior_b, double *Sinv_eta, double *rho, double *w, 
      double *w0, int *constant, double *sig2eta)     
 {
-     int m1, col, t, l, i, r1, rT1;
+     int m1, col, t, l, i, r1;
      m1 = *m;
      col = *constant;
      r1 = *r;
-     rT1 = *rT;
+//     rT1 = *rT;
      
      double *w1, *w2, *er, *out, u, b, sh, sig[1];
 
@@ -391,10 +391,10 @@ void sig_eta_gpp(int *m, int *r, int *T, int *rT, double *shape,
 void sig_beta_gpp_sp(int *m, int *q, double *shape, double *prior_b, 
      double *betasp, double *Sinv, int *constant, double *sig2beta)
 {
-     int i, j, m1, q1, col;
+     int i, j, m1, q1;
      m1 =*m;
      q1 =*q;
-     col =*constant;
+//     col =*constant;
      
      double *bt;
      bt = (double *) malloc((size_t)((m1)*sizeof(double)));
@@ -628,11 +628,11 @@ void rho_gpp(int *m, int *r, int *T, int *rT, int *p, double *mu_rho,
      double *delta2, double *Q_eta, double *w0, double *w, 
      int *constant, double *rho)     
 {
-     int m1, col, t, l, i, r1, p1;
+     int m1, col, t, l, i, r1;
      m1 = *m;
      col = *constant;
      r1 = *r;
-     p1= *p;
+//     p1= *p;
 
      double *w2, *w1, *out, *mu, *s2;
      w2 = (double *) malloc((size_t)((m1*col)*sizeof(double)));
@@ -703,11 +703,11 @@ void rho_gpp_sp(int *m, int *r, int *T, int *rT, int *p, double *mu_rho,
      double *delta2, double *Q_eta, double *w0, double *w, 
      int *constant, double *rho)     
 {
-     int m1, col, t, l, i, r1, p1, T1;
+     int m1, col, t, l, i, r1, T1;
      m1 = *m;
      col = *constant;
      r1 = *r;
-     p1= *p;
+//     p1= *p;
      T1 =*T;
      
      double *w2, *w1, *out, *mu, *s2;
@@ -845,9 +845,9 @@ void Z_fit_gpp(double *flag, int *n, int *m, int *T, int *r, int *rT,
      double *sig2e, double *Aw, double *XB, double *z, int *constant, 
      double *zfit)
 {
-     int i, l, t, n1, m1, r1, col;
+     int i, l, t, n1, r1, col;
      n1 = *n;
-     m1 = *m;
+//     m1 = *m;
      r1 = *r;
      col = *constant;
    
@@ -904,10 +904,10 @@ void Z_fit_gpp_sp(double *flag, int *n, int *m, int *T, int *r, int *rT,
      double *sig2e, double *Aw, double *XB, double *z, int *constant, 
      double *zfit)
 {
-     int i, l, t, n1, T1, m1, r1, col;
+     int i, l, t, n1, T1, r1, col;
      n1 = *n;
      T1 =*T;
-     m1 = *m;
+//     m1 = *m;
      r1 = *r;
      col = *constant;
    
@@ -951,9 +951,9 @@ void o_fit_gpp(double *flag, int *n, int *m, int *T, int *r, int *rT,
      double *Aw, double *XB, double *z, int *constant, 
      double *zfit)
 {
-     int i, l, t, n1, m1, r1, col;
+     int i, l, t, n1, r1, col;
      n1 = *n;
-     m1 = *m;
+//     m1 = *m;
      r1 = *r;
      col = *constant;
    
@@ -1123,8 +1123,8 @@ void wlt_gpp(int *n, int *m, int *r, int *T, int *rT, int *p, double *sig2e,
      double *rho, double *Q_eta, double *A, double *w0, double *w, double *XB, 
      double *z, int *constant, double *wp)     
 {
-     int i, l, t, r1, n1, m1, mm, col, p1; 
-     r1 =*r; n1 =*n; m1 =*m; mm =m1*m1; p1 =*p; col =*constant;
+     int i, l, t, r1, n1, m1, mm, col; 
+     r1 =*r; n1 =*n; m1 =*m; mm =m1*m1; col =*constant;
      
      double *tA, *AA, *de_tT, *de_T, *det, *w2, *w1;
      double *tr, *tr1, *tr2, *tr3, *z1, *XB1, *chi, *mean1, *ww;
@@ -1270,8 +1270,8 @@ void wlt_gpp_sp(int *n, int *m, int *r, int *T, int *rT, int *p, double *sig2e,
      double *rho, double *Q_eta, double *A, double *w0, double *w, double *XB, 
      double *z, int *constant, double *wp)     
 {
-     int i, l, t, r1, n1, m1, mm, col, p1, T1; 
-     r1 =*r; n1 =*n; m1 =*m; mm =m1*m1; p1 =*p; T1 =*T; col =*constant;
+     int i, l, t, r1, n1, m1, mm, col, T1; 
+     r1 =*r; n1 =*n; m1 =*m; mm =m1*m1; T1 =*T; col =*constant;
      
      double *tA, *AA, *de_tT, *de_T, *det, *w2, *w1;
      double *tr, *tr1, *tr2, *tr3, *z1, *XB1, *chi, *mean1, *ww;
@@ -1504,12 +1504,12 @@ void phi_gpp_DIS2(int *cov, double *Qeta1, double *det1, double *phi1,
      double *accept, double *phip) 
 {
     
-     int row, col, i, r1, N1, rT1, pk;
+     int row, col, i, pk;
      row = *m;
      col = *constant;
-     r1 = *r;
-     rT1 = *rT;
-     N1 = row*rT1;
+//     r1 = *r;
+//     rT1 = *rT;
+//     N1 = row*rT1;
      pk = *phik;
 
      double *phitmp, *pden, *Qeta, *det, *out;
@@ -1646,12 +1646,12 @@ void nu_gpp_DIS(int *cov, double *Qeta1, double *det1, double *phi, double *nu1,
      int *m, int *r, int *T, int *rT, double *dm, double *rho, double *sig2eta, 
      double *mu_l, double *w0, double *w, int *constant, double *nup) 
 {
-     int row, col, i, r1, N1, rT1;
+     int row, col, i;
      row = *m;
      col = *constant;
-     r1 = *r;
-     rT1 = *rT;
-     N1 = row*rT1;
+//     r1 = *r;
+//     rT1 = *rT;
+//     N1 = row*rT1;
 
      int nuk;
 

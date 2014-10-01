@@ -15,10 +15,10 @@ void z_pr_its_ar(int *cov, int *its, int *nsite, int *n, int *r, int *rT,
      double *rhop, double *betap, double *mu_lp,  
      double *X, double *valX, double *op, int *constant, double *zpred)
 {
-     int its1, r1, n1, rT1, N1, col, i, j, k, ns, p1;
+     int its1, r1, rT1, N1, col, i, j, k, ns, p1;
      its1 = *its;
      r1 = *r;
-     n1 = *n;
+//     n1 = *n;
      rT1 = *rT;
      N1 = *N;
      col = *constant;

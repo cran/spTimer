@@ -67,16 +67,17 @@ void GP_para_printR (int i, int iteration, int report, int p, double accept,
      double *phi, double *sig2e, double *sig2eta, double *beta) 
 {
     int j, k;
-    double phi1, sig2e1, sig2eta1, x, intpart, fractional, ii;
+    double phi1, sig2e1, sig2eta1, ii;
     phi1 = *phi;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+//    fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -99,17 +100,18 @@ void GP_para_printRnu (int i, int iteration, int report, int p, double accept,
      double *phi, double *nu, double *sig2e, double *sig2eta, double *beta) 
 {
     int j, k;
-    double phi1, nu1, sig2e1, sig2eta1, x, intpart, fractional, ii;
+    double phi1, nu1, sig2e1, sig2eta1, ii;
     phi1 = *phi;
     nu1 =*nu;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -132,17 +134,18 @@ void GPsp_para_printR (int i, int iteration, int report, int p, double accept,
      double *phi, double *sig2e, double *sig2eta, double *sig2beta, double *beta) 
 {
     int j, k;
-    double phi1, sig2e1, sig2eta1, sig2beta1, x, intpart, fractional, ii;
+    double phi1, sig2e1, sig2eta1, sig2beta1, ii;
     phi1 = *phi;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
     sig2beta1 = *sig2beta;    
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -170,18 +173,19 @@ void GPsp_para_printRnu (int i, int iteration, int report, int p, double accept,
      double *beta) 
 {
     int j, k;
-    double phi1, nu1, sig2e1, sig2eta1, sig2beta1, x, intpart, fractional, ii;
+    double phi1, nu1, sig2e1, sig2eta1, sig2beta1, ii;
     phi1 = *phi;
     nu1 =*nu;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
     sig2beta1 = *sig2beta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -208,18 +212,19 @@ void GPtp_para_printR (int i, int iteration, int report, int p, int u, double ac
      double *rho, double *beta) 
 {
     int j, k;
-    double phi1, sig2e1, sig2eta1, sig2delta1, sig201, x, intpart, fractional, ii;
+    double phi1, sig2e1, sig2eta1, sig2delta1, sig201, ii;
     phi1 = *phi;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
     sig2delta1 = *sig2delta;    
     sig201 = *sig20;    
     
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -251,7 +256,7 @@ void GPtp_para_printRnu (int i, int iteration, int report, int p, int u, double 
      double *sig20, double *rho, double *beta) 
 {
     int j, k;
-    double phi1, nu1, sig2e1, sig2eta1, sig2delta1, sig201, x, intpart, fractional, ii;
+    double phi1, nu1, sig2e1, sig2eta1, sig2delta1, sig201, ii;
     phi1 = *phi;
     nu1 =*nu;
     sig2e1 = *sig2e;
@@ -259,11 +264,12 @@ void GPtp_para_printRnu (int i, int iteration, int report, int p, int u, double 
     sig2delta1 = *sig2delta;    
     sig201 = *sig20;    
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -296,7 +302,7 @@ void GPsptp_para_printR (int i, int iteration, int report, int p, int u, double 
      double *sig20, double *rho, double *beta) 
 {
     int j, k;
-    double phi1, sig2e1, sig2eta1, sig2beta1, sig2delta1, sig201, x, intpart, fractional, ii;
+    double phi1, sig2e1, sig2eta1, sig2beta1, sig2delta1, sig201, ii;
     phi1 = *phi;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
@@ -304,11 +310,12 @@ void GPsptp_para_printR (int i, int iteration, int report, int p, int u, double 
     sig2delta1 = *sig2delta;    
     sig201 = *sig20;    
     
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -340,7 +347,7 @@ void GPsptp_para_printRnu (int i, int iteration, int report, int p, int u, doubl
      double *sig2delta, double *sig20, double *rho, double *beta) 
 {
     int j, k;
-    double phi1, nu1, sig2e1, sig2eta1, sig2beta1, sig2delta1, sig201, x, intpart, fractional, ii;
+    double phi1, nu1, sig2e1, sig2eta1, sig2beta1, sig2delta1, sig201, ii;
     phi1 = *phi;
     nu1 =*nu;
     sig2e1 = *sig2e;
@@ -349,11 +356,12 @@ void GPsptp_para_printRnu (int i, int iteration, int report, int p, int u, doubl
     sig2delta1 = *sig2delta;    
     sig201 = *sig20;    
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -385,7 +393,7 @@ void GPPsp_para_printRnu (int i, int iteration, int report, int p, double accept
      double *sig2beta, double *beta) 
 {
     int j, k;
-    double phi1, nu1, rho1, sig2e1, sig2eta1, sig2beta1, x, intpart, fractional, ii;
+    double phi1, nu1, rho1, sig2e1, sig2eta1, sig2beta1, ii;
     phi1 = *phi;
     nu1 =*nu;
     rho1 =*rho;
@@ -393,11 +401,12 @@ void GPPsp_para_printRnu (int i, int iteration, int report, int p, double accept
     sig2eta1 = *sig2eta;
     sig2beta1 = *sig2beta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+    //fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -421,19 +430,20 @@ void GPPsp_para_printR (int i, int iteration, int report, int p, double accept,
      double *sig2beta, double *beta) 
 {
     int j, k;
-    double phi1, rho1, sig2e1, sig2eta1, sig2beta1, x, intpart, fractional, ii;
+    double phi1, rho1, sig2e1, sig2eta1, sig2beta1, ii;
     phi1 = *phi;
     rho1 =*rho;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
     sig2beta1 = *sig2beta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+//    fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
-      ii = (double) i;
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
+  	  ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
       i+1, iteration, 100.0*(i+1)/iteration, 100.0*(accept/ii));
@@ -457,17 +467,18 @@ void para_printR (int i, int iteration, int report, int p, double accept,
      double *phi, double *rho, double *sig2e, double *sig2eta, double *beta) 
 {
     int j, k;
-    double phi1, rho1, sig2e1, sig2eta1, x, intpart, fractional, ii;
+    double phi1, rho1, sig2e1, sig2eta1, ii;
     phi1 = *phi;
     rho1 = *rho;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+//    fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -489,18 +500,19 @@ void para_printRnu (int i, int iteration, int report, int p, double accept,
      double *phi, double *nu, double *rho, double *sig2e, double *sig2eta, double *beta) 
 {
     int j, k;
-    double phi1, nu1, rho1, sig2e1, sig2eta1, x, intpart, fractional, ii;
+    double phi1, nu1, rho1, sig2e1, sig2eta1, ii;
     phi1 = *phi;
     nu1=*nu;
     rho1 = *rho;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+//    fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -521,16 +533,17 @@ void para_print_spTR (int i, int iteration, int report, int p, double accept,
      double *phi, double *sig2e, double *sig2eta, double *beta) 
 {
     int j, k;
-    double phi1, sig2e1, sig2eta1, x, intpart, fractional, ii;
+    double phi1, sig2e1, sig2eta1, ii;
     phi1 = *phi;
     sig2e1 = *sig2e;
     sig2eta1 = *sig2eta;
 
-    x =  (iteration/report); 
-    fractional = modf(x, &intpart);
+//    x =  (iteration/report); 
+//    fractional = modf(x, &intpart);
 
     for(j=0; j<report; j++){
-    if(i==(intpart*(j+1)-1)){
+//    if(i==(intpart*(j+1)-1)){
+    if(i==((j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -609,12 +622,11 @@ void extn_12(int j, int *n, double *S_12, double *S_12c)
 void comb_XB_tp(int *n, int *r, int *T, int *p, double *Xtp, double *betatp, 
      int *constant, double *XB)
 {
-     int t, l, n1, r1, T1, p1, col;
+     int t, l, n1, r1, T1, p1;
      n1 =*n;
      r1 =*r;
      T1 =*T;
      p1 =*p;
-     col = *constant;
 
      double *X1, *beta, *XB1;
      X1 = (double *) malloc((size_t)((n1*p1)*sizeof(double)));
@@ -650,12 +662,11 @@ void comb_XB_tp(int *n, int *r, int *T, int *p, double *Xtp, double *betatp,
 void comb_XB_sp(int *n, int *r, int *T, int *q, double *Xsp, double *betasp, 
      int *constant, double *XB)
 {
-     int i, j, l, t, n1, r1, T1, q1, col;
+     int i, j, l, t, n1, r1, T1, q1;
      n1=*n;
      r1=*r;
      T1=*T;
      q1=*q;
-     col=*constant;
      
      double *XB1, *dump, *I;
      XB1 = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -689,13 +700,12 @@ void comb_XB_sp(int *n, int *r, int *T, int *q, double *Xsp, double *betasp,
 void comb_XB_sp_gpp(int *n, int *m, int *r, int *T, int *q, double *Xsp, 
      double *betasp, double *A, int *constant, double *XB)
 {
-     int i, j, l, t, n1, m1, r1, T1, q1, col;
+     int i, j, l, t, n1, m1, r1, T1, q1;
      n1=*n;
      m1=*m;
      r1=*r;
      T1=*T;
      q1=*q;
-     col=*constant;
      
      double *XB1, *XA, *dump, *dump1, *I;
      XB1 = (double *) malloc((size_t)((n1*n1)*sizeof(double)));
@@ -893,9 +903,8 @@ void extract_beta_sp2(int j, int *n, int *q, double *betasp, double *alt)
 // extract p x T into p x 1 matrix
 void extract_beta_t(int t, int *T, int *p, double *beta, double *alt)
 {
-     int i, k, T1, p1;
+     int i, k, p1;
      p1=*p;
-     T1=*T;
      
      for(i=0; i< p1; i++){
         k = i + t*p1;
@@ -907,9 +916,8 @@ void extract_beta_t(int t, int *T, int *p, double *beta, double *alt)
 // extract p x r into p x 1 matrix
 void extract_beta_l(int l, int *r, int *p, double *beta, double *alt)
 {
-     int i, k, r1, p1;
+     int i, k, p1;
      p1=*p;
-     r1=*r;
      
      for(i=0; i< p1; i++){
         k = i + l*p1;
@@ -1075,11 +1083,10 @@ void extract_X2(int l, int t, int *n, int *rT, int *T, int *p,
 void extract_X3(int l, int t, int k, int *n, int *rT, int *T, int *p, 
      double *x, double *alt)
 {
-     int i, k1, n1, rT1, T1, p1, nrT;
+     int i, k1, n1, rT1, T1, nrT;
      n1 = *n;
      rT1 = *rT;
      T1 = *T;
-     p1= *p;
      nrT= n1*rT1;
      
      for (i=0; i < n1; i++) {
@@ -1095,11 +1102,10 @@ void extract_X3(int l, int t, int k, int *n, int *rT, int *T, int *p,
 void extract_X3_uneqT(int l, int t, int k, int *n, int *r, int *rT, int *T, 
      int *p, double *x, double *alt)
 {
-     int i, k1, n1, r1, rT1, p1, nrT;
+     int i, k1, n1, r1, rT1, nrT;
      n1 = *n;
      r1 = *r;
      rT1 = *rT;
-     p1= *p;
      nrT= n1*rT1;
 
      int *T1; 
