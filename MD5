@@ -1,4 +1,4 @@
-d886e2101a42e5643c90478557a59fb9 *DESCRIPTION
+bcbf1ad2d0a4ee5d91323f8583e20dcf *DESCRIPTION
 6ac711806d962e7e127a811737842ce9 *NAMESPACE
 51ebd625f17aa0c248d594396e31df42 *R/spAR.r
 1a9b882893c3094a9af514a87bafd0a5 *R/spGP.r
@@ -10,14 +10,14 @@ e67b591c9181041b7bff6c365a6377a3 *data/NYdata.txt.gz
 ff91fc942c89518dd7f797873f92fa5e *data/NYgrid.txt.gz
 4ee50f6ae276945478388d23b89c4fa0 *demo/00Index
 e73cea579db6c710f481ca54631af44c *demo/nyExample.R
-91a2261921023a6c3be6bc560ab4f076 *inst/CITATION
-4dff9b325210f1e322cbea7802858483 *inst/ChangeLog
+d1e5182c09c5304b071fa45086c84f20 *inst/CITATION
+9364feda2c75db98a4f0a53ccbda8602 *inst/ChangeLog
 61a91f4ebd1862d0b395596a24780da5 *man/NYdata.Rd
 78686c9176f870be068c9c16bbb3b5f6 *man/confint.spT.Rd
 c4a15b345c4658400dbef88af6558c54 *man/fitted.spT.Rd
 6f04181a16e1f5dd0e47335c0097629e *man/plot.spT.Rd
 be4042276a09b2a48583ef6238411cf5 *man/predict.spT.Rd
-5283f6def32f16aeb06cbdb6e0c31af4 *man/spT.Gibbs.Rd
+afadeadea3fcbac0607782ed67ff6488 *man/spT.Gibbs.Rd
 57f307634b20da5f0fa69dcb99e216e1 *man/spT.check.locations.Rd
 ac84dab4c94fad432599e999a31f2622 *man/spT.decay.Rd
 87b8653a55453373487248d996beedff *man/spT.geodist.Rd
@@ -31,10 +31,10 @@ d7394e8750a68ae9b869ca6f2cf62fb7 *man/spT.subset.Rd
 bf120981def4e217c0631d4350042e05 *man/spT.time.Rd
 e187b052f5f81c99f1dca79f83104380 *man/spT.validation.Rd
 3dbbef701472b8d6a39d473cde82b5f9 *man/spTimer-internal.Rd
-6aeaf273646d165914103ba9ac936864 *man/spTimer-package.Rd
+859a6d4713b50a04b6d624458bf38a2a *man/spTimer-package.Rd
 b3c130b3425d904fa5396be11a144735 *man/summary.spT.Rd
 b9a551bd4382feea448394c887504c0a *src/Print.h
-7f32153cdacc1497fdc8305e83821ac2 *src/common.c
+ddd31714cfd3c79cb8a893e693f6f3d3 *src/common.c
 93f1ff69bce9abddd47c55d609829434 *src/common.h
 5e5d66817803e75084ec3bbf75351dc3 *src/covariance.c
 2a3e0ec5f3850cf2b49628fabd39457d *src/covariance.h

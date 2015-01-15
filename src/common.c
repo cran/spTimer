@@ -77,7 +77,8 @@ void GP_para_printR (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+//    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -111,7 +112,7 @@ void GP_para_printRnu (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -145,7 +146,7 @@ void GPsp_para_printR (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -185,7 +186,7 @@ void GPsp_para_printRnu (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -224,7 +225,7 @@ void GPtp_para_printR (int i, int iteration, int report, int p, int u, double ac
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -269,7 +270,7 @@ void GPtp_para_printRnu (int i, int iteration, int report, int p, int u, double 
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -315,7 +316,7 @@ void GPsptp_para_printR (int i, int iteration, int report, int p, int u, double 
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -361,7 +362,7 @@ void GPsptp_para_printRnu (int i, int iteration, int report, int p, int u, doubl
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -406,7 +407,7 @@ void GPPsp_para_printRnu (int i, int iteration, int report, int p, double accept
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -442,7 +443,7 @@ void GPPsp_para_printR (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
   	  ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -478,7 +479,7 @@ void para_printR (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -512,7 +513,7 @@ void para_printRnu (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
@@ -543,7 +544,7 @@ void para_print_spTR (int i, int iteration, int report, int p, double accept,
 
     for(j=0; j<report; j++){
 //    if(i==(intpart*(j+1)-1)){
-    if(i==((j+1)-1)){	
+    if(i==((iteration/report)*(j+1)-1)){	
       ii = (double) i;
       Rprintf("---------------------------------------------------------------\n");
       Rprintf(" Sampled: %i of %i, %3.2f%%.\n Batch Acceptance Rate (phi): %3.2f%%\n", 
