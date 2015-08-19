@@ -1,5 +1,5 @@
-bcbf1ad2d0a4ee5d91323f8583e20dcf *DESCRIPTION
-6ac711806d962e7e127a811737842ce9 *NAMESPACE
+5aa4c203d757d7330eb7c392e656a15c *DESCRIPTION
+cc26cda075bc69e4a55135716e833a7e *NAMESPACE
 51ebd625f17aa0c248d594396e31df42 *R/spAR.r
 1a9b882893c3094a9af514a87bafd0a5 *R/spGP.r
 1020b59e58bb1f854a24fafe05f7228d *R/spGPP.r
@@ -11,7 +11,7 @@ ff91fc942c89518dd7f797873f92fa5e *data/NYgrid.txt.gz
 4ee50f6ae276945478388d23b89c4fa0 *demo/00Index
 e73cea579db6c710f481ca54631af44c *demo/nyExample.R
 d1e5182c09c5304b071fa45086c84f20 *inst/CITATION
-9364feda2c75db98a4f0a53ccbda8602 *inst/ChangeLog
+55d2fede2d913c828215befc6516ef97 *inst/ChangeLog
 61a91f4ebd1862d0b395596a24780da5 *man/NYdata.Rd
 78686c9176f870be068c9c16bbb3b5f6 *man/confint.spT.Rd
 c4a15b345c4658400dbef88af6558c54 *man/fitted.spT.Rd
@@ -38,9 +38,9 @@ ddd31714cfd3c79cb8a893e693f6f3d3 *src/common.c
 93f1ff69bce9abddd47c55d609829434 *src/common.h
 5e5d66817803e75084ec3bbf75351dc3 *src/covariance.c
 2a3e0ec5f3850cf2b49628fabd39457d *src/covariance.h
-9f042f6c0b6d0335bac54b18155af0ea *src/equation_xb_ar.c
-901b644c5f0c306cd5f1959a145b6730 *src/equation_xb_gp.c
-290131e2f2cbb998f07ee322dff1a076 *src/equation_xb_gpp.c
+be01ec9a82fff1d3fbb38d8bf763b820 *src/equation_xb_ar.c
+cec507f23fcc848a04373dc60d100aef *src/equation_xb_gp.c
+c427a0e41a8740215541d797db428d1b *src/equation_xb_gpp.c
 5f321432704fb9470ad1df8d9f7633e0 *src/forecast_xb_ar.c
 2641b4f20633cd9edf2371dfaaf38fbc *src/forecast_xb_gp.c
 31f15c79b2318f9636e250189b7d0a4e *src/forecast_xb_gpp.c
@@ -55,6 +55,6 @@ c3a99ae0b22e6feea0562d17dc93c5bb *src/main_gpp.h
 1ee05c7c9e7224a191c7401eef3675ad *src/mathematics.h
 a551d7211fedd6cfde51971356c3e9ce *src/prediction_xb_ar.c
 3d7224b39200dc691add0d7c69ad24e4 *src/prediction_xb_gp.c
-93613f8b667623c2e15595d3f4a64257 *src/prediction_xb_gpp.c
+58371aaecc2c1af28bb18ef39d7648c0 *src/prediction_xb_gpp.c
 bf77df06bba56b68099d229cf62ccff7 *src/randgenerator.c
 372968ba11e05bbd710bca7d2e76d324 *src/randgenerator.h

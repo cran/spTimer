@@ -75,10 +75,10 @@ void JOINT_gp(int *n, int *T, int *r, int *rT, int *p, int *N,
       if(phi[0] <= 0){
         phi[0] = pow(1,-320);
       }      
-      tmp[0] = -log(phi[0]); 
+      tmp[0] = log(phi[0]); 
 // Rprintf("   phi: %4.4f, tmp: %4.4f, cov: %i\n", phi[0], tmp[0], cov[0]);      
       mvrnormal(constant, tmp, tau, constant, phi2);
-      phi2[0]= exp(-phi2[0]);      
+      phi2[0]= exp(phi2[0]);      
 // Rprintf("   phi: %4.4f, tmp: %4.4f, cov: %i\n", phi[0], tmp[0], cov[0]);      
       covFormat(cov, n, phi2, nup, d, sig_eta, S, det2, Sinv, Qeta2);   
 // Rprintf("   phi: %4.4f, phi2: %4.4f, cov: %i\n", phi[0], phi2[0], cov[0]);
@@ -204,9 +204,9 @@ void JOINTsptp_gp(int *intercept, int *n, int *T, int *r, int *rT, int *p, int *
       if(phi[0] <= 0){
         phi[0] = pow(1,-320);
       }      
-      tmp[0] = -log(phi[0]); 
+      tmp[0] = log(phi[0]); 
       mvrnormal(constant, tmp, tau, constant, phi2);
-      phi2[0]= exp(-phi2[0]);      
+      phi2[0]= exp(phi2[0]);      
       covFormat(cov, n, phi2, nup, d, sig_eta, S, det2, Sinv, Qeta2);   
 //     randow-walk M  
 
@@ -391,9 +391,9 @@ void JOINTtp_gp(int *intercept, int *n, int *T, int *r, int *rT, int *p, int *u,
       if(phi[0] <= 0){
         phi[0] = pow(1,-320);
       }      
-      tmp[0] = -log(phi[0]); 
+      tmp[0] = log(phi[0]); 
       mvrnormal(constant, tmp, tau, constant, phi2);
-      phi2[0]= exp(-phi2[0]);      
+      phi2[0]= exp(phi2[0]);      
       covFormat(cov, n, phi2, nup, d, sig_eta, S, det2, Sinv, Qeta2);   
 //     randow-walk M  
      phi_gp_MH_sptp(Qeta, Qeta2, det, det2, phi, phi2, n, r, T, rT, N, 
@@ -1645,10 +1645,10 @@ void phi_gp_MH(double *Qeta1, double *Qeta2, double *det1, double *det2,
           phip[0] = phi1[0];
           accept[0] = 0.0;
      }
-     else if(phi2[0] > 0.9999){
-          phip[0] = phi1[0];
-          accept[0] = 0.0;
-     }
+     //else if(phi2[0] > 0.9999){
+     //     phip[0] = phi1[0];
+     //     accept[0] = 0.0;
+     //}
      else{    
      tr1 = (a-1.0)*log(phi1[0])-b*phi1[0]-0.5*rT1*log(det1[0])- u; 
      tr2 = (a-1.0)*log(phi2[0])-b*phi2[0]-0.5*rT1*log(det2[0])- v; 
@@ -1679,13 +1679,13 @@ void phi_gp_MH_sptp(double *Qeta1, double *Qeta2, double *det1, double *det2,
      double *accept, double *phip)
 {
      
-     int row, col, l, i, j, r1, rT1, T1;
+     int row, col, l, i, j, r1, N1, rT1, T1;
      row = *n;
      col = *constant;
      r1 = *r;
      T1 =*T;
      rT1 = *rT;
-//     N1 = row*rT1;
+     N1 = row*rT1;
      
      double *ov, *o1, *XB1, *ratio, *U; 
      o1 = (double *) malloc((size_t)((row*col)*sizeof(double)));
@@ -1737,15 +1737,14 @@ void phi_gp_MH_sptp(double *Qeta1, double *Qeta2, double *det1, double *det2,
           phip[0] = phi1[0];
           accept[0] = 0.0;
      }
-     else if(phi2[0] > 0.9999){
-          phip[0] = phi1[0];
-          accept[0] = 0.0;
-     }
+     //else if(phi2[0] > 0.9999){
+     //     phip[0] = phi1[0];
+     //     accept[0] = 0.0;
+     //}
      else{    
      tr1 = (a-1.0)*log(phi1[0])-b*phi1[0]-0.5*rT1*log(det1[0])- u; 
      tr2 = (a-1.0)*log(phi2[0])-b*phi2[0]-0.5*rT1*log(det2[0])- v; 
-     ratio[0] = exp(tr2 - tr1 + log(phi2[0]) - log(phi1[0]));
-//     ratio[0] = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
+     ratio[0] = exp(tr2 + exp(tr2) - tr1 - exp(tr1));
      ratio_fnc(ratio, constant, U);
      if(U[0] < ratio[0]){
           phip[0] = phi2[0];

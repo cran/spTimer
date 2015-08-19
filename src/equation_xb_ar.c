@@ -86,9 +86,9 @@ void JOINT_ar(int *n, int *T, int *r, int *rT, int *p, int *N,
       if(phi[0] <= 0){
         phi[0] = pow(1,-320);
       }      
-      tmp[0] = -log(phi[0]); 
+      tmp[0] = log(phi[0]); 
       mvrnormal(constant, tmp, tau, constant, phi2);
-      phi2[0]= exp(-phi2[0]);
+      phi2[0]= exp(phi2[0]);
       //phi2[0]= exp(-phi2[0]-exp(-phi2[0]));      
 
       covFormat2(cov, n, phi2, nup, d, sig_eta, det2, Qeta2);
@@ -1122,10 +1122,10 @@ void phi_ar_MH(double *Sinv1, double *Sinv2, double *det1, double *det2,
           phip[0] = phi1[0];
           accept[0] = 0.0;
      }
-     else if(phi2[0] > 0.9999){
-          phip[0] = phi1[0];
-          accept[0] = 0.0;
-     }
+     //else if(phi2[0] > 0.9999){
+     //     phip[0] = phi1[0];
+     //     accept[0] = 0.0;
+     //}
      else{    
 // with Gamma prior    
      tr1 = (a-1.0)*log(phi1[0])-b*phi1[0]-0.5*rT1*log(det1[0])-u; 
