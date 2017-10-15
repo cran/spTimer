@@ -5,16 +5,18 @@
 This function is used to draw MCMC samples using the Gibbs sampler. 
 }
 \usage{
-spT.Gibbs(formula, data=parent.frame(), model="GP", time.data=NULL, 
-	coords, knots.coords, newcoords=NULL, newdata=NULL, priors=NULL, 
-	initials=NULL, nItr=5000, nBurn=1000, report=1, tol.dist=0.05, 
-	distance.method="geodetic:km", cov.fnc="exponential", scale.transform="NONE", 
-	spatial.decay=spT.decay(distribution="FIXED"), annual.aggrn="NONE")
+spT.Gibbs(formula, data = parent.frame(), model = "GP", time.data = NULL, 
+	coords, knots.coords, newcoords = NULL, newdata = NULL, priors = NULL, 
+	initials = NULL, nItr = 5000, nBurn = 1000, report = 1, tol.dist = 0.05, 
+	distance.method = "geodetic:km", cov.fnc = "exponential", 
+	scale.transform = "NONE", spatial.decay = spT.decay(distribution = "FIXED"), 
+	truncation.para = list(at = 0,lambda = 2), annual.aggrn = "NONE",
+	fitted.values="TRANSFORMED")
 }
 \arguments{
 \item{formula}{The symnbolic description of the model equation of the regression part of the space-time model.} 
 \item{data}{An optional data frame containing the variables in the model. If omitted, the variables are taken from environment(formula), typically the environment from which spT.Gibbs is called. The data should be ordered first by the time and then by the sites specified by the \code{coords} below. One can also supply coordinates through this argument, where coordinate names should be "Latitude" and "Longitude".}
-\item{model}{The spatio-temporal models to be fitted, current choices are: "GP", "AR", and "GPP" with the first one as the default.}
+\item{model}{The spatio-temporal models to be fitted, current choices are: "GP", "truncatedGP", "AR", "GPP", and "truncatedGPP", with the first one as the default.}
 \item{time.data}{Defining the segments of the time-series set up using the function \code{\link{spT.time}}.}
 \item{coords}{The n by 2 matrix or data frame defining the locations (e.g., longitude/easting, latitude/northing) of the fitting sites, where n is the number of fitting sites. One can also supply coordinates through a formula argument such as ~Longitude+Latitude.}
 \item{knots.coords}{The locations of the knots in similar format to coords above, only required if \code{model="GPP"}.}
@@ -30,7 +32,9 @@ spT.Gibbs(formula, data=parent.frame(), model="GP", time.data=NULL,
 \item{cov.fnc}{Covariance function for the spatial effects. The available options  are "exponential", "gaussian", "spherical" and "matern". If "matern" is used then by default the smooth parameter (\eqn{\nu}) is estimated from (0,1) uniform distribution using discrete samples.}
 \item{scale.transform}{The transformation method for the response variable. Currently implemented options are: "NONE", "SQRT", and "LOG" with  "NONE" as the deault.}
 \item{spatial.decay}{Provides the prior distribution for the spatial decay parameter \eqn{\phi}. Currently implemented options  are  "FIXED", "Unif", or "Gamm".  Further details for each of these are specified by \code{\link{spT.decay}}.}
+\item{truncation.para}{Provides truncation parameter \eqn{\lambda} and truncation point "at" using list.}
 \item{annual.aggrn}{This provides the options for calculating annual summary statistics by aggregating different time segments (e.g., annual mean). Currently implemented options are: "NONE", "ave" and "an4th", where "ave" = annual average, "an4th"= annual 4th highest. Only applicable if \code{\link{spT.time}} inputs more than one segment and when fit and predict are done simultaneously.}
+\item{fitted.values}{This option provides calculating fitted values and corresponding sd in the original scale. Currently implemented options are: "ORIGINAL" and "TRANSFORMED". Only applicable if \code{scale.transform} inputs "SQRT" or "LOG". Note that the PMCC (model validation criteria) values will be changed accordingly.}
 %\item{X.out}{Logical value, if TRUE then the covariates are present in the output.}
 %\item{Y.out}{Logical value, if TRUE then the dependent variable is present in the output.}
 }
@@ -108,13 +112,11 @@ OutGPP_Annual_4th_Highest_Prediction.txt: (nItr x (predsites*r)) matrix. \cr
 }
 \references{
 
-1. Bakar, K.S. & Sahu, S.K. (2015). spTimer: Spatio-Temporal Bayesian Modelling Using R. Journal of Statistical Software. 63(15). 1-32.
+ Bakar, K. S. and Sahu, S. K. (2015) spTimer: Spatio-Temporal Bayesian Modelling Using R. Journal of Statistical Software, 63(15). 1--32. 
 
-2. Sahu, S.K. & Bakar, K.S. (2012). Hierarchical Bayesian Autoregressive Models for Large Space Time Data with Applications to Ozone Concentration Modelling. Applied Stochastic Models in Business and Industry, 28, 395-415.
+ Sahu, S. K. and Bakar, K. S. (2012a) A comparison of Bayesian Models for Daily Ozone Concentration Levels Statistical Methodology, 9, 144-157.
 
-3. Sahu, S.K., Gelfand, A.E., & Holland, D.M. (2007). High-Resolution Space-Time Ozone Modelling for Assessing Trends. Journal of the American Statistical Association, 102, 1221-1234.
-
-4. Bakar, K.S. (2012). Bayesian Analysis of Daily Maximum Ozone Levels. PhD Thesis, University of Southampton, Southampton, United Kingdom.
+ Sahu, S. K. and Bakar, K. S. (2012b) Hierarchical Bayesian auto-regressive models for large space time data with applications to ozone concentration modelling. Applied Stochastic Models in Business and Industry, 28, 395-415. 
 
 }
 %\note{
@@ -451,6 +453,69 @@ names(post.gpp.fitpred)
 # validation criteria
 spT.validation(DataValPred$o8hrmax,c(post.gpp.fitpred$prediction[,1]))  
 
+
+######################################################
+## The Truncated/Censored GP models:
+######################################################
+
+##
+## Model fitting
+##
+
+data(NYdata)
+
+# Truncation at 50 (say)
+NYdata$o8hrmax[NYdata$o8hrmax<=50] <- 50
+
+# Read data 
+s<-c(8,11,12,14,18,21,24,28)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day %in% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day %in% c(30, 31) & Month == 8)))
+DataValFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValFore<-subset(DataValFore, with(DataValFore, (Day %in% c(30, 31) & Month == 8)))
+
+#
+nItr <- 5000 # number of MCMC samples for each model
+nBurn <- 1000 # number of burn-in from the MCMC samples
+# Truncation at 50 
+# fit truncated GP model 
+out <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH,data=DataFit,
+  model="truncatedGP",coords=~Longitude+Latitude,
+  distance.method="geodetic:km",nItr=nItr,nBurn=nBurn,report=5,
+  truncation.para = list(at = 50,lambda = 4),
+  fitted.values="ORIGINAL")
+#  
+summary(out)
+fitted(out)
+plot(out,density=F)
+#
+cbind(DataFit$o8hrmax,fitted(out)[,1])
+plot(DataFit$o8hrmax,fitted(out)[,1])
+spT.validation(DataFit$o8hrmax,fitted(out)[,1])
+
+##
+## prediction (spatial)
+##
+
+pred <- predict(out,newdata=DataValPred, newcoords=~Longitude+Latitude, tol=0.05)
+names(pred)
+plot(DataValPred$o8hrmax,c(pred$Mean)) 
+pred$prob.below.threshold
+
+##
+## forecast (temporal)
+##
+
+fore <- predict(out,newdata=DataValFore, newcoords=~Longitude+Latitude,
+   type="temporal", foreStep=2, tol=0.05)
+spT.validation(DataValFore$o8hrmax,c(fore$Mean)) 
+plot(DataValFore$o8hrmax,c(fore$Mean)) 
+fore$prob.below.threshold
+
+######################################################
+######################################################
 ##
 }
 }

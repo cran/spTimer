@@ -5,11 +5,12 @@
 The following function is used to validate the predicted observations with the actual values.
 }
 \usage{
-spT.validation(z, zhat)
+spT.validation(z, zhat, names=FALSE)
 }
 \arguments{
 \item{z}{The original values (matrix or vector).}
 \item{zhat}{The predicted values (matrix or vector).}
+\item{names}{Logical, if TRUE then print the names of the validation statistics.}
 }
 \value{
 \item{MSE}{Mean Squared Error.}
