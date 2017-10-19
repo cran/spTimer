@@ -787,11 +787,6 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           }
           #
      ##
-	 #if(posteriors$model == "truncatedGP"){
-	 #     output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
-  	 #     output$truncation.para <- posteriors$truncation.para
-	 #}
-	  ## 	   
        output$pred.coords <- pred.coords
        output$distance.method <- posteriors$distance.method
        output$Distance.matrix.pred <- dns
@@ -828,8 +823,9 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
 			 output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
              output$SD <- matrix(szp$SD,rT, nsite)
              output$Low <- matrix(szp[,4],rT, nsite)
-			 output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
              output$Up <- matrix(szp[,5],rT, nsite)
+             szp <- NULL
+			 output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
  			 output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
              output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
     	     output$truncation.para <- posteriors$truncation.para
@@ -841,6 +837,7 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           output$SD <- matrix(szp$SD,rT, nsite)
           output$Low <- matrix(szp[,4],rT, nsite)
           output$Up <- matrix(szp[,5],rT, nsite)
+          szp <- NULL
 		  }
 	   ##
 	   ##
@@ -1776,7 +1773,7 @@ sptruncGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            output$op <- out$op[1:N,(nBurn+1):nItr]
            output$wp <- output$op-output$X%*%output$betap
 		   fit.val <- reverse.truncated.fnc(output$op,at=at,lambda=lambda)
-		   output$fitted <- cbind(apply(fit.val,1,median),prob.below.threshold(fit.val,at=50))
+		   output$fitted <- cbind(apply(fit.val,1,median),prob.below.threshold(fit.val,at=at))
 		   #output$fitted <- out$fit
            #output$fitted[,1] <- reverse.truncated.fnc(out$fit[,1],at=at,lambda=lambda)
            dimnames(output$fitted)[[2]] <- c("Median","Prob.below.threshold")

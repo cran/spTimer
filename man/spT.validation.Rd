@@ -25,7 +25,7 @@ spT.validation(z, zhat, names=FALSE)
 \code{\link{spT.pCOVER}}.
 }
 \examples{
-\dontrun{
+%\dontrun{
 ##
 
 # Create `x', which is the true values.
@@ -36,6 +36,6 @@ y <- rnorm(10,5,1)
 spT.validation(x, y)
 
 ##
-}
+%}
 }
 \keyword{utility}

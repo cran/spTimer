@@ -1749,10 +1749,10 @@ truncated.fnc<-function(Y, at=0, lambda=NULL, both=FALSE){
 	  zm[zm[, 2] <= 0, 3] <- 0
       zm[, 2] <- zm[, 2]^(1/lambda)
 	  zm[zm[, 3] == 0, 2] <- -(rgamma(nrow(zm[zm[,3]==0,]), shape=1, rate=1/(range(zm[zm[,3]==1,2],na.rm=TRUE)[[2]]/4.1)))
-	  #mat <- matrix(NA,nrow(zm[zm[,3]==0,]),10)
-	  #mat[,] <- (rgamma(nrow(zm[zm[,3]==0,])*10, shape=1, rate=1/(range(zm[zm[,3]==1,2],na.rm=TRUE)[[2]]/4.1)))
-	  #mat[,] <- -(rexp(nrow(zm[zm[,3]==0,])*10, rate=1/(range(zm[zm[,3]==1,2],na.rm=TRUE)[[2]]/4.1)))
-	  #zm[zm[, 3] == 0, 2] <- -apply(mat,1,max)
+	  #-(rexp(nrow(zm[zm[,3]==0,])*10, rate=1/(range(zm[zm[,3]==1,2],na.rm=TRUE)[[2]]/4.1)))
+	  # scale it 
+	  
+	  #
       if (both == TRUE) {
         zm
       }

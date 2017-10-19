@@ -755,11 +755,6 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       #
       out<-NULL
       ##
-	  if(posteriors$model == "truncatedGPP"){
-	      output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
-  	      output$truncation.para <- posteriors$truncation.para
-      }
-	  ## 	   
       output$knots.coords <- posteriors$knots.coords
       output$pred.coords <- pred.coords
       output$distance.method <- posteriors$distance.method
@@ -789,18 +784,34 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
           cat("# Predicted samples and summary statistics are given.\n# nBurn = ",nBurn+posteriors$nBurn,". Iterations = ",posteriors$iterations,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$pred.samples[,])
-          # 
-      	  if(posteriors$model == "truncatedGP"){
+      	  if(posteriors$model == "truncatedGPP"){
 	         output$prob.below.threshold <- prob.below.threshold(output$pred.samples, at=posteriors$truncation.para$at)
+             szp<-spT.Summary.Stat(output$pred.samples[,])
+             output$Mean <- matrix(szp$Mean,rT, nsite)
+			 output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$Median <- matrix(szp$Median,rT, nsite)
+			 output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$SD <- matrix(szp$SD,rT, nsite)
+             output$Low <- matrix(szp[,4],rT, nsite)
+             output$Up <- matrix(szp[,5],rT, nsite)
+             szp <- NULL
+			 output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+ 			 output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+    	     output$truncation.para <- posteriors$truncation.para
 	      }
+		  else{
           # 
+          szp<-spT.Summary.Stat(output$pred.samples[,])
           output$Mean <- matrix(szp$Mean,rT, nsite)
           output$Median <- matrix(szp$Median,rT, nsite)
           output$SD <- matrix(szp$SD,rT, nsite)
           output$Low <- matrix(szp[,4],rT, nsite)
           output$Up <- matrix(szp[,5],rT, nsite)
           szp <- NULL
+		  }
+		  
+		  
     #
    end.time <- proc.time()[3]
    comp.time<-end.time-start.time
@@ -981,7 +992,6 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
       output$distance.method<-posteriors$distance.method  
       output$cov.fnc<-posteriors$cov.fnc  
       #output$scale.transform <- posteriors$scale.transform
-
       output$obsData<-matrix(posteriors$Y,rT,n)  
       output$fittedData<-matrix(posteriors$fitted[,1],rT,n) 
       if(posteriors$scale.transform=="SQRT"){output$fittedData<-output$fittedData^2}
@@ -1010,6 +1020,26 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
           cat("##", "\n")
           cat("# Forecast samples and summary statistics are given.\n# nBurn = ",nBurn,". Iterations = ",nItr,".", "\n")
           cat("##", "\n")
+		  #
+          #
+      	  if(posteriors$model == "truncatedGPP"){
+	         output$prob.below.threshold <- prob.below.threshold(output$fore.samples, at=posteriors$truncation.para$at)
+             szp<-spT.Summary.Stat(output$fore.samples[,])
+             out <- NULL
+             output$Mean <- matrix(szp$Mean,r*K, nsite)
+			 output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$Median <- matrix(szp$Median,r*K, nsite)
+			 output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$SD <- matrix(szp$SD,r*K, nsite)
+             output$Low <- matrix(szp[,4],r*K, nsite)
+             output$Up <- matrix(szp[,5],r*K, nsite)
+             szp <- NULL
+			 output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+ 			 output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$fore.samples <- reverse.truncated.fnc(output$fore.samples,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+    	     output$truncation.para <- posteriors$truncation.para
+	      }
+		  else{
           #
           szp<-spT.Summary.Stat(output$fore.samples[,])
           # 
@@ -1019,6 +1049,7 @@ spGPP.prediction<-function(nBurn, pred.data, pred.coords,
           output$SD <- matrix(szp$SD,r*K, nsite)
           output$Low <- matrix(szp[,4],r*K, nsite)
           output$Up <- matrix(szp[,5],r*K, nsite)
+		  }
     #
    end.time <- proc.time()[3]
    comp.time<-end.time-start.time
@@ -1840,20 +1871,18 @@ sptruncGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
            }
            out$sig2eps <- as.matrix(out$sig2eps[(nBurn+1):nItr])
            out$sig2etap <- as.matrix(out$sig2etap[(nBurn+1):nItr])
-           if((length(x.names.sp) > 0)){
-           out$sig2betap <- as.matrix(out$sig2betap[(nBurn+1):nItr])
-           } 
            out$sig2lp <- matrix(out$sig2lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
            out$rhop <- as.matrix(out$rhop[(nBurn+1):nItr])
            out$betap <- matrix(out$betap[1:p,(nBurn+1):nItr],p,length((nBurn+1):nItr))
-           if(length(x.names.sp) != 0){          
-           out$betasp <- matrix(out$betasp[1:(knots*q),(nBurn+1):nItr],knots*q,length((nBurn+1):nItr))
-           }
            out$mu_lp <- matrix(out$mu_lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))	
            out$w0p <- out$w0p[1:(knots*r),(nBurn+1):nItr]	
            out$wp <- out$wp[1:(knots*rT),(nBurn+1):nItr]
-           dimnames(out$fitted)[[2]] <- c("Mean","SD")
-           out$fitted[,1] <- reverse.truncated.fnc(out$fitted[,1],at=0,lambda=1)
+		   #fit.val <- reverse.truncated.fnc(out$op,at=at,lambda=lambda)
+		   #out$fitted <- cbind(apply(fit.val,1,median),prob.below.threshold(fit.val,at=at))
+           #dimnames(out$fitted)[[2]] <- c("Median","Prob.below.threshold")
+		   out$fitted <- cbind(out$fitted[,1],out$fitted[,1],out$fitted[,2])
+           out$fitted[,1] <- reverse.truncated.fnc(out$fitted[,1],at=at,lambda=lambda)
+           dimnames(out$fitted)[[2]] <- c("Mean","Mean.Untransformed.Scale","SD.Untransformed.Scale")
 		   out$truncation.para <- truncation.para
            out$tol.dist<-tol.dist
            out$distance.method<-method
@@ -1861,9 +1890,6 @@ sptruncGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
            out$scale.transform<-scale.transform
            out$sampling.sp.decay<-spatial.decay
            out$covariate.names<-c(x.names)
-           if(length(x.names.sp) != 0){          
-           out$sp.covariate.names<-c(x.names.sp)
-           }
            out$Distance.matrix.knots<-coords.D.knots
            out$knots.coords<-knots.coords
            out$coords<-coords

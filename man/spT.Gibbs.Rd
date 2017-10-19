@@ -125,7 +125,69 @@ OutGPP_Annual_4th_Highest_Prediction.txt: (nItr x (predsites*r)) matrix. \cr
 \code{\link{spT.priors}, \link{spT.initials}, \link{spT.geodist}, \link{dist}, \link{summary.spT}, \link{plot.spT}, \link{predict.spT}}.
 }
 \examples{
-\dontrun{
+\dontshow{
+# Read data 
+data(NYdata)
+#
+nItr <- 100
+nBurn <- 0
+#
+# GP: MCMC via Gibbs using default choices
+set.seed(11)
+post.gp <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+        nItr=nItr, nBurn=nBurn,
+        data=NYdata, model="GP", coords=~Longitude+Latitude, 
+        scale.transform="SQRT")
+print(post.gp)
+summary(post.gp)
+# AR: MCMC via Gibbs using default choices
+set.seed(11)
+post.ar <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+        nItr=nItr,  nBurn=nBurn, 
+        data=NYdata, model="AR", coords=~Longitude+Latitude, 
+        scale.transform="SQRT")
+print(post.ar)
+summary(post.ar)
+# GPP: MCMC via Gibbs using default choices
+# Define the coordinates
+coords<-as.matrix(unique(cbind(NYdata[,2:3])))
+knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
+              min(coords[,1])),Latitude=c(max(coords[,2]),
+              min(coords[,2])), by=c(4,4))
+set.seed(11)
+post.gpp <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+        nItr=nItr,  nBurn=nBurn,
+        data=NYdata, model="GPP", coords=coords, 
+        knots.coords=knots, scale.transform="SQRT")
+print(post.gpp)
+summary(post.gpp)
+# Truncated GP: Truncation at 30 (say)
+NYdata$o8hrmax[NYdata$o8hrmax<=30] <- 30
+set.seed(11)
+out <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH,
+  data=NYdata,
+  model="truncatedGP",coords=~Longitude+Latitude,
+  distance.method="geodetic:km",
+  nItr=nItr,  nBurn=nBurn,
+  truncation.para = list(at = 30,lambda = 4))
+print(out)
+summary(out)
+# Truncated GPP: Truncation at 30 (say)
+coords<-as.matrix(unique(cbind(NYdata[,2:3])))
+knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
+              min(coords[,1])),Latitude=c(max(coords[,2]),
+              min(coords[,2])), by=c(4,4))
+set.seed(11)			  
+out <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=NYdata, 
+		 model="truncatedGPP",coords=~Longitude+Latitude,
+         knots.coords=knots, distance.method="geodetic:km",
+         nItr=nItr,  nBurn=nBurn,
+         truncation.para = list(at = 30,lambda = 4))
+print(out)
+summary(out)
+}
+\donttest{
 ##
 
 ###########################
@@ -216,11 +278,9 @@ DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE)
 DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
 DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
 DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
-
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))
 pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
-
 # MCMC via Gibbs will provide output in *.txt format  
 # from C routine to avoide large data problem in R
 set.seed(11)
@@ -233,7 +293,6 @@ summary(post.gp.fitpred)
 coef(post.gp.fitpred)
 plot(post.gp.fitpred)
 names(post.gp.fitpred)
-
 # validation criteria
 spT.validation(DataValPred$o8hrmax,c(post.gp.fitpred$prediction[,1]))  
 
@@ -333,14 +392,12 @@ post.ar$PMCC
 # Read data 
 s<-c(8,11,12,14,18,21,24,28)
 DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
-DataFit<-subset(DataFit, with(DataFit, !(Day %in% c(30, 31) & Month == 8)))
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
 DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
-DataValPred<-subset(DataValPred, with(DataValPred, !(Day %in% c(30, 31) & Month == 8)))
-
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))
 pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
-
 # MCMC via Gibbs will provide output in *.txt format  
 # from C routine to avoide large data problem in R
 set.seed(11)
@@ -351,7 +408,6 @@ post.ar.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,
 print(post.ar.fitpred)
 summary(post.ar.fitpred)
 names(post.ar.fitpred)
-
 # validation criteria
 spT.validation(DataValPred$o8hrmax,c(post.ar.fitpred$prediction[,1]))  
 
@@ -429,14 +485,12 @@ DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE)
 DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
 DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
 DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
-
 # Define the coordinates
 coords<-as.matrix(unique(cbind(DataFit[,2:3])))
 pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
 knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
               min(coords[,1])),Latitude=c(max(coords[,2]),
               min(coords[,2])), by=c(4,4))
-
 # MCMC via Gibbs will provide output in *.txt format  
 # from C routine to avoide large data problem in R
 set.seed(11)
@@ -447,9 +501,7 @@ post.gpp.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,
 print(post.gpp.fitpred)
 summary(post.gpp.fitpred)
 plot(post.gpp.fitpred)
-
 names(post.gpp.fitpred)
-
 # validation criteria
 spT.validation(DataValPred$o8hrmax,c(post.gpp.fitpred$prediction[,1]))  
 
@@ -464,34 +516,37 @@ spT.validation(DataValPred$o8hrmax,c(post.gpp.fitpred$prediction[,1]))
 
 data(NYdata)
 
-# Truncation at 50 (say)
-NYdata$o8hrmax[NYdata$o8hrmax<=50] <- 50
+# Truncation at 30 (say)
+NYdata$o8hrmax[NYdata$o8hrmax<=30] <- 30
 
 # Read data 
 s<-c(8,11,12,14,18,21,24,28)
 DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
-DataFit<-subset(DataFit, with(DataFit, !(Day %in% c(30, 31) & Month == 8)))
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
 DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
-DataValPred<-subset(DataValPred, with(DataValPred, !(Day %in% c(30, 31) & Month == 8)))
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
 DataValFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
-DataValFore<-subset(DataValFore, with(DataValFore, (Day %in% c(30, 31) & Month == 8)))
+DataValFore<-subset(DataValFore, with(DataValFore, (Day \%in\% c(30, 31) & Month == 8)))
+DataFitFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataFitFore<-subset(DataFitFore, with(DataFitFore, (Day \%in\% c(30, 31) & Month == 8)))
 
 #
 nItr <- 5000 # number of MCMC samples for each model
 nBurn <- 1000 # number of burn-in from the MCMC samples
-# Truncation at 50 
+# Truncation at 30 
 # fit truncated GP model 
 out <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH,data=DataFit,
   model="truncatedGP",coords=~Longitude+Latitude,
   distance.method="geodetic:km",nItr=nItr,nBurn=nBurn,report=5,
-  truncation.para = list(at = 50,lambda = 4),
+  truncation.para = list(at = 30,lambda = 4),
   fitted.values="ORIGINAL")
 #  
 summary(out)
-fitted(out)
-plot(out,density=F)
+head(fitted(out))
+plot(out,density=FALSE)
 #
-cbind(DataFit$o8hrmax,fitted(out)[,1])
+head(cbind(DataFit$o8hrmax,fitted(out)[,1]))
 plot(DataFit$o8hrmax,fitted(out)[,1])
 spT.validation(DataFit$o8hrmax,fitted(out)[,1])
 
@@ -502,17 +557,107 @@ spT.validation(DataFit$o8hrmax,fitted(out)[,1])
 pred <- predict(out,newdata=DataValPred, newcoords=~Longitude+Latitude, tol=0.05)
 names(pred)
 plot(DataValPred$o8hrmax,c(pred$Mean)) 
-pred$prob.below.threshold
+spT.validation(DataValPred$o8hrmax,c(pred$Mean)) 
+#pred$prob.below.threshold
 
 ##
 ## forecast (temporal)
 ##
 
+# unobserved locations
 fore <- predict(out,newdata=DataValFore, newcoords=~Longitude+Latitude,
    type="temporal", foreStep=2, tol=0.05)
 spT.validation(DataValFore$o8hrmax,c(fore$Mean)) 
 plot(DataValFore$o8hrmax,c(fore$Mean)) 
-fore$prob.below.threshold
+#fore$prob.below.threshold
+
+# observed locations 
+fore <- predict(out,newdata=DataFitFore, newcoords=~Longitude+Latitude,
+   type="temporal", foreStep=2, tol=0.05)
+spT.validation(DataFitFore$o8hrmax,c(fore$Mean)) 
+plot(DataFitFore$o8hrmax,c(fore$Mean)) 
+#fore$prob.below.threshold
+
+
+######################################################
+## The Truncated/Censored GPP models:
+######################################################
+
+##
+## Model fitting
+##
+
+data(NYdata)
+
+# Define the coordinates
+coords<-as.matrix(unique(cbind(NYdata[,2:3])))
+# Define knots
+knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
+              min(coords[,1])),Latitude=c(max(coords[,2]),
+              min(coords[,2])), by=c(4,4))
+
+# Truncation at 30 (say)
+NYdata$o8hrmax[NYdata$o8hrmax<=30] <- 30
+
+# Read data 
+s<-c(8,11,12,14,18,21,24,28)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValFore<-subset(DataValFore, with(DataValFore, (Day \%in\% c(30, 31) & Month == 8)))
+DataFitFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataFitFore<-subset(DataFitFore, with(DataFitFore, (Day \%in\% c(30, 31) & Month == 8)))
+
+#
+nItr <- 5000 # number of MCMC samples for each model
+nBurn <- 1000 # number of burn-in from the MCMC samples
+# Truncation at 30 
+# fit truncated GPP model 
+out <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
+         data=DataFit, model="truncatedGPP",coords=~Longitude+Latitude,
+         knots.coords=knots, distance.method="geodetic:km",
+         nItr=nItr,nBurn=nBurn,report=5,fitted="ORIGINAL",
+         truncation.para = list(at = 30,lambda = 4))
+#  
+summary(out)
+head(fitted(out))
+plot(out,density=FALSE)
+#
+head(cbind(DataFit$o8hrmax,fitted(out)[,1]))
+plot(DataFit$o8hrmax,fitted(out)[,1])
+spT.validation(DataFit$o8hrmax,fitted(out)[,1])
+
+##
+## prediction (spatial)
+##
+
+pred <- predict(out,newdata=DataValPred, newcoords=~Longitude+Latitude, tol=0.05)
+names(pred)
+plot(DataValPred$o8hrmax,c(pred$Mean)) 
+spT.validation(DataValPred$o8hrmax,c(pred$Mean)) 
+#pred$prob.below.threshold
+
+##
+## forecast (temporal)
+##
+
+# unobserved locations
+fore <- predict(out,newdata=DataValFore, newcoords=~Longitude+Latitude,
+   type="temporal", foreStep=2, tol=0.05)
+spT.validation(DataValFore$o8hrmax,c(fore$Mean)) 
+plot(DataValFore$o8hrmax,c(fore$Mean)) 
+#fore$prob.below.threshold
+
+# observed locations 
+fore <- predict(out,newdata=DataFitFore, newcoords=~Longitude+Latitude,
+   type="temporal", foreStep=2, tol=0.05)
+spT.validation(DataFitFore$o8hrmax,c(fore$Mean)) 
+plot(DataFitFore$o8hrmax,c(fore$Mean)) 
+#fore$prob.below.threshold
+
 
 ######################################################
 ######################################################

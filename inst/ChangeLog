@@ -1,3 +1,9 @@
+2017-10-19
+
+	* Version 3.0-1
+	* Bugs fixed: Truncated GPP model with spatial and temporal predictions.
+	* Example files are updated. 
+	
 2017-10-15
 
 	* Version 3.0-0
