@@ -413,10 +413,10 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
     stop("\n# Error: correctly define spatial.decay \n")
    }
    #
-   if(model %in% c("truncatedAR")){
-    stop("\n# Currently under constructions \n")
-   }
-   if(!model %in% c("GP", "AR", "GPP", "truncatedGP", "truncatedGPP")){
+   #if(model %in% c("truncatedAR")){
+   # stop("\n# Currently not available \n")
+   #}
+   if(!model %in% c("GP", "AR", "GPP", "truncatedGP", "truncatedAR", "truncatedGPP")){
     stop("\n# Error: correctly define model \n")
    }
    #
@@ -510,6 +510,34 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
         stop("\n# Error: truncation parameter should be a list. \n")
 	  }
 	  out <- sptruncGP.Gibbs(formula=formula, data=data, time.data=time.data, coords=coords,
+           priors=priors, initials=initials, nItr=nItr, nBurn=nBurn, report=report, 
+           tol.dist=tol.dist, distance.method=distance.method, cov.fnc=cov.fnc,
+           scale.transform=scale.transform, spatial.decay=spatial.decay, 
+		   truncation.para=truncation.para, 
+		   fitted.values=fitted.values, X.out=TRUE, Y.out=TRUE)
+      out$combined.fit.pred<-FALSE
+      out$model<-model
+      out$parameter<-stat.sum(out, cov.fnc=cov.fnc)
+      out$data<-data
+      class(out)<-"spT"
+      out
+   }
+   #
+   else if(model=="truncatedAR"){
+      cat("\n Output: Truncated AR models \n")
+      if(class(priors) != "spAR" & class(priors) != "NULL"){
+        stop("\n# Error: correctly define the AR or truncated AR models for function spT.priors.")
+      }
+      if(class(initials) != "spAR" & class(initials) != "NULL"){
+        stop("\n# Error: correctly define the AR or truncated AR models for function spT.initials.")
+      }
+      if(!missing(knots.coords)){
+        stop("\n# Error: please check options for the AR or truncated AR model and/or knots.coords \n")
+      }
+	  if(!is.list(truncation.para)){
+        stop("\n# Error: truncation parameter should be a list. \n")
+	  }
+	  out <- sptruncAR.Gibbs(formula=formula, data=data, time.data=time.data, coords=coords,
            priors=priors, initials=initials, nItr=nItr, nBurn=nBurn, report=report, 
            tol.dist=tol.dist, distance.method=distance.method, cov.fnc=cov.fnc,
            scale.transform=scale.transform, spatial.decay=spatial.decay, 
@@ -638,7 +666,7 @@ spT.prediction<-function(nBurn=0, pred.data=NULL, pred.coords,
    #
    model<-posteriors$model
    #
-   if(!model %in% c("GP", "AR", "GPP", "truncatedGP", "truncatedGPP")){
+   if(!model %in% c("GP", "AR", "GPP", "truncatedGP", "truncatedAR", "truncatedGPP")){
     stop("\n# Error: model is not correctly defined \n")
    }
    #
@@ -660,6 +688,14 @@ spT.prediction<-function(nBurn=0, pred.data=NULL, pred.coords,
    }
    else if(model=="AR"){
       cat("\n Prediction: AR models \n")
+      out<-spAR.prediction(nBurn=nBurn, pred.data=pred.data, pred.coords=pred.coords, 
+           posteriors=posteriors, tol.dist=tol.dist, Summary=Summary)
+      out$model<-model
+      #class(out)<-"spTprd"
+      out
+   }
+   else if(model=="truncatedAR"){
+      cat("\n Prediction: Truncated AR models \n")
       out<-spAR.prediction(nBurn=nBurn, pred.data=pred.data, pred.coords=pred.coords, 
            posteriors=posteriors, tol.dist=tol.dist, Summary=Summary)
       out$model<-model
@@ -708,7 +744,7 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
    #
    model<-posteriors$model
    #
-   if(!model %in% c("GP", "AR", "GPP", "truncatedGP", "truncatedGPP")){
+   if(!model %in% c("GP", "AR", "GPP", "truncatedGP", "truncatedAR", "truncatedGPP")){
     stop("\n# Error: model is not correctly defined \n")
    }
    #
@@ -737,6 +773,19 @@ spT.forecast<-function(nBurn=0, K=1, fore.data=NULL, fore.coords,
         stop("Error: define predAR by value or by NULL.")
       }
       cat("\n Forecast: AR models \n")
+      out<-spAR.forecast(nBurn=nBurn, K=K, fore.data=fore.data, fore.coords=fore.coords, 
+           posteriors=posteriors, pred.samples.ar=pred.samples.ar, tol.dist=tol.dist,
+		   Summary=Summary)
+      out$model<-model
+      class(out)<-"spTfore"
+      out
+   }
+   #
+   else if(model=="truncatedAR"){
+      if(missing(pred.samples.ar)){
+        stop("Error: define predAR by value or by NULL.")
+      }
+      cat("\n Forecast: Truncated AR models \n")
       out<-spAR.forecast(nBurn=nBurn, K=K, fore.data=fore.data, fore.coords=fore.coords, 
            posteriors=posteriors, pred.samples.ar=pred.samples.ar, tol.dist=tol.dist,
 		   Summary=Summary)

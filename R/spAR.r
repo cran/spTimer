@@ -102,8 +102,6 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     #
 
          zm <- matrix(Y,rT,n)
-         #cat("\n-- Initial Imputation using Amelia --\n")
-         #zm <- imputation.z(zm)
          zm <- apply(zm,1,median,na.rm=TRUE)
          zm <- rep(zm,n)
          zm <- cbind(Y,c(zm))
@@ -267,9 +265,6 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            output$sig2lp <- matrix(out$sig_l0p[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
            output$rhop <- as.matrix(out$rhop[(nBurn+1):nItr])
            output$betap <- matrix(out$betap[1:p,(nBurn+1):nItr],p,length((nBurn+1):nItr))
-           if(length(x.names.sp) != 0){          
-           output$betasp <- matrix(out$betasp[1:(n*q),(nBurn+1):nItr],n*q,length((nBurn+1):nItr))
-           }
            output$mu_lp <- matrix(out$mu_lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
            output$op <- out$op[1:N,(nBurn+1):nItr]
            output$wp <- out$wp[1:N,(nBurn+1):nItr]
@@ -281,9 +276,6 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            output$scale.transform<-scale.transform
            output$sampling.sp.decay<-spatial.decay
            output$covariate.names<-x.names
-           if(length(x.names.sp) != 0){          
-           output$sp.covariate.names<-c(x.names.sp)
-           }
            output$Distance.matrix <- coords.D
            output$coords <- coords
            output$n <- n
@@ -511,13 +503,37 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           cat("# Predicted samples and summary statistics are given.\n# nBurn = ",nBurn+posteriors$nBurn,". Iterations = ",posteriors$iterations,".", "\n")
           cat("##", "\n")
           #
+      	  if(posteriors$model == "truncatedAR"){
+             output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+	         output$prob.below.threshold <- matrix(prob.below.threshold(output$pred.samples, at=posteriors$truncation.para$at[1]),rT, nsite)
+             output$Mean <- matrix(apply(output$pred.samples,1,mean,na.rm=TRUE),rT, nsite)
+             output$Median <- matrix(apply(output$pred.samples,1,median,na.rm=TRUE),rT, nsite)
+			 output$SD <- matrix(apply(output$pred.samples,1,sd,na.rm=TRUE),rT, nsite)
+			 ck <- apply(output$pred.samples,1,quantile,c(0.025,0.975),na.rm=TRUE)
+             output$Low <- matrix(ck[1,],rT, nsite)
+             output$Up <- matrix(ck[2,],rT, nsite)
+             #szp<-spT.Summary.Stat(output$pred.samples[,])
+             #output$Mean <- matrix(szp$Mean,rT, nsite)
+			 #output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+             #output$Median <- matrix(szp$Median,rT, nsite)
+			 #output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+             #output$SD <- matrix(szp$SD,rT, nsite)
+             #output$Low <- matrix(szp[,4],rT, nsite)
+             #output$Up <- matrix(szp[,5],rT, nsite)
+             #szp <- NULL
+			 #output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+ 			 #output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+             #output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+    	     output$truncation.para <- posteriors$truncation.para
+	      }
+          else{
           szp<-spT.Summary.Stat(output$pred.samples[,])
-          # 
           output$Mean <- matrix(szp$Mean,rT, nsite)
           output$Median <- matrix(szp$Median,rT, nsite)
           output$SD <- matrix(szp$SD,rT, nsite)
           output$Low <- matrix(szp[,4],rT, nsite)
           output$Up <- matrix(szp[,5],rT, nsite)
+		  }
     #
    end.time <- proc.time()[3]
    comp.time<-end.time-start.time
@@ -751,13 +767,36 @@ pred.samples<-log(pred.samples.ar$pred.samples[,])
           cat("# Forecast samples and summary statistics are given.\n# nBurn = ",nBurn,". Iterations = ",nItr,".", "\n")
           cat("##", "\n")
           #
-          szp<-spT.Summary.Stat(output$fore.samples[,])
           # 
+      	  if(posteriors$model == "truncatedAR"){
+             output$fore.samples <- reverse.truncated.fnc(output$fore.samples,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+	         output$prob.below.threshold <- matrix(prob.below.threshold(output$fore.samples, at=posteriors$truncation.para$at[1]),r*K, nsite)
+             output$Mean <- matrix(apply(output$fore.samples,1,mean,na.rm=TRUE),r*K, nsite)
+             output$Median <- matrix(apply(output$fore.samples,1,median,na.rm=TRUE),r*K, nsite)
+			 output$SD <- matrix(apply(output$fore.samples,1,sd,na.rm=TRUE),r*K, nsite)
+			 ck <- apply(output$fore.samples,1,quantile,c(0.025,0.975),na.rm=TRUE)
+             output$Low <- matrix(ck[1,],r*K, nsite)
+             output$Up <- matrix(ck[2,],r*K, nsite)
+             #szp<-spT.Summary.Stat(output$fore.samples[,])
+             #output$Mean <- matrix(szp$Mean,r*K, nsite)
+             #output$Median <- matrix(szp$Median,r*K, nsite)
+			 #output$SD <- matrix(szp$SD,r*K, nsite)
+             #output$Low <- matrix(szp[,4],r*K, nsite)
+             #output$Up <- matrix(szp[,5],r*K, nsite)
+			 #output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+ 			 #output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+			 #output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+ 			 #output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+    	     output$truncation.para <- posteriors$truncation.para
+	      }
+          else{		  
+          szp<-spT.Summary.Stat(output$fore.samples[,])
           output$Mean <- matrix(szp$Mean,r*K, nsite)
           output$Median <- matrix(szp$Median,r*K, nsite)
           output$SD <- matrix(szp$SD,r*K, nsite)
           output$Low <- matrix(szp[,4],r*K, nsite)
           output$Up <- matrix(szp[,5],r*K, nsite)
+		  }
     #
    end.time <- proc.time()[3]
    comp.time<-end.time-start.time
@@ -1352,4 +1391,354 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
 }
 ##
 ## 
+##
+##
+## MCMC sampling for the truncated GP models
+## time.data format: col-1: year, col-2: month, col-3: day
+##
+sptruncAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
+           priors=NULL, initials=NULL, nItr, nBurn=0, report=1, 
+           tol.dist, distance.method="geodetic:km", cov.fnc="exponential",
+           scale.transform="NONE", spatial.decay, truncation.para=NULL,
+		   fitted.values=fitted.values, X.out=TRUE, Y.out=TRUE)
+{
+    start.time<-proc.time()[3]
+  #
+  #
+    if(nBurn >= nItr){
+         stop(paste("\n Error: iterations < nBurn\n Here, nBurn = ",nBurn," and iterations = ",nItr,"."))
+    }
+  #  
+    if (missing(formula)) {
+         stop("\n Error: formula must be specified \n")
+    }
+  #
+    if (class(formula) != "formula") {
+         stop("\n Error: equation must be in formula-class \n ...")
+    }
+   #
+         XY <- Formula.matrix(formula, data)
+         Y <- XY[[1]]
+         X <- as.matrix(XY[[2]])
+         x.names <- XY[[3]]
+         Xsp <- XY[[4]]
+         x.names.sp <- XY[[5]]
+         Xtp <- XY[[6]]
+         x.names.tp <- XY[[7]]
+
+   #
+    if (missing(coords)) {
+         stop("\n Error: need to specify the coords \n")
+    }
+    if ( !is.matrix(coords) & !is.data.frame(coords)) {
+         stop("\n Error: coords must be a (n x 2) matrix or data frame of xy-coordinate locations \n")
+    }
+    if ( dim(coords)[[2]] !=2) {
+         stop("\n Error: coords should have 2 columns \n")
+    }
+   #
+     method <- distance.method
+     spT.check.sites.inside(coords, method, tol=tol.dist)
+   #
+   if(method=="geodetic:km"){
+     coords.D <- as.matrix(spT.geodist(Lon=coords[,1],Lat=coords[,2], KM=TRUE))
+   }
+   else if(method=="geodetic:mile"){
+     coords.D <- as.matrix(spT.geodist(Lon=coords[,1],Lat=coords[,2], KM=FALSE))
+   }
+   else{
+     coords.D <- as.matrix(dist(coords, method, diag = TRUE, upper = TRUE))
+   }
+   #
+   # check time.data
+   if(is.null(time.data)){
+     #time.data<-c(1,0,length(Y)/length(coords[,1]))
+     time.data<-list(1,length(Y)/length(coords[,1]))
+   }
+   else{
+     time.data<-time.data
+   }
+   #
+         n <- length(coords[,1])              # number of sites
+         r <- time.data[[1]]                  # number of years
+         T <- time.data[[2]]                  # number of days
+         # checking unequal T
+         if(length(T) > 1){
+           rT <- sum(T)
+         }
+         else{
+           rT <- r*T
+         }
+         N <- n*rT
+    #
+    if (N != length(Y)) {
+         stop(" Error: Years, Months, and Days are misspecified,\n i.e., total number of observations in the data set should be equal to N\n  : N = n * r * T \n   where, N = total number of observations in the data,\n          n = total number of sites,\n          r = total number of years,\n          T = total number of days. \n## Check spT.time function.")
+    }
+    #
+         priors<-priors.checking.ar(priors)
+    #
+         shape_e<-N/2+priors$prior_a
+         shape_eta<-N/2+priors$prior_a
+		 shape_0<-n/2+priors$prior_a
+    #
+	if(is.null(truncation.para)){
+	   stop(" Error: define truncation parameter lambda and truncation point \n")
+	}
+	     ##
+	     at <- truncation.para$at
+		 lambda <- truncation.para$lambda
+ 	     zm <- truncated.fnc(Y, at=at, lambda=lambda, both=FALSE)
+		 at2 <- zm[[2]]; zm <- zm[[1]]
+		 truncation.para$at <- c(at,at2)
+		 ##
+         zmm <- matrix(zm,rT,n)
+         zmm <- apply(zmm,1,median,na.rm=TRUE)
+         zmm <- rep(zmm,n)
+         zm <- cbind(zm,zmm)
+         zm[is.na(zm[,1]),1] <- zm[is.na(zm[,1]),2]
+         zm[is.na(zm[,1]),1] <- median(zm[,2],na.rm=TRUE)
+    #
+         flag <- matrix(NA,n*rT,2)
+         flag[,1] <- c(Y)
+         flag[!is.na(flag[,1]),2] <- 0
+         flag[is.na(flag[,1]),2] <- 1
+		 flag <- flag[,2]
+    #
+    if(cov.fnc=="exponential"){
+         cov <- 1
+    }
+    else if(cov.fnc=="gaussian"){
+         cov <- 2
+    }
+    else if(cov.fnc=="spherical"){
+         cov <- 3
+    }
+    else if(cov.fnc=="matern"){
+         cov <- 4
+    }
+    else{
+         stop("\n Error: cov.fnc is not correctly specified \n")
+    }
+    #
+    #
+    if(scale.transform=="NONE"){
+         zm <- zm[,1]
+         trans <- 0
+    }
+    else if(scale.transform=="SQRT"){
+	   stop(" Error: scale.transformation option is not available for truncated model \n")
+    }
+    else if(scale.transform=="LOG"){
+	   stop(" Error: scale.transformation option is not available for truncated model \n")
+    }
+    else{
+         stop("\n Error: scale.transform is not correctly specified \n")
+    }
+    #
+    #
+      initials<-initials.checking.ar(initials,zm,X,Xsp,n,r,T,coords.D)
+    #
+         o <- zm
+    #
+    #
+	if(fitted.values=="ORIGINAL"){
+      if(scale.transform=="NONE"){
+         ft <- 0
+      }
+      else if(scale.transform=="SQRT"){
+         ft <- 1
+      }
+      else if(scale.transform=="LOG"){
+         ft <- 2
+      }
+      else{
+         stop("\n Error: scale.transform is not correctly specified \n")
+      }
+	}
+	else if(fitted.values=="TRANSFORMED"){
+        ft <- 0	
+	}
+	else{
+         stop("\n Error: fitted.values option is not correctly specified \n")
+	}
+	#
+    if(spatial.decay$type=="FIXED"){
+         spdecay <- 1
+		 if(is.null(spatial.decay$value)){
+		 spatial.decay$value <- (3/max(c(coords.D))) 
+		 }
+         init.phi <- spatial.decay$value 
+         tuning <- 0; phis<-0; phik<-0; 
+		 phi_a <- 0; phi_b <- 0; 
+    }
+    else if(spatial.decay$type=="DISCRETE"){
+         spdecay <- 2
+         init.phi <- initials$phi 
+         tuning <-0; 
+         phis<-spatial.decay$value; 
+         phik<-spatial.decay$segments;
+		 phi_a<-0; phi_b<-0
+    }
+    else if(spatial.decay$type=="MH"){
+         spdecay <- 3
+         init.phi <- initials$phi 
+         tuning <- spatial.decay$tuning
+         phis<-0; phik<-0; 
+		 phi_a<-spatial.decay$val[1]
+		 phi_b<-spatial.decay$val[2]
+    }
+    else{
+         stop("\n Error: spatial.decay is not correctly specified \n")
+    }
+    # 
+         p <- length(x.names)          # number of covariates
+    #
+	
+    # 
+      if(length(initials$mu_l) != length(initials$sig_l0)){
+         stop("Error: check the parameters with year labels")
+      }  
+      for(i in 1:length(initials$mu_l)){
+      if(is.na(initials$mu_l[i])){
+         stop("Error: mu_l must be specified correctly")
+      }
+      if(is.na(initials$sig_l0[i])){
+         stop("Error: sig2l must be specified correctly")
+      }
+      }
+    #
+      if (length(initials$mu_l) != r){
+         stop("Error: need to specify correct number of years for mu.")
+      }
+      if (length(initials$beta) != p){
+         stop("Error: need to specify correct number of parameters for beta.")
+      }
+    #    
+    #
+    if((length(x.names.sp) == 0) & (length(x.names.tp) == 0)){
+    # non-spatial and non-temporal beta
+    # check for T
+      if(r > 1){ 
+         if(length(T) != r){         
+           T<-rep(T,r) 
+         }
+      }
+    #
+      out<-.C('GIBBS_ar',as.double(flag),as.integer(nItr), 
+           as.integer(nBurn), as.integer(n),as.integer(T),as.integer(r),
+           as.integer(rT),as.integer(p),as.integer(N),as.integer(report),
+           as.integer(cov),as.integer(spdecay), as.integer(ft),
+		   as.double(shape_e),
+           as.double(shape_eta),as.double(shape_0),
+		   as.double(phi_a),as.double(phi_b),
+		   as.double(priors$prior_a),as.double(priors$prior_b),
+		   as.double(priors$prior_sig),as.double(init.phi), 
+           as.double(tuning),as.double(phis),as.integer(phik),
+           as.double(coords.D),as.integer(1),as.double(initials$sig2eps),
+           as.double(initials$sig2eta),as.double(initials$sig_l0),as.double(initials$mu_l),
+           as.double(initials$rho),as.double(initials$beta),
+           as.double(X),as.double(zm),as.double(o), 
+           phip=double(nItr),accept=double(1),nup=double(nItr),sig_ep=double(nItr),sig_etap=double(nItr), 
+           rhop=double(nItr),betap=matrix(double(nItr*p),p,nItr),mu_lp=matrix(double(r*nItr),r,nItr),
+           sig_l0p=matrix(double(r*nItr),r,nItr),op=matrix(double(nItr*N),N,nItr),wp=matrix(double(nItr*N),N,nItr),
+           fit=matrix(double(2*N),N,2),gof=double(1),penalty=double(1))[37:50]
+    }
+    else if((length(x.names.sp) > 0) & (length(x.names.tp) == 0)){
+    # for spatial beta
+    stop("Error: Currently not available for this version.")
+    } 
+    else if((length(x.names.sp) == 0) & (length(x.names.tp) > 0)){
+    # for temporal beta
+    stop("Error: Currently not available for this version.")
+    }
+    else if((length(x.names.sp) > 0) & (length(x.names.tp) > 0)){
+    # for both spatial and temporal beta
+    stop("Error: Currently not available for this version.")
+    }
+    else{
+         stop("\n#\n## Error: \n#")
+    }
+    #
+      accept <- round(out$accept/nItr*100,2)
+    #
+      output <- NULL
+    #
+     if(X.out==TRUE){
+        if((length(x.names.sp) == 0) & (length(x.names.tp) == 0)){
+        # non-spatial and temporal beta
+          output$X <- X
+          #dimnames(output$X)[[2]] <- x.names
+        }
+        else{
+          stop("\n#\n## Error: \n#")
+        }
+     }
+     if(Y.out==TRUE){
+        output$Y <- Y
+     }
+    #
+      output$accept <- accept
+      output$call <- formula
+    #
+           output$phip <- as.matrix(out$phip[(nBurn+1):nItr])
+           if(cov==4){
+           output$nup <- as.matrix(out$nup[(nBurn+1):nItr])
+           }
+           output$sig2ep <- as.matrix(out$sig_ep[(nBurn+1):nItr])
+           output$sig2etap <- as.matrix(out$sig_etap[(nBurn+1):nItr])
+           output$sig2lp <- matrix(out$sig_l0p[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
+           output$rhop <- as.matrix(out$rhop[(nBurn+1):nItr])
+           output$betap <- matrix(out$betap[1:p,(nBurn+1):nItr],p,length((nBurn+1):nItr))
+           output$mu_lp <- matrix(out$mu_lp[1:r,(nBurn+1):nItr],r,length((nBurn+1):nItr))
+           output$op <- out$op[1:N,(nBurn+1):nItr]
+           output$wp <- out$wp[1:N,(nBurn+1):nItr]
+		   fit.val <- reverse.truncated.fnc(output$op,at=at,lambda=lambda,at2=at2)
+		   output$fitted <- cbind(apply(fit.val,1,median),prob.below.threshold(fit.val,at=at))
+           dimnames(output$fitted)[[2]] <- c("Median","Prob.below.threshold")
+           output$tol.dist<-tol.dist
+           output$distance.method<-method
+           output$cov.fnc<-cov.fnc
+           output$scale.transform<-scale.transform
+           output$sampling.sp.decay<-spatial.decay
+           output$covariate.names<-x.names
+		   output$truncation.para <- truncation.para
+           output$Distance.matrix <- coords.D
+           output$coords <- coords
+           output$n <- n
+           output$r <- r
+           output$T <- T
+           output$p <- p
+           output$initials <- initials	
+           output$priors <- priors	
+           output$gof <- round(out$gof,2)
+           output$penalty <- round(out$penalty,2)
+           tmp <- matrix(c(output$gof,output$penalty,output$gof+output$penalty),1,3)
+           dimnames(tmp)[[2]]<-c("Goodness.of.fit","Penalty","PMCC")
+           dimnames(tmp)[[1]]<-c("values:")
+           output$PMCC <- tmp
+           tmp <- NULL
+           output$gof <- NULL
+           output$penalty <- NULL
+    #
+           output$iterations <- nItr	
+           output$nBurn <- nBurn	
+    #
+     rm(out)
+    #
+      cat("##","\n")
+      cat("# nBurn = ",nBurn,", Iterations = ",nItr,".", "\n")
+      cat("# Overall Acceptance Rate (phi) = ",output$accept,"%", "\n")
+      cat("##","\n")
+    #
+   end.time <- proc.time()[3]
+   comp.time<-end.time-start.time
+   comp.time<-fnc.time(comp.time)
+   output$computation.time<-comp.time
+    #
+     output
+    #
+    #
+}
+##
+##
 ##

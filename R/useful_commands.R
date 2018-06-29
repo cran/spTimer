@@ -1732,48 +1732,54 @@ Unif<-function(low=NA,up=NA){
 ## Truncated Gaussian code
 ##
 truncated.fnc<-function(Y, at=0, lambda=NULL, both=FALSE){
-   #
-   #
-   # at is left-tailed
-   #
-      if(is.null(lambda)){
-	    stop("Error: define truncation parameter lambda properly using list ")
-	  }
-      if(is.null(at)){
-	    stop("Error: define truncation point properly using list ")
-	  }
-	  if(at < 0){
-	    stop("Error: currently truncation point only can take value >= zero ")
-	  }
-	  zm <- cbind(Y,Y-at,1)
-	  zm[zm[, 2] <= 0, 3] <- 0
-      zm[, 2] <- zm[, 2]^(1/lambda)
-	  zm[zm[, 3] == 0, 2] <- -(rgamma(nrow(zm[zm[,3]==0,]), shape=1, rate=1/(range(zm[zm[,3]==1,2],na.rm=TRUE)[[2]]/4.1)))
-	  #-(rexp(nrow(zm[zm[,3]==0,])*10, rate=1/(range(zm[zm[,3]==1,2],na.rm=TRUE)[[2]]/4.1)))
-	  # scale it 
-	  
-	  #
-      if (both == TRUE) {
-        zm
-      }
-      else {
-        c(zm[,2])
-      }
-    #
+  #
+  #
+  # at is left-tailed
+  #
+  if(is.null(lambda)){
+    stop("Error: define truncation parameter lambda properly using list ")
+  }
+  if(is.null(at)){
+    stop("Error: define truncation point properly using list ")
+  }
+  if(at < 0){
+    stop("Error: currently truncation point only can take value >= zero ")
+  }
+  zm <- cbind(Y,Y-at,1)
+  zm[zm[, 2] <= 0, 3] <- 0
+  zm[zm[, 3] == 0, 2] <- - rhnorm(nrow(zm[zm[,3]==0,]),sd(zm[zm[, 3] != 0, 1],na.rm=TRUE))
+  ck <- min(zm[,2],na.rm=TRUE)
+  zm[,2] <- zm[,2]-ck
+  zm[,2] <- zm[,2]^(1/lambda)
+  #zm[, 2] <- zm[, 2]^(1/lambda)
+  #zm[zm[, 3] == 0, 2] <- - rhnorm(nrow(zm[zm[,3]==0,]),sd(zm[zm[, 3] != 0, 1]^(1/lambda)))
+  #
+  if (both == TRUE) {
+    list(zm=zm,at2=ck)
+  }
+  else {
+    list(zm=c(zm[,2]),at2=ck)
+  }
+  #
 }
 ##
 ## for truncated model
 ##
-reverse.truncated.fnc<-function(Y, at=0, lambda=NULL){
+reverse.truncated.fnc<-function(Y, at=0, lambda=NULL, at2=0){
    #
    # at is left-tailed
    #
       if(is.null(lambda)){
 	    stop("Error: define truncation parameter lambda properly using list ")
 	  }
-      zm <- Y
-      zm[zm <= 0]<- 0
+      #zm <- Y
+      #zm[zm <= 0]<- 0
+	  #zm <- zm^(lambda)
+	  #zm <- zm + at
+	  zm <- Y
 	  zm <- zm^(lambda)
+	  zm <- zm + at2
+      zm[zm <= 0]<- 0
 	  zm <- zm + at
 	  zm
     #

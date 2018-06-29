@@ -815,19 +815,27 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           #
           # 
       	  if(posteriors$model == "truncatedGP"){
-	         output$prob.below.threshold <- prob.below.threshold(output$pred.samples, at=posteriors$truncation.para$at)
-             szp<-spT.Summary.Stat(output$pred.samples[,])
-             output$Mean <- matrix(szp$Mean,rT, nsite)
-			 output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
-             output$Median <- matrix(szp$Median,rT, nsite)
-			 output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
-             output$SD <- matrix(szp$SD,rT, nsite)
-             output$Low <- matrix(szp[,4],rT, nsite)
-             output$Up <- matrix(szp[,5],rT, nsite)
-             szp <- NULL
-			 output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
- 			 output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
-             output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+	         output$prob.below.threshold <- matrix(prob.below.threshold(output$pred.samples, at=posteriors$truncation.para$at[1]),rT, nsite)
+             output$Mean <- matrix(apply(output$pred.samples,1,mean,na.rm=TRUE),rT, nsite)
+             output$Median <- matrix(apply(output$pred.samples,1,median,na.rm=TRUE),rT, nsite)
+			 output$SD <- matrix(apply(output$pred.samples,1,sd,na.rm=TRUE),rT, nsite)
+			 ck <- apply(output$pred.samples,1,quantile,c(0.025,0.975),na.rm=TRUE)
+             output$Low <- matrix(ck[1,],rT, nsite)
+             output$Up <- matrix(ck[2,],rT, nsite)
+	         #output$prob.below.threshold <- prob.below.threshold(output$pred.samples, at=posteriors$truncation.para$at[1])
+             #szp<-spT.Summary.Stat(output$pred.samples[,])
+             #output$Mean <- matrix(szp$Mean,rT, nsite)
+			 #output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+             #output$Median <- matrix(szp$Median,rT, nsite)
+			 #output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+             #output$SD <- matrix(szp$SD,rT, nsite)
+             #output$Low <- matrix(szp[,4],rT, nsite)
+             #output$Up <- matrix(szp[,5],rT, nsite)
+             #szp <- NULL
+			 #output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+ 			 #output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+             #output$pred.samples <- reverse.truncated.fnc(output$pred.samples,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
     	     output$truncation.para <- posteriors$truncation.para
 	      }
 		  else{
@@ -1072,18 +1080,26 @@ spGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           #
           # 
       	  if(posteriors$model == "truncatedGP"){
-	         output$prob.below.threshold <- prob.below.threshold(output$fore.samples[,], at=posteriors$truncation.para$at)
-             szp<-spT.Summary.Stat(output$fore.samples[,])
-             output$Mean <- matrix(szp$Mean,newr*K, nsite)
-             output$Median <- matrix(szp$Median,newr*K, nsite)
-             output$SD <- matrix(szp$SD,newr*K, nsite)
-             output$Low <- matrix(szp[,4],newr*K, nsite)
-             output$Up <- matrix(szp[,5],newr*K, nsite)
-			 output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
- 			 output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
-			 output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
- 			 output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
-             output$fore.samples <- reverse.truncated.fnc(output$fore.samples,at=posteriors$truncation.para$at,lambda=posteriors$truncation.para$lambda)
+             output$fore.samples <- reverse.truncated.fnc(output$fore.samples,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+	         output$prob.below.threshold <- matrix(prob.below.threshold(output$fore.samples, at=posteriors$truncation.para$at[1]),newr*K, nsite)
+             output$Mean <- matrix(apply(output$fore.samples,1,mean,na.rm=TRUE),newr*K, nsite)
+             output$Median <- matrix(apply(output$fore.samples,1,median,na.rm=TRUE),newr*K, nsite)
+			 output$SD <- matrix(apply(output$fore.samples,1,sd,na.rm=TRUE),newr*K, nsite)
+			 ck <- apply(output$fore.samples,1,quantile,c(0.025,0.975),na.rm=TRUE)
+             output$Low <- matrix(ck[1,],newr*K, nsite)
+             output$Up <- matrix(ck[2,],newr*K, nsite)
+	         #output$prob.below.threshold <- prob.below.threshold(output$fore.samples[,], at=posteriors$truncation.para$at[1])
+             #szp<-spT.Summary.Stat(output$fore.samples[,])
+             #output$Mean <- matrix(szp$Mean,newr*K, nsite)
+             #output$Median <- matrix(szp$Median,newr*K, nsite)
+             #output$SD <- matrix(szp$SD,newr*K, nsite)
+             #output$Low <- matrix(szp[,4],newr*K, nsite)
+             #output$Up <- matrix(szp[,5],newr*K, nsite)
+			 #output$Mean <- reverse.truncated.fnc(output$Mean,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+ 			 #output$Median <- reverse.truncated.fnc(output$Median,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+			 #output$Low <- reverse.truncated.fnc(output$Low,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+ 			 #output$Up <- reverse.truncated.fnc(output$Up,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
+             #output$fore.samples <- reverse.truncated.fnc(output$fore.samples,at=posteriors$truncation.para$at[1],lambda=posteriors$truncation.para$lambda,at2=posteriors$truncation.para$at[2])
     	     output$truncation.para <- posteriors$truncation.para
 	      }
 		  else{
@@ -1564,9 +1580,13 @@ sptruncGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
 	if(is.null(truncation.para)){
 	   stop(" Error: define truncation parameter lambda and truncation point \n")
 	}
+	     ##
 	     at <- truncation.para$at
 		 lambda <- truncation.para$lambda
  	     zm <- truncated.fnc(Y, at=at, lambda=lambda, both=FALSE)
+		 at2 <- zm[[2]]; zm <- zm[[1]]
+		 truncation.para$at <- c(at,at2)
+		 ##
          zmm <- matrix(zm,rT,n)
          zmm <- apply(zmm,1,median,na.rm=TRUE)
          zmm <- rep(zmm,n)
@@ -1598,7 +1618,7 @@ sptruncGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     #
     #
     if(scale.transform=="NONE"){
-         zm <- zm
+         zm <- zm[,1]
          trans <- 0
     }
     else if(scale.transform=="SQRT"){
@@ -1612,9 +1632,9 @@ sptruncGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
     }
     #
     #
-      initials<-initials.checking.gp(initials,zm[,1],X,Xsp,Xtp,n,r,T,coords.D)
+      initials<-initials.checking.gp(initials,zm,X,Xsp,Xtp,n,r,T,coords.D)
     #
-         o <- zm[,1]
+         o <- zm
     #
     #
 	if(fitted.values=="ORIGINAL"){
@@ -1696,7 +1716,7 @@ sptruncGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          as.double(tuning),as.double(phis),as.integer(phik),
          as.double(coords.D),
          as.double(initials$sig2eps), as.double(initials$sig2eta),
-         as.double(initials$beta),as.double(X),as.double(zm[,1]),  
+         as.double(initials$beta),as.double(X),as.double(zm),  
          as.double(o),as.integer(1),phip=double(nItr),
          accept=double(1),nup=double(nItr),sig2ep=double(nItr),
          sig2etap=double(nItr),betap=matrix(double(p*nItr),p,nItr), 
@@ -1729,29 +1749,6 @@ sptruncGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
           output$X <- X
           #dimnames(output$X)[[2]] <- x.names
         }
-        else if((length(x.names.sp) > 0) & (length(x.names.tp) == 0)){
-        # for spatial beta
-          output$X <- X
-          output$Xsp <- Xsp
-          dimnames(output$X)[[2]] <- as.list(x.names)
-          #dimnames(output$Xsp)[[2]] <- x.names.sp
-        }  
-        else if((length(x.names.sp) == 0) & (length(x.names.tp) > 0)){
-        # for temporal beta
-          output$X <- X
-          output$Xtp <- Xtp
-          dimnames(output$X)[[2]] <- as.list(x.names)
-          #dimnames(output$Xtp)[[2]] <- x.names.tp
-        }
-        else if((length(x.names.sp) > 0) & (length(x.names.tp) > 0)){
-        # for both spatial and temporal beta
-          output$X <- X
-          output$Xsp <- Xsp
-          output$Xtp <- Xtp
-          dimnames(output$X)[[2]] <- as.list(x.names)
-          #dimnames(output$Xsp)[[2]] <- x.names.sp
-          #dimnames(output$Xtp)[[2]] <- x.names.tp
-        }
         else{
           stop("\n#\n## Error: \n#")
         }
@@ -1772,10 +1769,8 @@ sptruncGP.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
            output$betap <- matrix(out$betap[1:p,(nBurn+1):nItr],p,length((nBurn+1):nItr))
            output$op <- out$op[1:N,(nBurn+1):nItr]
            output$wp <- output$op-output$X%*%output$betap
-		   fit.val <- reverse.truncated.fnc(output$op,at=at,lambda=lambda)
+		   fit.val <- reverse.truncated.fnc(output$op,at=at,lambda=lambda,at2=at2)
 		   output$fitted <- cbind(apply(fit.val,1,median),prob.below.threshold(fit.val,at=at))
-		   #output$fitted <- out$fit
-           #output$fitted[,1] <- reverse.truncated.fnc(out$fit[,1],at=at,lambda=lambda)
            dimnames(output$fitted)[[2]] <- c("Median","Prob.below.threshold")
            output$tol.dist<-tol.dist
            output$distance.method<-method

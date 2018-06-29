@@ -4,6 +4,7 @@ useDynLib(spTimer, .registration = TRUE)
 import(coda)
 import(sp)
 import(spacetime)
+import(extraDistr)
 
 importFrom("grDevices", "dev.new")
 importFrom("graphics", "abline", "legend", "par", "points", "segments",
@@ -16,6 +17,7 @@ importFrom("stats", "acf", "as.formula", "contrasts", "density",
 importFrom("utils", "read.table")
 importFrom("stats", "rnorm")
 importFrom("stats", "rgamma")
+importFrom("extraDistr", "rhnorm")
 
 
 S3method(print,spT)

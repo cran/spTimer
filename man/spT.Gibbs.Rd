@@ -539,7 +539,80 @@ nBurn <- 1000 # number of burn-in from the MCMC samples
 out <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH,data=DataFit,
   model="truncatedGP",coords=~Longitude+Latitude,
   distance.method="geodetic:km",nItr=nItr,nBurn=nBurn,report=5,
-  truncation.para = list(at = 30,lambda = 4),
+  truncation.para = list(at = 30,lambda = 2),
+  fitted.values="ORIGINAL")
+#  
+summary(out)
+head(fitted(out))
+plot(out,density=FALSE)
+#
+head(cbind(DataFit$o8hrmax,fitted(out)[,1]))
+plot(DataFit$o8hrmax,fitted(out)[,1])
+spT.validation(DataFit$o8hrmax,fitted(out)[,1])
+
+##
+## prediction (spatial)
+##
+
+pred <- predict(out,newdata=DataValPred, newcoords=~Longitude+Latitude, tol=0.05)
+names(pred)
+plot(DataValPred$o8hrmax,c(pred$Mean)) 
+spT.validation(DataValPred$o8hrmax,c(pred$Mean)) 
+#pred$prob.below.threshold
+
+##
+## forecast (temporal)
+##
+
+# unobserved locations
+fore <- predict(out,newdata=DataValFore, newcoords=~Longitude+Latitude,
+   type="temporal", foreStep=2, tol=0.05)
+spT.validation(DataValFore$o8hrmax,c(fore$Mean)) 
+plot(DataValFore$o8hrmax,c(fore$Mean)) 
+#fore$prob.below.threshold
+
+# observed locations 
+fore <- predict(out,newdata=DataFitFore, newcoords=~Longitude+Latitude,
+   type="temporal", foreStep=2, tol=0.05)
+spT.validation(DataFitFore$o8hrmax,c(fore$Mean)) 
+plot(DataFitFore$o8hrmax,c(fore$Mean)) 
+#fore$prob.below.threshold
+
+
+######################################################
+## The Truncated/Censored AR models:
+######################################################
+
+##
+## Model fitting
+##
+
+data(NYdata)
+
+# Truncation at 30 (say)
+NYdata$o8hrmax[NYdata$o8hrmax<=30] <- 30
+
+# Read data 
+s<-c(8,11,12,14,18,21,24,28)
+DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
+DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
+DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
+DataValFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28)) 
+DataValFore<-subset(DataValFore, with(DataValFore, (Day \%in\% c(30, 31) & Month == 8)))
+DataFitFore<-spT.subset(data=NYdata, var.name=c("s.index"), s=c(8,11,12,14,18,21,24,28),
+			reverse=TRUE) 
+DataFitFore<-subset(DataFitFore, with(DataFitFore, (Day \%in\% c(30, 31) & Month == 8)))
+
+#
+nItr <- 5000 # number of MCMC samples for each model
+nBurn <- 1000 # number of burn-in from the MCMC samples
+# Truncation at 30 
+# fit truncated AR model 
+out <- spT.Gibbs(formula=o8hrmax~cMAXTMP+WDSP+RH,data=DataFit,
+  model="truncatedAR",coords=~Longitude+Latitude,
+  distance.method="geodetic:km",nItr=nItr,nBurn=nBurn,report=5,
+  truncation.para = list(at = 30,lambda = 2),
   fitted.values="ORIGINAL")
 #  
 summary(out)
@@ -620,7 +693,7 @@ out <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,
          data=DataFit, model="truncatedGPP",coords=~Longitude+Latitude,
          knots.coords=knots, distance.method="geodetic:km",
          nItr=nItr,nBurn=nBurn,report=5,fitted="ORIGINAL",
-         truncation.para = list(at = 30,lambda = 4))
+         truncation.para = list(at = 30,lambda = 2))
 #  
 summary(out)
 head(fitted(out))

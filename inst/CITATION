@@ -22,7 +22,7 @@ citEntry(entry = "Article",
 )
 
 citEntry(entry="Manual",
-  title = "spTimer: Spatio-Temporal Bayesian Modeling Using R",
+  title = "Spatio-Temporal Bayesian Modeling",
   author    = personList(as.person("Khandoker Shuvo Bakar"),
                                       as.person("Sujit K. Sahu")),
   year = year,
