@@ -35,7 +35,6 @@
 \alias{spGPP.forecast}
 \alias{spGPP.prediction}
 \alias{spT.fit.pred}
-\alias{spT.hit.false}
 \alias{spT.forecast}
 \alias{spT.prediction}
 \alias{spT.Summary.Stat}

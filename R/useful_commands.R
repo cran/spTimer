@@ -287,35 +287,57 @@ spT.segment.plot<-function(obs, est, up, low, limit=NULL){
 }
 ##
 ## hit and false alarm function for forecast
-##
- spT.hit.false<-function(obs,fore,tol){
-   #
-   tmp<-cbind(obs,fore)
-   tmp<-na.omit(tmp)
-   #
-   c11<-tmp[tmp[,1]<=tol & tmp[,2]<=tol,]
-   c11<-length(c11)/2
-   c12<-tmp[tmp[,1]<=tol & tmp[,2]>tol,]
-   c12<-length(c12)/2  
-   c21<-tmp[tmp[,1]>tol & tmp[,2]<=tol,]
-   c21<-length(c21)/2  
-   c22<-tmp[tmp[,1]>tol & tmp[,2]>tol,]
-   c22<-length(c22)/2
-   mat<-matrix(c(c11,c21,c12,c22),2,2)
-   dimnames(mat)[[1]]<-c(paste("[Obs:<=",tol,"]"),paste("[Obs:> ",tol,"]")) 
-   dimnames(mat)[[2]]<-c(paste("[Forecast:<=",tol,"]"),paste("[Forecast:>",tol,"]")) 
-   POD<-round(mat[1,1]/sum(diag(mat)),4)
-   FAR<-round(mat[2,1]/sum(mat[,1]),4)
-   HAR<-round(mat[1,1]/sum(mat[1,]),4)
-   #FAR<-round(mat[1,2]/sum(mat[1,]),4)
-   #HAR<-round(sum(diag(mat))/sum(mat),4)
-   top<-2*(mat[1,1]*mat[2,2]-mat[1,2]*mat[2,1])
-   bot<-mat[1,2]^2+mat[2,1]^2+2*mat[1,1]*mat[2,2]+(mat[1,2]+mat[2,1])*sum(diag(mat))
-   S<-round(top/bot,4)
-   x<-list(False.Alarm=FAR,Hit.Rate=HAR,Probability.of.Detection=POD,
-      Heidke.Skill=S,cross.table=mat,tolerance.limit=tol) 
-   x
+## code for hit and false 
+spT.validation2<-function(z,zhat,cutoff,names=FALSE){
+  #
+  obs <- z; fore <- zhat; tol <- cutoff;
+  tmp<-cbind(obs,fore)
+  tmp<-na.omit(tmp)
+  #
+  c11<-tmp[tmp[,1]<=tol & tmp[,2]<=tol,]
+  c11<-length(c11)/2
+  c12<-tmp[tmp[,1]<=tol & tmp[,2]>tol,]
+  c12<-length(c12)/2  
+  c21<-tmp[tmp[,1]>tol & tmp[,2]<=tol,]
+  c21<-length(c21)/2  
+  c22<-tmp[tmp[,1]>tol & tmp[,2]>tol,]
+  c22<-length(c22)/2
+  mat<-matrix(c(c11,c21,c12,c22),2,2)
+  dimnames(mat)[[1]]<-c(paste("[Obs:<=",tol,"]"),paste("[Obs:> ",tol,"]")) 
+  dimnames(mat)[[2]]<-c(paste("[Forecast:<=",tol,"]"),paste("[Forecast:>",tol,"]")) 
+  # Type I error (false positive): mat[1,2]
+  # Type II error (false negative): mat[2,1]
+  # True positive: mat[1,1]
+  # True negative: mat[2,2]
+  TPR <- mat[1,1]/sum(mat[,1]) # True Positive Rate, Sensitivity, Hit rate, Recall
+  FPR <- mat[1,2]/sum(mat[,2]) # False Positive Rate, False alarm
+  FNR <- 1-TPR # False Negative Rate, Miss rate 
+  TNR <- 1-FPR # True Negative Rate, Specificity 
+  Prevalence <- sum(mat[,1])/sum(c(mat))
+  Accuracy <- sum(diag(mat))/sum(c(mat))
+  Precision <- mat[1,1]/sum(mat[1,]) # positive predictive value
+  FOR <- mat[2,1]/sum(mat[1,]) # false ommission rate
+  LRp <- TPR/FPR # positive likelihood ratio 
+  LRn <- FNR/TNR # negative likelihood ratio
+  FDR <- mat[1,2]/sum(mat[1,]) # false discovery rate 
+  NPV <- mat[2,2]/sum(mat[2,]) # negative predictive value
+  DOR <- LRp/LRn # diagnostic odds ratio 
+  F1score <- 2/(1/TPR+1/Precision)
+  top<-2*(mat[1,1]*mat[2,2]-mat[1,2]*mat[2,1])
+  bot<-mat[1,2]^2+mat[2,1]^2+2*mat[1,1]*mat[2,2]+(mat[1,2]+mat[2,1])*sum(diag(mat))
+  S<-round(top/bot,4) # Heidke Skill
+  x<-list(
+    TPR=TPR, FPR=FPR, FNR=FNR, TNR=TNR, Prevalence=Prevalence, Accuracy=Accuracy,
+    Precision=Precision, FOR=FOR, LRp=LRp, LRn=LRn, FDR=FDR, NPV=NPV, DOR=DOR,
+    F1.Score=F1score,Heidke.Skill=S)
+ ##
+ if(names==TRUE){
+ cat("##\n True Positive Rate/ Sensitivity/ Hit rate/ Recall \n False Positive Rate/ False alarm \n False Negative Rate/ Miss rate \n True Negative Rate/ Specificity \n Prevalence \n Accuracy \n Precision/ Positive Predictive Value \n False Ommission Rate \n Positive Likelihood Ratio \n Negative Likelihood Ratio \n False Discovery Rate \n Negative Predictive Value \n Diagnostic Odds Ratio \n F1score \n Heidke Skill \n##\n") 
+ }
+ ##
+  unlist(x)
 }
+##
 ##
 ## For data split
 ##
@@ -347,78 +369,6 @@ spT.subset<-function (data, var.name, s = NULL, reverse = FALSE)
         data
     }
 }
-# spT.subset<-function(data, var.name, s = NULL, reverse=FALSE) 
-#{
-#
-# This function is to select and deduct the sites used to
-# fit or valid the model
-# Input: 	data
-#		s = the site numbers to be selected/deselected, e.g., c(4,7,10)
-#	if(missing(var.name)){
-#		stop("Error: need to define the var.name")
-#	}
-#   s.index <- unique(data[,var.name[1]])
-#    if(reverse==FALSE){
-#		dat <- subset(data, s.index %in% s)
-#		dat
-#	}
-#	else{
-#		dat <- subset(data, !(s.index %in% s))
-#		dat
-#	}
-#}
-##
-# spT.data.selection<-function(data, rs = NULL, s = NULL, reverse=FALSE) 
-#{
-#
-# This function is to select and deduct the sites used to
-# fit or valid the model
-# Input: 	data
-#		s = the site numbers to be selected/deselected, e.g., c(4,7,10)
-#		rs = the total number of random sites to be selected , e.g., 3
-#  if(reverse==FALSE){
-#	if(is.null(rs) & !is.null(s)){
-	# not random
-#		rs<-NULL
-#		dat<-NULL
-#			for(i in 1:length(s)){
-#			dat<-rbind(dat,data[data[,var.name[1]]==s[i], ])
-#			}	
-#		dat	
-#	}	
-#	else if (!is.null(rs) & is.null(s)){
-	# for randomly selected sites
-#		s<-NULL
-#		a.s<-unique(data[,1])
-#		a.s<-sort(sample(a.s, rs))
-#		cat('Randomly selected sites =', a.s, '\n')
-#		dat<-NULL
-#			for(i in 1:rs){
-#			dat<-rbind(dat,data[data[,1]==a.s[i], ])
-#			}	
-#		dat
-#	}
-#  }
-#  else{
-#	if(is.null(rs) & !is.null(s)){
-#		rs<-NULL
-#			for(i in 1:length(s)){
-#			data<-data[data[,1] != s[i], ]
-#			}	
-#		data	
-#	}	
-#	else{
-#		s<-NULL
-#		a.s<-unique(data[,1])
-#		a.s<-sort(sample(a.s, rs))
-#		cat('Randomly deducted sites =', a.s, '\n')
-#			for(i in 1:rs){
-#			data<-data[data[,1] != s[i], ]
-#			}	
-#		data
-#	}
-#  }
-# }
 ##
 ## grid coordinates
 ##
@@ -781,8 +731,7 @@ spT.geo_dist <- function(points)
 ##
 ## To check sites that has <tol km of distances
 ## 
- spT.check.locations<-function(fit.locations, pred.locations,
-              method="geodetic:km", tol=5){
+ spT.check.locations<-function(fit.locations, pred.locations, method, tol){
   #
       #
       if(!method %in% c("geodetic:km", "geodetic:mile", "euclidean",
@@ -834,7 +783,7 @@ spT.geo_dist <- function(points)
       else{
            fdmis<-cbind(c(fdmis),1:length(fdmis)) # 
            fdmis<-fdmis[fdmis[,1] < tol,]
-           if(!is.na(fdmis[1])==TRUE){
+           if(!is.na(fdmis[,1])==TRUE){
             cat("#\n# Tolerance Limit:", paste(tol))
             cat("\n# There are some Prediction locations very close to the Fitted locations.\n#\n")
             fdmis<-matrix(fdmis) 
@@ -994,7 +943,7 @@ spT.validation <- function(z, zhat, names=FALSE)
  {
     z<-as.matrix(z)
     zhat<-as.matrix(zhat)
-    x <- abs(c(zhat-z))/z
+    x <- abs(c(zhat-z))/abs(z)
     u <- x[!is.na(x)]
     u <- u[!is.infinite(u)]
     round(sum(u)/length(u)*100, 4)

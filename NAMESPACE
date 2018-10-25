@@ -1,5 +1,4 @@
 useDynLib(spTimer, .registration = TRUE)
-#useDynLib(spTimer, .registration = TRUE, .fixes = "C_")
 
 import(coda)
 import(sp)
@@ -58,6 +57,7 @@ export(
        "spT.grid.coords",
        "spT.pCOVER",
        "spT.validation",
+	   "spT.validation2",
        "Formula.matrix",
        "Formula.coords",
        "as.mcmc.spT",

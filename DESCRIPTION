@@ -1,8 +1,8 @@
 Package: spTimer
 Type: Package
 Title: Spatio-Temporal Bayesian Modelling
-Version: 3.1
-Date: 2018-06-29
+Version: 3.2
+Date: 2018-10-25
 Author: K. Shuvo Bakar & Sujit K. Sahu
 Maintainer: Shuvo Bakar <shuvo.bakar@gmail.com>
 Depends: R (>= 3.4.0)
@@ -12,6 +12,6 @@ Imports: coda, sp, spacetime, extraDistr, grDevices, graphics, stats,
         utils
 LazyData: yes
 NeedsCompilation: yes
-Packaged: 2018-06-29 05:11:05 UTC; bak18b
+Packaged: 2018-10-24 00:21:29 UTC; bak18b
 Repository: CRAN
-Date/Publication: 2018-06-29 05:42:54 UTC
+Date/Publication: 2018-10-25 13:10:11 UTC

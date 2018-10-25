@@ -363,7 +363,7 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
         }
       #
            coords.all <- rbind(coords,pred.coords)
-           spT.check.locations(coords, pred.coords, method, tol=tol.dist)
+           spT.check.locations(coords, pred.coords, method=method, tol=tol.dist)
            tn.fitsites <- length(coords[, 1])
            nfit.sites <- 1:tn.fitsites
            tn.predsites <- length(coords.all[, 1]) - tn.fitsites

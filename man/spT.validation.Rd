@@ -22,7 +22,7 @@ spT.validation(z, zhat, names=FALSE)
 \item{rMSEP}{Relative Mean Separation.}
 }
 \seealso{
-\code{\link{spT.pCOVER}}.
+\code{\link{spT.pCOVER},\link{spT.validation2}}.
 }
 \examples{
 %\dontrun{
