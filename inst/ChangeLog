@@ -1,5 +1,13 @@
 2018-11-07
 
+	* Version 3.3.1
+	* Fixed issues related to NAMESPACE asked by CRAN team.
+	* Fixed a bug in Formula.matrix argument.
+	* Dropped "model.frame.spT","model.matrix.spT","as.forecast.object", and exportClasses("spT") from NAMESPACE.
+	* Fixed bugs in *.C code related to saving text file in drive.
+	
+2018-11-07
+
 	* Version 3.3
 	* Bugs fixed: spT.check.locations with one prediction location.
 	

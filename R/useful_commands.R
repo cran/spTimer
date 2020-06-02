@@ -527,7 +527,7 @@ Formula.matrix <- function(formula, data, na.rm=FALSE)
   # null model support
   "%w/o%" <- function(x, y) x[!x %in% y]
   x.names <- attr(mt, "term.labels") # X variable names
-  X <- if (!is.empty.model(mt)) model.matrix(mt, mf, contrasts)
+  X <- if (!is.empty.model(mt)) model.matrix(mt, mf)
   if((!is.null(spcheck)) & (is.null(tpcheck))){
     # only spatially varying  
     x.names.sp <- x.names[attr(mt, "specials")$sp-1]
@@ -600,7 +600,7 @@ Formula.coords <- function(formula, data, na.rm=TRUE)
   if(missing(data)) data <- sys.frame(sys.parent())
   mf <- model.frame(mt, data=data)
   # null model support
-  X <- if (!is.empty.model(mt)) model.matrix(mt, mf, contrasts)
+  X <- if (!is.empty.model(mt)) model.matrix(mt, mf)
   X <- as.matrix(X[,2:3])         # X matrix
   X <- unique(X); dimnames(X)<-NULL
   X

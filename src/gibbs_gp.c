@@ -118,10 +118,12 @@ void GIBBS_sumpred_txt_gp(int *aggtype, double *flag, int *its, int *burnin,
      FILE *predfilestat;
      predfilestat = fopen("OutGP_Stats_PredValue.txt", "w");
 
-     int type1;
-     type1= *aggtype;
+     //int type1;
+     //type1= *aggtype;
 
      FILE *textan;
+     textan = fopen("OutGP_textan.txt", "w");
+	 /*
      // none
      if(type1==0){
        textan = fopen("OutGP_NONE.txt", "w");
@@ -138,6 +140,7 @@ void GIBBS_sumpred_txt_gp(int *aggtype, double *flag, int *its, int *burnin,
      if(type1==3){
        textan = fopen("OutGP_Annual_w126_Prediction.txt", "w");
      }
+	 */
 
      GetRNGstate();                 
      for(i=0; i < its1; i++) {

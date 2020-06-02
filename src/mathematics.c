@@ -441,9 +441,13 @@ void median(int *n, double *x, double *med)
       }
      }
      if(n1%2==0)
+	 {
       *med = (x[n1/2]+x[(n1/2)-1])/2;
+	 }
      else
+	 {
       *med = x[n1/2];
+	 }
       return;
 }
 

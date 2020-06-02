@@ -18,7 +18,6 @@ importFrom("stats", "rnorm")
 importFrom("stats", "rgamma")
 importFrom("extraDistr", "rhnorm")
 
-
 S3method(print,spT)
 S3method(print,spTpred)
 S3method(print,spTfore)
@@ -37,8 +36,6 @@ S3method(as.mcmc,spT)
 S3method(confint,spT)
 S3method(fitted,spT)
 S3method(formula,spT)
-
-exportClasses("spT")
 
 export(
        "spT.Gibbs",
@@ -61,15 +58,12 @@ export(
        "Formula.matrix",
        "Formula.coords",
        "as.mcmc.spT",
-       "as.forecast.object",
        "confint.spT",
 	   "coef.spT",
 	   "residuals.spT",
 	   "print.spT",
        "fitted.spT",
        "formula.spT",
-	   "model.frame.spT",
-	   "model.matrix.spT",
        "Gamm",
        "Norm",
        "Unif" 

@@ -113,10 +113,12 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      FILE *predfile;
      predfile = fopen("OutGPP_Values_Prediction.txt", "w");
 
-     int type1;
-     type1= *aggtype;
+     //int type1;
+     //type1= *aggtype;
    
      FILE *textan;
+     textan = fopen("OutGPP_textan.txt", "w");
+	 /*
      // none
      if(type1==0){
        textan = fopen("OutGPP_NONE.txt", "w");
@@ -133,6 +135,7 @@ void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag,
      if(type1==3){
        textan = fopen("OutGPP_Annual_w126_Prediction.txt", "w");
      }
+	 */
 
      GetRNGstate();            
      for(i=0; i < its1; i++) {

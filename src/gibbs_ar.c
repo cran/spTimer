@@ -126,10 +126,15 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      FILE *predfilestat;
      predfilestat = fopen("OutAR_Stats_PredValue.txt", "w");
 
-     int type1;
-     type1= *aggtype;
+     //int type1;
+     //type1= *aggtype;
    
      FILE *textan;
+     // annual average value
+     // annual 4th highest value
+     // annual w126 option
+     textan = fopen("OutAR_textan.txt", "w");
+	 /*
      // none
      if(type1==0){
        textan = fopen("OutAR_NONE.txt", "w");
@@ -146,6 +151,7 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      if(type1==3){
        textan = fopen("OutAR_Annual_w126_Prediction.txt", "w");
      }
+	 */
 
      GetRNGstate();            
      for(i=0; i < its1; i++) {
@@ -235,7 +241,6 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
            fprintf(textan, "%f ", anf[j]);
          }
          fprintf(textan, "\n");
-
       } // end of loop i >= brin
 
        ext_sige(phip, phi1);
@@ -265,6 +270,8 @@ void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
      fclose(parafile);
      fclose(predfile);
      fclose(textan);
+	 
+	 //
 
      free(phip); free(nu); free(nup); free(sig_ep); free(sig_etap); free(rhop); 
      free(betap); free(mu_lp); free(sig_0p); free(op); free(phi1); free(sig_e1); 
