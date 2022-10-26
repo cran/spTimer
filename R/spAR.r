@@ -19,7 +19,7 @@ spAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          stop("\n Error: formula must be specified \n")
     }
   #
-    if (class(formula) != "formula") {
+    if (!inherits(formula, "formula")) {
          stop("\n Error: equation must be in formula-class \n ...")
     }
    #
@@ -840,7 +840,7 @@ spAR.MCMC.Pred<-function(formula, data=parent.frame(), time.data,
          stop("\n Error: formula must be specified \n")
     }
   #
-    if (class(formula) != "formula") {
+    if (!inherits(formula, "formula")) {
          stop("\n Error: equation must be in formula-class \n ...")
     }
   #
@@ -1413,7 +1413,7 @@ sptruncAR.Gibbs<-function(formula, data=parent.frame(), time.data, coords,
          stop("\n Error: formula must be specified \n")
     }
   #
-    if (class(formula) != "formula") {
+    if (!inherits(formula, "formula")) {
          stop("\n Error: equation must be in formula-class \n ...")
     }
    #

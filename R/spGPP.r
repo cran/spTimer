@@ -139,11 +139,11 @@ spGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
          stop("\n Error: formula must be specified \n")
     }
    #
-    if (class(formula) != "formula") {
+    if (!inherits(formula, "formula")) {
          stop("\n Error: equation must be in formula-class \n ...")
     }
    #
-    if (class(formula) == "formula") {
+    if (inherits(formula, "formula")) {
          XY <- Formula.matrix(formula, data)
          Y <- XY[[1]]
          X <- as.matrix(XY[[2]])
@@ -1116,7 +1116,7 @@ spGPP.MCMC.Pred<-function(formula, data=parent.frame(), pred.data,
          stop("\n Error: formula must be specified \n")
     }
    #
-    if (class(formula) != "formula") {
+    if (!inherits(formula, "formula")) {
          stop("\n Error: equation must be in formula-class \n ...")
     }
    #
@@ -1545,11 +1545,11 @@ sptruncGPP.Gibbs<-function(formula, data=parent.frame(), time.data,
          stop("\n Error: formula must be specified \n")
     }
    #
-    if (class(formula) != "formula") {
+    if (!inherits(formula, "formula")) {
          stop("\n Error: equation must be in formula-class \n ...")
     }
    #
-    if (class(formula) == "formula") {
+    if (inherits(formula, "formula")) {
          XY <- Formula.matrix(formula, data)
          Y <- XY[[1]]
          X <- as.matrix(XY[[2]])

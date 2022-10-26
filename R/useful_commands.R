@@ -4,7 +4,7 @@
 spT.MCMC.stat<-function(x, nBurn=0)
 {
   options(warn=-1)
-  if(class(x) != "spT"){
+  if(!inherits(x, "spT")){
     stop("\n# Error: provide valid posterior output \n")
   }
   model<-x$model
@@ -132,7 +132,7 @@ spT.MCMC.stat<-function(x, nBurn=0)
 spT.MCMC.plot<-function(x, nBurn=0, ACF="FALSE", PARTIAL.acf="FALSE")
 {
   options(warn=-1)
-  if(class(x) != "spT"){
+  if(!inherits(x, "spT")){
     stop("\n# Error: provide valid posterior output \n")
   }
   model<-x$model
