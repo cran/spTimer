@@ -15,9 +15,6 @@ extern void GeoDist_km(void *, void *, void *, void *);
 extern void GeoDist_miles(void *, void *, void *, void *);
 extern void GIBBS_ar(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void GIBBS_gp(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern void GIBBS_sumpred_gpp(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern void GIBBS_sumpred_txt_ar(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern void GIBBS_sumpred_txt_gp(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void GIBBS_zfitsum_onephi_gpp(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void z_pr_its_ar(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void z_pr_its_gp(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
@@ -31,9 +28,6 @@ static const R_CMethodDef CEntries[] = {
     {"GeoDist_miles",            (DL_FUNC) &GeoDist_miles,             4},
     {"GIBBS_ar",                 (DL_FUNC) &GIBBS_ar,                 50},
     {"GIBBS_gp",                 (DL_FUNC) &GIBBS_gp,                 45},
-    {"GIBBS_sumpred_gpp",        (DL_FUNC) &GIBBS_sumpred_gpp,        52},
-    {"GIBBS_sumpred_txt_ar",     (DL_FUNC) &GIBBS_sumpred_txt_ar,     44},
-    {"GIBBS_sumpred_txt_gp",     (DL_FUNC) &GIBBS_sumpred_txt_gp,     43},
     {"GIBBS_zfitsum_onephi_gpp", (DL_FUNC) &GIBBS_zfitsum_onephi_gpp, 59},
     {"z_pr_its_ar",              (DL_FUNC) &z_pr_its_ar,              24},
     {"z_pr_its_gp",              (DL_FUNC) &z_pr_its_gp,              22},

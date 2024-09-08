@@ -5,17 +5,7 @@
 /**************************** From "gibbs_ar.c" *********************************/
 /*****************************************************************************/
 
-void GIBBS_sumpred_txt_ar(int *aggtype, double *flag, int *its, int *burnin,
-     int *n, int *T, int *r, int *rT, int *p, int *N, int *report,
-     int *cov, int *spdecay, double *shape_e, double *shape_eta, double *shape_0,  
-     double *phi_a, double *phi_b,
-     double *prior_a, double *prior_b, double *prior_sig, double *phi, 
-     double *tau, double *phis, int *phik, double *d, int *constant, 
-     double *sig_e, double *sig_eta, double *sig_0, double *mu_l,  
-     double *rho, double *beta, double *X, double *z, double *o, 
-     int *nsite, int *predN, double *d12, double *predX, int *transform,
-     double *accept_f, double *gof, double *penalty);
-     
+    
 void GIBBS_ar(double *flag, int *its, int *burnin,
      int *n, int *T, int *r, int *rT, int *p, int *N, int *report,
      int *cov, int *spdecay, int *ft, 

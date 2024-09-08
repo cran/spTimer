@@ -631,11 +631,12 @@ spT.Gibbs<-function(formula, data=parent.frame(), model="GP",
         }
 	}
    ##
-	 out<-spT.fit.pred(formula=formula, data=data, model=model, time.data=time.data, coords=coords, 
-            knots.coords=knots.coords, pred.coords=newcoords, priors=priors,
-            initials=initials, pred.data=newdata, nItr=nItr, nBurn=nBurn, report=report,
-            tol.dist=tol.dist, distance.method=distance.method, cov.fnc=cov.fnc, scale.transform=scale.transform,
-            spatial.decay=spatial.decay, annual.aggrn=annual.aggrn)
+	 #out<-spT.fit.pred(formula=formula, data=data, model=model, time.data=time.data, coords=coords, 
+     #       knots.coords=knots.coords, pred.coords=newcoords, priors=priors,
+     #       initials=initials, pred.data=newdata, nItr=nItr, nBurn=nBurn, report=report,
+     #       tol.dist=tol.dist, distance.method=distance.method, cov.fnc=cov.fnc, scale.transform=scale.transform,
+     #       spatial.decay=spatial.decay, annual.aggrn=annual.aggrn)
+	out <- list("No Output")
     class(out)<-"spT"
     out
    } 
@@ -967,15 +968,16 @@ print.spTpred<-function(x, ...) {
       if(!inherits(initials, "spGP") & !inherits(initials, "NULL")){
         stop("\n# Error: correctly define the GP models for function spT.initials.")
       }
-      out <- spGP.MCMC.Pred(formula=formula, data=data,
-             time.data=time.data, coords=coords, 
-             pred.coords=pred.coords, priors=priors,
-             initials=initials, pred.data=pred.data, 
-             nItr=nItr, nBurn=nBurn, report=report, tol.dist=tol.dist,
-             distance.method=distance.method, cov.fnc=cov.fnc, 
-             scale.transform=scale.transform, 
-             spatial.decay=spatial.decay,
-             annual.aggregation=annual.aggrn)
+      #out <- spGP.MCMC.Pred(formula=formula, data=data,
+      #       time.data=time.data, coords=coords, 
+      #       pred.coords=pred.coords, priors=priors,
+      #       initials=initials, pred.data=pred.data, 
+      #       nItr=nItr, nBurn=nBurn, report=report, tol.dist=tol.dist,
+      #       distance.method=distance.method, cov.fnc=cov.fnc, 
+      #       scale.transform=scale.transform, 
+      #       spatial.decay=spatial.decay,
+      #       annual.aggregation=annual.aggrn)
+	  out <- list() 
       out$combined.fit.pred<-TRUE
       out$model<-model
       out
@@ -989,15 +991,16 @@ print.spTpred<-function(x, ...) {
       if(!inherits(initials, "spAR") & !inherits(initials, "NULL")){
         stop("\n# Error: correctly define the AR models for function spT.initials.")
       }
-      out <- spAR.MCMC.Pred(formula=formula, data=data,
-             time.data=time.data, coords=coords, 
-             pred.coords=pred.coords, priors=priors,
-             initials=initials, pred.data=pred.data, 
-             nItr=nItr, nBurn=nBurn, report=report, tol.dist=tol.dist,
-             distance.method=distance.method, cov.fnc=cov.fnc, 
-             scale.transform=scale.transform, 
-             spatial.decay=spatial.decay,
-             annual.aggregation=annual.aggrn)
+      #out <- spAR.MCMC.Pred(formula=formula, data=data,
+      #       time.data=time.data, coords=coords, 
+      #       pred.coords=pred.coords, priors=priors,
+      #       initials=initials, pred.data=pred.data, 
+      #       nItr=nItr, nBurn=nBurn, report=report, tol.dist=tol.dist,
+      #       distance.method=distance.method, cov.fnc=cov.fnc, 
+      #       scale.transform=scale.transform, 
+      #       spatial.decay=spatial.decay,
+      #       annual.aggregation=annual.aggrn)
+	  out <- list() 
       out$combined.fit.pred<-TRUE
       out$model<-model
       out
@@ -1014,16 +1017,17 @@ print.spTpred<-function(x, ...) {
       if(!inherits(initials, "spGPP") & !inherits(initials, "NULL")){
         stop("\n# Error: correctly define the GPP models for function spT.initials.")
       }
-      out <- spGPP.MCMC.Pred(formula=formula, data=data,
-             time.data=time.data, knots.coords=knots.coords, 
-             coords=coords, pred.coords=pred.coords, priors=priors,
-             initials=initials, pred.data=pred.data, nItr=nItr, nBurn=nBurn, 
-             report=report, tol.dist=tol.dist,
-             distance.method=distance.method, cov.fnc=cov.fnc, 
-             scale.transform=scale.transform, 
-             spatial.decay=spatial.decay,
-             annual.aggregation=annual.aggrn) 
-      out$combined.fit.pred<-TRUE
+      #out <- spGPP.MCMC.Pred(formula=formula, data=data,
+      #       time.data=time.data, knots.coords=knots.coords, 
+      #       coords=coords, pred.coords=pred.coords, priors=priors,
+      #       initials=initials, pred.data=pred.data, nItr=nItr, nBurn=nBurn, 
+      #       report=report, tol.dist=tol.dist,
+      #       distance.method=distance.method, cov.fnc=cov.fnc, 
+      #       scale.transform=scale.transform, 
+      #       spatial.decay=spatial.decay,
+      #       annual.aggregation=annual.aggrn) 
+      out <- list() 
+	  out$combined.fit.pred<-TRUE
       out$model<-model
       out
    }

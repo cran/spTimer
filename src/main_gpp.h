@@ -3,24 +3,10 @@
 #include "header.h"
 
 
-/**************************** From "gibbs_ar.c" *********************************/
+/**************************** From "gibbs_gpp.c" *********************************/
 /*****************************************************************************/
 
-void GIBBS_sumpred_gpp(int *aggtype, int *cov, int *spdecay, double *flag, 
-     int *its, int *burnin,
-     int *n, int *m, int *T, int *r, int *rT, int *p, int *N, int *report,
-     double *shape_e, double *shape_eta, double *shape_l,  
-     double *phi_a, double *phi_b,
-     double *prior_a, double *prior_b, double *mu_beta, double *delta2_beta,
-     double *mu_rho,  double *delta2_rho, double *alpha_l, double *delta2_l,
-     double *phi, double *tau, double *phis, int *phik,
-     double *dm, double *dnm, int *constant, 
-     double *sig2e, double *sig2eta, double *sig2l, double *beta, 
-     double *rho, double *mu_l, double *X, double *z, double *w0, double *w,
-     int *nsite, int *nsiterT, double *dnsm, double *Xpred, int *transform, 
-     double *accept_f, double *gof, double *penalty);   
-
-
+ 
 void GIBBS_zfitsum_onephi_gpp(int *cov, int *spdecay, double *flag, int *its, int *burnin,
      int *n, int *m, int *T, int *r, int *rT, int *p, int *N, int *report,
 	 int *ft,

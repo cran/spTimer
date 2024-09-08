@@ -268,34 +268,6 @@ model.matrix(post.gp)
 # Model selection criteria
 post.gp$PMCC 
 
-##
-## Fit and spatially prediction simultaneously
-##
-
-# Read data 
-s<-c(8,11,12,14,18,21,24,28)
-DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
-DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
-DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
-DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
-# Define the coordinates
-coords<-as.matrix(unique(cbind(DataFit[,2:3])))
-pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
-# MCMC via Gibbs will provide output in *.txt format  
-# from C routine to avoide large data problem in R
-set.seed(11)
-post.gp.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
-         data=DataFit, model="GP", coords=coords, 
-         newcoords=pred.coords, newdata=DataValPred,
-         scale.transform="SQRT")
-print(post.gp.fitpred)
-summary(post.gp.fitpred)
-coef(post.gp.fitpred)
-plot(post.gp.fitpred)
-names(post.gp.fitpred)
-# validation criteria
-spT.validation(DataValPred$o8hrmax,c(post.gp.fitpred$prediction[,1]))  
-
 
 ######################################
 ## The GP model for sp class data
@@ -385,32 +357,6 @@ plot(post.ar)
 # Model selection criteria
 post.ar$PMCC 
 
-##
-## Fit and spatially prediction simultaneously
-##
-
-# Read data 
-s<-c(8,11,12,14,18,21,24,28)
-DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
-DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
-DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
-DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
-# Define the coordinates
-coords<-as.matrix(unique(cbind(DataFit[,2:3])))
-pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
-# MCMC via Gibbs will provide output in *.txt format  
-# from C routine to avoide large data problem in R
-set.seed(11)
-post.ar.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
-         data=DataFit, model="AR", coords=coords, 
-         newcoords=pred.coords, newdata=DataValPred,
-         scale.transform="SQRT")
-print(post.ar.fitpred)
-summary(post.ar.fitpred)
-names(post.ar.fitpred)
-# validation criteria
-spT.validation(DataValPred$o8hrmax,c(post.ar.fitpred$prediction[,1]))  
-
 #################################
 ## The GPP approximation models:
 #################################
@@ -474,36 +420,6 @@ plot(post.gpp)
 
 # Model selection criteria
 post.gpp$PMCC 
-
-##
-## Fit and spatially prediction simultaneously
-##
-
-# Read data 
-s<-c(8,11,12,14,18,21,24,28)
-DataFit<-spT.subset(data=NYdata, var.name=c("s.index"), s=s, reverse=TRUE) 
-DataFit<-subset(DataFit, with(DataFit, !(Day \%in\% c(30, 31) & Month == 8)))
-DataValPred<-spT.subset(data=NYdata, var.name=c("s.index"), s=s) 
-DataValPred<-subset(DataValPred, with(DataValPred, !(Day \%in\% c(30, 31) & Month == 8)))
-# Define the coordinates
-coords<-as.matrix(unique(cbind(DataFit[,2:3])))
-pred.coords<-as.matrix(unique(cbind(DataValPred[,2:3])))
-knots<-spT.grid.coords(Longitude=c(max(coords[,1]),
-              min(coords[,1])),Latitude=c(max(coords[,2]),
-              min(coords[,2])), by=c(4,4))
-# MCMC via Gibbs will provide output in *.txt format  
-# from C routine to avoide large data problem in R
-set.seed(11)
-post.gpp.fitpred <- spT.Gibbs(formula=o8hrmax ~cMAXTMP+WDSP+RH,   
-         data=DataFit, model="GP", coords=coords, knots.coords=knots,
-         newcoords=pred.coords, newdata=DataValPred,
-         scale.transform="SQRT")
-print(post.gpp.fitpred)
-summary(post.gpp.fitpred)
-plot(post.gpp.fitpred)
-names(post.gpp.fitpred)
-# validation criteria
-spT.validation(DataValPred$o8hrmax,c(post.gpp.fitpred$prediction[,1]))  
 
 
 ######################################################

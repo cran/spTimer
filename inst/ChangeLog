@@ -1,3 +1,10 @@
+2024-09-05
+
+	* Version 3.3.3
+	* Dropped simultaneous model fit and predictions due to adjust the requirements by CRAN for not saving *.txt files from *.C back-end code.
+	* For simultaneous model fit and predictions - use spTimer version 3.3.2
+	* Also updated the CRAN new layout format in "Authors@R - DESCRIPTION" and "bibentry() - CITATION".
+	
 2022-10-25
 
 	* Version 3.3.2
