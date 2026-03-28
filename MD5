@@ -1,4 +1,4 @@
-b75021fc5979dd8e263c3f8deb37b446 *DESCRIPTION
+b31e0797340ac3c5083c636c6ac2a737 *DESCRIPTION
 bdb25e8b677c5fe8513bd5e73305a250 *NAMESPACE
 f30464fd129508ef85b62966a8990037 *R/spAR.r
 78db428d2c17ca8186b82737f81cdb3c *R/spGP.r
@@ -8,10 +8,8 @@ f30464fd129508ef85b62966a8990037 *R/spAR.r
 c71f6c8bcc7939351ea674a1601ed3ba *R/useful_commands.R
 e67b591c9181041b7bff6c365a6377a3 *data/NYdata.txt.gz
 ff91fc942c89518dd7f797873f92fa5e *data/NYgrid.txt.gz
-4ee50f6ae276945478388d23b89c4fa0 *demo/00Index
-e73cea579db6c710f481ca54631af44c *demo/nyExample.R
 bffb3a2651a171aa30194dd5e91d39a4 *inst/CITATION
-ffecd56148430e3955a9d6f2814300a7 *inst/ChangeLog
+e3bbdc4e5e6598de377edeb93c6c182a *inst/ChangeLog
 ebaab00ef33c88b3a775a2d9532f7cce *man/NYdata.Rd
 78686c9176f870be068c9c16bbb3b5f6 *man/confint.spT.Rd
 c4a15b345c4658400dbef88af6558c54 *man/fitted.spT.Rd
